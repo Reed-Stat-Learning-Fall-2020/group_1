@@ -1,12 +1,13 @@
 ---
 title: "Preliminary Data Exploration"
-output: html_notebook
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(readr)
 ```
 
 ##Stability of Trends Between Seasons##
@@ -15,6 +16,8 @@ One of the concerns going into this project was whether the pitching data from v
 
 Just looking at two sample predictors, release speed and release spin rate, below, it seems like the distribution of data is consistent across the 2 seasons. This suggests that we can combine data from various seasons in our project as they are unlikely to change significantly between seasons.
 ```{r}
+pitch_2016_18 <- read_csv("pitch_2016_18.csv")
+
 ggplot(pitch_2016_18, aes( x=events,y=release_spin_rate,color=factor(year))) +
   geom_boxplot()+
   theme_classic()
