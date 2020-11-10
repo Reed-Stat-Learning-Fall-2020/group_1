@@ -1,0 +1,103 @@
+---
+title: "Preliminary Data Exploration"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readr)
+```
+
+##Stability of Trends Between Seasons##
+
+One of the concerns going into this project was whether the pitching data from various years would differ by a substantial degree. However, because many of the statcast variables we will use as predictors have only been tracked since 2016, it is unlikely that historical trends will significantly alter our data. Nevertheless, it is important to investigate if general trends are stable across seasons.
+
+Just looking at two sample predictors, release speed and release spin rate, below, it seems like the distribution of data is consistent across the 2 seasons. This suggests that we can combine data from various seasons in our project as they are unlikely to change significantly between seasons.
+```{r}
+pitch_2016_18 <- read_csv("pitch_2016_18.csv")
+
+ggplot(pitch_2016_18, aes( x=events,y=release_spin_rate,color=factor(year))) +
+  geom_boxplot()+
+  theme_classic()
+
+ggplot(pitch_2016_18, aes( x=events,y=release_speed,color=factor(year))) +
+  geom_boxplot()+
+  theme_classic()
+
+```
+##Exploratory Data Visualization##
+
+In trying to predict pitching outcome, the most intuitive first predictor to examine is release speed. One might expect faster pitches to be more difficult to hit.
+
+However, as seen in the density plot below, the peaks for both weak (resulting in an out) and strong (resulting in a hit) contact fall along 95 MPH. Interestingly, swinging strikes displays a small peak at around 85 MPH, suggesting that release speed might actually be inversely correlated with pitching outcome.
+
+
+```{r}
+ggplot(pitch_2016_18, aes(x = release_speed, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+```
+
+Release spin rate displays a similar trend where the peak for pitches that result in contact (regardless of weak or strong contact) aggregate together around 2200. Here, the peak for swinging strikes is slightly to the right of the aformentioned 2200 peak, closer to 2300, suggesting that strikes might be slightly correlated with higher spin rates.
+
+```{r}
+ggplot(pitch_2016_18, aes(x = release_spin_rate, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+```
+
+Zone appears to be a strong candidate for inclusion in our model as it seems like the pitching outcome is quite depedent on the zone in which the ball passes home plate. For example, zones 4 and 5, which are close to the center of the strike zone, seem to be highly correlated with home runs. We should consider coming up with a better way to quantify location other than zone.
+```{r}
+ggplot(pitch_2016_18, aes(x = zone, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+```
+
+Both vertical and horizontal movement of the ball displayed a similar trend to release speed and spin rate in that swinging strikes displayed differences from contact but the difference between weak and strong contact is not clear.
+
+```{r}
+ggplot(pitch_2016_18, aes(x = pfx_x, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+ggplot(pitch_2016_18, aes(x = pfx_z, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+```
+
+The horizontal and vertical positions at which the ball crosses home plate displays a similar trend as well. Specifically, the horizontal and vertical ranges of swining strikes is wider than that of pitches that resulted in contact. We need to come up with a way to combine these predictors into location but already it seems like high/low or right/left positioned pitches result in swinging strikes more often.
+
+```{r}
+ggplot(pitch_2016_18, aes(x = plate_x, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+ggplot(pitch_2016_18, aes(x = plate_z, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+```
+Velocity in X and Z dimensions does not seem to be very correlated at all. Interestingly, velocity in the Y dimension does seem to be correlated with pitches that do not result in contact, specifically, higher velocities in the Y dimension seem to be correlated with strikes.
+
+```{r}
+ggplot(pitch_2016_18, aes(x = vx0, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+ggplot(pitch_2016_18, aes(x = vy0, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+ggplot(pitch_2016_18, aes(x = vz0, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+```
+Interestingly, in contrast with velocity, acceleration in X, Y, and Z dimensions seemed to be correlated with pitching outcome. Specifically, higher X acceleration but lower Y and Z accelerations seem to be correlated with more strikes. 
+
+```{r}
+ggplot(pitch_2016_18, aes(x = ax, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+ggplot(pitch_2016_18, aes(x = ay, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+ggplot(pitch_2016_18, aes(x = az, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+```
+
+
+Release position x and z appear to have no correlation with pitching outcome, might need to be combined in some sort of way. Release extension does not appear to be correlated either.
+
+```{r}
+ggplot(pitch_2016_18, aes(x = release_pos_x, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+ggplot(pitch_2016_18, aes(x = release_pos_z, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+ggplot(pitch_2016_18, aes(x = release_extension, fill = events))+geom_density( alpha = 0.25)+theme_bw()
+
+```
+
+## Overall Trends##
+In conclusion, it seems like location data will be our strongest predictor by far. Even though the correlation is not as strong, velocity and acceleration data and even release speed/spin rate can provide some benefits as well. In almost every predictor, there is a very clear split between pitches that result in contact (regardless of if the contact results in a hit or an out) and pitches resulting in strikes. We could consider BA as it seems like the difference between a single and a double or triple or home run is too nuanced to predict accurately.
