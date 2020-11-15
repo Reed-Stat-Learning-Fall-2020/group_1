@@ -12,7 +12,7 @@ library(readr)
 ```
 Expected weighted on-base average (xWOBA) is the response in this project. xWOBA is designed to gauge a player's average offensive contributions per plate appearance and is calculated from the velocity and launch angle of the ball following contact. Here, we try to predict the xWOBA using purely pitching data in order to elucidate the important pitching variables that determine xWOBA values in order to remove a degree of noise from the evaluation of pitching performance and value while also performing inference on the important variables that determine a pitcher's xWOBA against the batters they face.
 
-##Stability of Trends Between Seasons##
+#Stability of Trends Between Seasons#
 
 One of the concerns going into this project was whether the relationship between xWOBA and various pitching predictors from different years would differ by a substantial degree as we are pooling data from multiple years in our dataset. However, because many of the statcast variables we will use as predictors have only been tracked since 2016, it is unlikely that historical trends will significantly alter our data. Nevertheless, it is important to investigate if general trends are stable across seasons.
 
@@ -44,5 +44,166 @@ ggplot(final_pitch_data, aes( x=zone,y=xwoba,color=factor(game_year))) +
 
 Just looking at three sample predictors, release speed and release spin rate, above, it seems like the distribution of data as well as the relationship between our response and predictors is decently consistent across the 5 seasons. This suggests that we can combine data from various seasons in our project as they are unlikely to change significantly between seasons.
 
-##Data Exploration##
+#Data Exploration#
+Here, we try to elucidate what predictors display a clear relationship with xWOBA in order to inform the predictors we will eventually fit our model on.
+
+###Pitch Speed####
+First, we looked at our two speed related predictors-release speed and effective speed (which also factors in release position in addition to release speed). It seems like neither of the two are highly correlated with xWOBA.
+
+This is somewhat unsurprising as, while one might think that, intuitively, faster pitches are harder to hit; with proper timing, a pitcher can pretty easily achieve hard contact on a poorly-placed fast ball. These trends suggest that location data of where the pitch crossed home plate might be more important to xWOBA than pure velocity related statistics. 
+```{r}
+ggplot(final_pitch_data, aes( x=release_speed,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$release_speed,final_pitch_data$xwoba)
+
+
+ggplot(final_pitch_data, aes( x=effective_speed,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$effective_speed,final_pitch_data$xwoba)
+
+
+```
+###Pitch Location Data###
+The variables examined below all relate to where, in reference to the strike zone, the ball crossed home plate. These variables are important as pitches thrown right down the center are easier to hit than pitches that are too high, low, or skewed to either the left or right side.
+
+First, looking at the relationship between the strike zone and xWOBA below, perhaps unsurprisingly, we see a high density of high xWOBA values or hard-hit balls in the zones 4, 5, and 6. These three zones represent the center of the strike zone and thus pitches delivered there are likely to result in hard contact. The correlation we observe between zone and xWOBA is one of the higher values we get. While 0.17 is still ultimately quite low, the inherent stochastic nature of baseball might make it hard to get very high correlation values. However, the trend displayed below also suggested to us that we should create our own location variable as it is hard to construct an overall trend considering that xWOBA peaks at zones 4-6 but then tails off on either end.
+```{r}
+ggplot(final_pitch_data, aes( x=zone,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$zone,final_pitch_data$xwoba)
+```
+We next looked at the X (horizontal) and Z (vertical) locations at which the pitch passes home plate. The trend is fascinating in both of them as the high xWOBA values consistently fall within the middle region of both predictors. This is reasonable as pitches that pass the plate in the center are likely to result in a hit by the batter. 
+
+Because the X coordinates of the ball as it passes home plate are recorded with both positive (to the right) and negative (left) values, we tried an absolute value transformation, which assumes that the direction the pitch skew does not matter as much as the fact that it leans towards one direction. This transformation gave us a much higher correlation of 0.15, one of our stronger correlations thus far.
+
+We also transformed the Z coordinates of the pitch as we observed that high xWOBA values tended to aggregate in the center of the distribution. Thus we took the absolute value of the difference between each point in order to represent how far away from the average they fall. This improved our correlation by quite a decent margin.
+
+Overall, location data seems very promising.
+```{r}
+ggplot(final_pitch_data, aes( x=plate_x,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$plate_x,final_pitch_data$xwoba)
+cor(abs(final_pitch_data$plate_x),final_pitch_data$xwoba)
+
+ggplot(final_pitch_data, aes( x=plate_z,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$plate_z,final_pitch_data$xwoba)
+cor(abs(final_pitch_data$plate_z-mean(final_pitch_data$plate_z)),final_pitch_data$xwoba)
+
+```
+###Pitch Movement###
+
+Pfx_x and pfx_z are predictors that indicate the horizontal or vertical movement of the ball in flight, respectively. For example, a negative pfx_z value suggests that the ball dropped substantially while a negative pfx_x value suggests leftward movement.
+
+It seems like neither of the two predictors are highly correlated with xWOBA. Surprisingly, an absolute value transformation of either predictors did not increase the correlation. We might have to consider an interaction term between pitch type and vertical/horizontal movement as it is possible that while movement in isolation is not important, certain pitch types benefit more from a high or low degree of pitch movement.
+
+```{r}
+ggplot(final_pitch_data, aes( x=pfx_x,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$pfx_x,final_pitch_data$xwoba)
+
+
+ggplot(final_pitch_data, aes( x=pfx_z,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$pfx_z,final_pitch_data$xwoba)
+```
+###Pitch Velocity and Acceleration###
+Here, we look at the velocity of the pitch in the X, Y and Z dimensions while also looking at the acceleration or rate of change of velocity.
+
+First, looking at velocity, there does not appear to be an obvious relationship between velocity in any direction and xWOBA. Seeing as velocity in the x direction was recorded with both positive and negative values, we tried an absolute value transformation, which helped increase the correlation, albeit by a very small amount. We also used the aforementioned transformation to determine how far off from average a pitch was in terms of velocity in the Z dimension, which increased our correlation by a medium amount.
+
+We might have to consider interaction terms between pitch type and velocity in order to make more use of these predictors.
+```{r}
+ggplot(final_pitch_data, aes( x=vx0,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$vx0,final_pitch_data$xwoba)
+cor(abs(final_pitch_data$vx0),final_pitch_data$xwoba)
+
+
+ggplot(final_pitch_data, aes( x=vy0,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$vy0,final_pitch_data$xwoba)
+
+
+ggplot(final_pitch_data, aes( x=vz0,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$vz0,final_pitch_data$xwoba)
+cor(abs(final_pitch_data$vz0-mean(final_pitch_data$vz0)),final_pitch_data$xwoba)
+
+```
+Next we looked at acceleration. Once again we don't see any obvious trends.
+
+One interesting thing we noted was that there seems to be more high xWOBA values in the middle of the distribution for acceleration in the Y. We used the transformation previously-mentioned to quantify how far these points fall from the average. This transformation increased the acceleration in Z as well but, once again, only to a very small degree.
+
+Even though this transformation did not accomplish what we had wanted it to here, it is a potentially useful transformation for other transformations.
+```{r}
+ggplot(final_pitch_data, aes( x=ax,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$ax,final_pitch_data$xwoba)
+
+
+ggplot(final_pitch_data, aes( x=ay,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$ay,final_pitch_data$xwoba)
+cor(abs(final_pitch_data$ay-mean(final_pitch_data$ay)),final_pitch_data$xwoba)
+
+ggplot(final_pitch_data, aes( x=az,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$az,final_pitch_data$xwoba)
+cor(abs(final_pitch_data$az-mean(final_pitch_data$az)),final_pitch_data$xwoba)
+
+```
+
+
+###Release Position of the Pitch###
+As one might expect, the position at which the ball is released from the pitcher mound does not seem to correlate with the outcome of the pitch. Nevertheless, these two predictors were worth investigating. It seems like the more important location data is where the ball crosses home plate, not necessarily where the ball leaves the pitcher's hand.
+```{r}
+ggplot(final_pitch_data, aes( x=release_pos_x,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$release_speed,final_pitch_data$xwoba)
+
+ggplot(final_pitch_data, aes( x=release_pos_x,y=xwoba)) +
+  geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
+  theme_classic()
+
+cor(final_pitch_data$release_pos_z,final_pitch_data$xwoba)
+```
+
+#Overall Trends#
+
+A couple of salient trends stand out when observing the data exploration and visualization done above. The first is that there are no strong or even medium-strength associations between xWOBA and a single pitching variable. This is to be expected for a couple of reasons. Sports have a high degree of inherent stochasticity and noise. Additionally, there isn't a single "be-all end-all" pitching variable, thus we might need to use a large number of predictors in order to improve our accuracy.
+
+However, some predictors were quite promising. Namely, location data provided us with the highest degree of correlation. Additionally, we observed an interesting trend where for certain variables, the raw value doesn't matter as much as seperation from the mean. This is reasonable as batters have come to expect certain pitches and if a pitcher is able to defy their expectations, they will be harder to hit.
+
+Overall, even though each predictor by itself has a low degree of correlation, it is possible that, through using a wide range of predictors and transformations or interaction terms, we can achieve decent predictive power.
+
+#Potential Interaction Terms#
 
