@@ -9,49 +9,60 @@ library(tidyverse)
 ```
 
 ```{r}
-## 2016
+## data from statcast ------------------------------------------------------------
 
 year16_pitches <- read_csv("/Users/joshuayamamoto/Downloads/savant_data.csv")
+year17_pitches <- read_csv("/Users/joshuayamamoto/Downloads/savant_data-2.csv")
+year18_pitches <- read_csv("/Users/joshuayamamoto/Downloads/savant_data-3.csv")
+year19_pitches <- read_csv("/Users/joshuayamamoto/Downloads/savant_data-4.csv")
+year20_pitches <- read_csv("/Users/joshuayamamoto/Downloads/savant_data-5.csv")
+
+
 ```
 
+
 ```{r}
+## selecting certain columns ----------------------------------------------------
+
 year16_pitches <- 
   year16_pitches %>%
   mutate(year = 2016) %>%
   select(1:7, zone, type, hit_location, game_year, pfx_x,
          pfx_z, plate_x, plate_z, vx0, vy0, vz0, ax, ay,
-         az, effective_speed, release_spin_rate, pitch_name, -game_date, estimated_woba_using_speedangle)
-  
+         az, effective_speed, release_spin_rate, pitch_name,
+         -game_date, estimated_woba_using_speedangle)
+
+## selection quant and cat variables to convert them to proper variable ---------
+## type before re joining the sets 
 
 dbl_year16 <-
   year16_pitches %>%
-  select(-pitch_type, -player_name, -batter, -type, -game_year, -pitch_name, -estimated_woba_using_speedangle) %>%
-  mutate(id = row_number())
+  select(-pitch_type, -player_name, -batter,
+         -type, -game_year, -pitch_name) %>%
+  mutate(id = row_number()) %>%
+  mutate_if(is.character,
+            as.double) %>%
+  mutate_all(~replace(.,is.na(.), 0)) %>%
+  rename("xwoba" = "estimated_woba_using_speedangle")
 
-dbl_year16 <- data.frame(lapply(dbl_year16, function(x) as.double(as.character(x))))
+## added id = row_number() in order to more easily join -------------------------
 
 cat_year16 <- 
   year16_pitches %>%
-  select(pitch_type, player_name, batter, type, game_year, pitch_name, estimated_woba_using_speedangle) %>%
+  select(pitch_type, player_name, batter, type, game_year, pitch_name) %>%
   mutate(id = row_number()) %>%
-  mutate_all(~replace(., is.na(.), 0)) %>%
-  mutate(xwoba = case_when(estimated_woba_using_speedangle == "null" ~ as.character(0),
-                           T ~ estimated_woba_using_speedangle )) %>%
-  mutate(xwoba = as.double(as.character(xwoba)))
-  
+  mutate_all(~replace(., is.na(.), 0))
 
 data16 <- 
   dbl_year16 %>%
-  inner_join(cat_year16, by = "id") %>%
+  left_join(cat_year16, by = "id") %>%
   select(-id) %>%
   sample_n(size = 4000)
 ```
 
 
-
-
 ```{r}
-year17_pitches <- read_csv("/Users/joshuayamamoto/Downloads/savant_data-2.csv")
+## same process for 2017 
 
 year17_pitches <- 
   year17_pitches %>%
@@ -60,35 +71,146 @@ year17_pitches <-
          pfx_z, plate_x, plate_z, vx0, vy0, vz0, ax, ay,
          az, effective_speed, release_spin_rate, pitch_name, -game_date, estimated_woba_using_speedangle)
   
-
 dbl_year17 <-
   year17_pitches %>%
-  select(-pitch_type, -player_name, -batter, -type, -game_year, -pitch_name, -estimated_woba_using_speedangle) %>%
-  mutate(id = row_number())
-
-dbl_year17 <- data.frame(lapply(dbl_year17, function(x) as.double(as.character(x))))
+  select(-pitch_type, -player_name, -batter,
+         -type, -game_year, -pitch_name) %>%
+  mutate(id = row_number()) %>%
+  mutate_if(is.character,
+            as.double) %>%
+  mutate_all(~replace(.,is.na(.), 0)) %>%
+  rename("xwoba" = "estimated_woba_using_speedangle")
 
 cat_year17 <- 
   year17_pitches %>%
-  select(pitch_type, player_name, batter, type, game_year, pitch_name, estimated_woba_using_speedangle) %>%
+  select(pitch_type, player_name, batter, type, game_year, pitch_name) %>%
   mutate(id = row_number()) %>%
-  mutate_all(~replace(., is.na(.), 0)) %>%
-  mutate(xwoba = case_when(estimated_woba_using_speedangle == "null" ~ as.character(0),
-                           T ~ estimated_woba_using_speedangle )) %>%
-  mutate(xwoba = as.double(as.character(xwoba)))
-  
+  mutate_all(~replace(., is.na(.), 0))
 
 data17 <- 
   dbl_year17 %>%
-  inner_join(cat_year16, by = "id") %>%
+  left_join(cat_year17, by = "id") %>%
   select(-id) %>%
   sample_n(size = 4000)
+  
 ```
 
 
 ```{r}
+# for 2018
+
+year18_pitches <- 
+  year18_pitches %>%
+  mutate(year = 2018) %>%
+  select(1:7, zone, type, hit_location, game_year, pfx_x,
+         pfx_z, plate_x, plate_z, vx0, vy0, vz0, ax, ay,
+         az, effective_speed, release_spin_rate, pitch_name, -game_date, estimated_woba_using_speedangle)
+  
+dbl_year18 <-
+  year18_pitches %>%
+  select(-pitch_type, -player_name, -batter,
+         -type, -game_year, -pitch_name) %>%
+  mutate(id = row_number()) %>%
+  mutate_if(is.character,
+            as.double) %>%
+  mutate_all(~replace(.,is.na(.), 0)) %>%
+  rename("xwoba" = "estimated_woba_using_speedangle")
+
+cat_year18 <- 
+  year18_pitches %>%
+  select(pitch_type, player_name, batter, type, game_year, pitch_name) %>%
+  mutate(id = row_number()) %>%
+  mutate_all(~replace(., is.na(.), 0))
+
+data18 <- 
+  dbl_year18 %>%
+  left_join(cat_year18, by = "id") %>%
+  select(-id) %>%
+  sample_n(size = 4000)
+```
+
+```{r}
+## for 2019
+
+year19_pitches <- 
+  year19_pitches %>%
+  mutate(year = 2019) %>%
+  select(1:7, zone, type, hit_location, game_year, pfx_x,
+         pfx_z, plate_x, plate_z, vx0, vy0, vz0, ax, ay,
+         az, effective_speed, release_spin_rate, pitch_name, -game_date, estimated_woba_using_speedangle)
+  
+dbl_year19 <-
+  year19_pitches %>%
+  select(-pitch_type, -player_name, -batter,
+         -type, -game_year, -pitch_name) %>%
+  mutate(id = row_number()) %>%
+  mutate_if(is.character,
+            as.double) %>%
+  mutate_all(~replace(.,is.na(.), 0)) %>%
+  rename("xwoba" = "estimated_woba_using_speedangle")
+
+cat_year19 <- 
+  year19_pitches %>%
+  select(pitch_type, player_name, batter, type, game_year, pitch_name) %>%
+  mutate(id = row_number()) %>%
+  mutate_all(~replace(., is.na(.), 0))
+
+data19 <- 
+  dbl_year19 %>%
+  left_join(cat_year19, by = "id") %>%
+  select(-id) %>%
+  sample_n(size = 4000)
 
 ```
+
+
+```{r}
+## for 2020
+
+year20_pitches <- 
+  year20_pitches %>%
+  mutate(year = 2020) %>%
+  select(1:7, zone, type, hit_location, game_year, pfx_x,
+         pfx_z, plate_x, plate_z, vx0, vy0, vz0, ax, ay,
+         az, effective_speed, release_spin_rate, pitch_name, -game_date, estimated_woba_using_speedangle)
+  
+dbl_year20 <-
+  year20_pitches %>%
+  select(-pitch_type, -player_name, -batter,
+         -type, -game_year, -pitch_name) %>%
+  mutate(id = row_number()) %>%
+  mutate_if(is.character,
+            as.double) %>%
+  mutate_all(~replace(.,is.na(.), 0)) %>%
+  rename("xwoba" ="estimated_woba_using_speedangle")
+
+cat_year20 <- 
+  year20_pitches %>%
+  select(pitch_type, player_name, batter, type, game_year, pitch_name) %>%
+  mutate(id = row_number()) %>%
+  mutate_all(~replace(., is.na(.), 0))
+
+data20 <- 
+  dbl_year20 %>%
+  left_join(cat_year20, by = "id") %>%
+  select(-id) %>%
+  sample_n(size = 4000)
+
+```
+
+```{r}
+
+## using rbind to combine all of our sampled data
+
+final_pitch_data <- rbind(data16, data17, data18, data19, data20)
+
+write_csv(final_pitch_data, "final_pitch_data.csv")
+
+```
+
+
+
+
 
 
 
