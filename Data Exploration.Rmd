@@ -1,0 +1,48 @@
+---
+title: "Data Exploration"
+author: "Group 1- Josh Yamamoto, Riley Leonard, Andy Zhao"
+date: "11/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+```
+Expected weighted on-base average (xWOBA) is the response in this project. xWOBA is designed to gauge a player's average offensive contributions per plate appearance and is calculated from the velocity and launch angle of the ball following contact. Here, we try to predict the xWOBA using purely pitching data in order to elucidate the important pitching variables that determine xWOBA values in order to remove a degree of noise from the evaluation of pitching performance and value while also performing inference on the important variables that determine a pitcher's xWOBA against the batters they face.
+
+##Stability of Trends Between Seasons##
+
+One of the concerns going into this project was whether the relationship between xWOBA and various pitching predictors from different years would differ by a substantial degree as we are pooling data from multiple years in our dataset. However, because many of the statcast variables we will use as predictors have only been tracked since 2016, it is unlikely that historical trends will significantly alter our data. Nevertheless, it is important to investigate if general trends are stable across seasons.
+
+```{r}
+final_pitch_data <- read_csv("data/final_pitch_data.csv")
+```
+First, it seems like xWOBA does not vary much between the years. The overall trends appear similar, namely, most of the density lies in low values of xWOBA or 0.
+```{r}
+ggplot(final_pitch_data, aes(x=factor(game_year),y=xwoba,)) +
+  geom_point(alpha=0.03)+
+  theme_classic()
+```
+
+While the graphs are somewhat messy, their heterogenity suggests that there is a lack of clear separation or delineation of certain years, indicating that there is not much of a difference between various years. 
+```{r}
+ggplot(final_pitch_data, aes( x=effective_speed,y=xwoba,color=factor(game_year))) +
+  geom_point(alpha=0.3)+
+  theme_classic()
+
+ggplot(final_pitch_data, aes( x=release_spin_rate,y=xwoba,color=factor(game_year))) +
+  geom_point(alpha=0.3)+
+  theme_classic()
+
+ggplot(final_pitch_data, aes( x=zone,y=xwoba,color=factor(game_year))) +
+  geom_point(alpha=0.3)+
+  theme_classic()
+
+```
+
+Just looking at three sample predictors, release speed and release spin rate, above, it seems like the distribution of data as well as the relationship between our response and predictors is decently consistent across the 5 seasons. This suggests that we can combine data from various seasons in our project as they are unlikely to change significantly between seasons.
+
+##Data Exploration##
+
