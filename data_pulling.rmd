@@ -1,0 +1,98 @@
+---
+title: "data_pulling"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+## 2016
+
+year16_pitches <- read_csv("/Users/joshuayamamoto/Downloads/savant_data.csv")
+```
+
+```{r}
+year16_pitches <- 
+  year16_pitches %>%
+  mutate(year = 2016) %>%
+  select(1:7, zone, type, hit_location, game_year, pfx_x,
+         pfx_z, plate_x, plate_z, vx0, vy0, vz0, ax, ay,
+         az, effective_speed, release_spin_rate, pitch_name, -game_date, estimated_woba_using_speedangle)
+  
+
+dbl_year16 <-
+  year16_pitches %>%
+  select(-pitch_type, -player_name, -batter, -type, -game_year, -pitch_name, -estimated_woba_using_speedangle) %>%
+  mutate(id = row_number())
+
+dbl_year16 <- data.frame(lapply(dbl_year16, function(x) as.double(as.character(x))))
+
+cat_year16 <- 
+  year16_pitches %>%
+  select(pitch_type, player_name, batter, type, game_year, pitch_name, estimated_woba_using_speedangle) %>%
+  mutate(id = row_number()) %>%
+  mutate_all(~replace(., is.na(.), 0)) %>%
+  mutate(xwoba = case_when(estimated_woba_using_speedangle == "null" ~ as.character(0),
+                           T ~ estimated_woba_using_speedangle )) %>%
+  mutate(xwoba = as.double(as.character(xwoba)))
+  
+
+data16 <- 
+  dbl_year16 %>%
+  inner_join(cat_year16, by = "id") %>%
+  select(-id) %>%
+  sample_n(size = 4000)
+```
+
+
+
+
+```{r}
+year17_pitches <- read_csv("/Users/joshuayamamoto/Downloads/savant_data-2.csv")
+
+year17_pitches <- 
+  year17_pitches %>%
+  mutate(year = 2017) %>%
+  select(1:7, zone, type, hit_location, game_year, pfx_x,
+         pfx_z, plate_x, plate_z, vx0, vy0, vz0, ax, ay,
+         az, effective_speed, release_spin_rate, pitch_name, -game_date, estimated_woba_using_speedangle)
+  
+
+dbl_year17 <-
+  year17_pitches %>%
+  select(-pitch_type, -player_name, -batter, -type, -game_year, -pitch_name, -estimated_woba_using_speedangle) %>%
+  mutate(id = row_number())
+
+dbl_year17 <- data.frame(lapply(dbl_year17, function(x) as.double(as.character(x))))
+
+cat_year17 <- 
+  year17_pitches %>%
+  select(pitch_type, player_name, batter, type, game_year, pitch_name, estimated_woba_using_speedangle) %>%
+  mutate(id = row_number()) %>%
+  mutate_all(~replace(., is.na(.), 0)) %>%
+  mutate(xwoba = case_when(estimated_woba_using_speedangle == "null" ~ as.character(0),
+                           T ~ estimated_woba_using_speedangle )) %>%
+  mutate(xwoba = as.double(as.character(xwoba)))
+  
+
+data17 <- 
+  dbl_year17 %>%
+  inner_join(cat_year16, by = "id") %>%
+  select(-id) %>%
+  sample_n(size = 4000)
+```
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
