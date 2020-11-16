@@ -1,0 +1,46 @@
+---
+title: "First Pass at Fitting Models"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+final_pitch_data <- read_csv("data/final_pitch_data.csv")
+
+#Removing "ball" outcomes
+balls<- final_pitch_data %>% filter(type == "B")
+
+final_pitch_data_nob <- anti_join(final_pitch_data,balls)
+
+final_pitch_data_nob<-final_pitch_data_nob %>% drop_na()
+
+#Dropping 0 values (should be NA but statcast codes them as 0, a release speed or an effective speed of 0 is impossible thus is dropped)
+final_pitch_data_nob<- final_pitch_data_nob[final_pitch_data_nob$release_speed !=0,]
+final_pitch_data_nob<- final_pitch_data_nob[final_pitch_data_nob$release_speed !=0,]
+```
+
+```{r}
+final_pitch_model<-final_pitch_data_nob %>% dplyr::select (-pitch_type,-pitch_name,-player_name,-batter,-xwoba,-hit_location)
+
+train<-final_pitch_model%>% sample_frac(.75)
+test<-anti_join(final_pitch_model,train)
+
+Auto_lda<-lda(type~.,data=train)
+lda_pred<-predict(Auto_lda, test)
+
+class<-data.frame(lda_pred$posterior)
+confusionMatrix(data=factor(lda_pred$class),reference=factor(test$type))
+
+
+roc_curve<-roc(response=test$type,predictor=class$X)
+ggroc(roc_curve,legacy.axes="True")
+auc(roc_curve)
+
+```
+```
+
+
