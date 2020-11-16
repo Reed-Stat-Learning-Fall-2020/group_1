@@ -21,16 +21,14 @@ final_pitch_data_nob<-final_pitch_data_nob %>% drop_na()
 
 #Dropping 0 values (should be NA but statcast codes them as 0, a release speed or an effective speed of 0 is impossible thus is dropped)
 final_pitch_data_nob<- final_pitch_data_nob[final_pitch_data_nob$release_speed !=0,]
-final_pitch_data_nob<- final_pitch_data_nob[final_pitch_data_nob$release_speed !=0,]
+final_pitch_data_nob<- final_pitch_data_nob[final_pitch_data_nob$effective_speed !=0,]
+
 ```
 
 ```{r}
 final_pitch_model<-final_pitch_data_nob %>% dplyr::select (-pitch_type,-pitch_name,-player_name,-batter,-xwoba,-hit_location)
 
-#This mutation is necessary for the bernoulli distribution in the boosted model below, which requires 0's and 1's
-final_pitch_model<- final_pitch_model%>% mutate(type2=ifelse(type == "S",0,1))
-
-train<-final_pitch_model %>% dplyr::select(-type) %>% sample_frac(.75)
+train<-final_pitch_model%>% sample_frac(.75)
 test<-anti_join(final_pitch_model,train)
 
 Auto_lda<-lda(type~.,data=train)
@@ -47,7 +45,13 @@ auc(roc_curve)
 ```
 
 ```{r}
-boosted_tree<-gbm(type2 ~., train,
+#This mutation is necessary for the bernoulli distribution in the boosted model below, which requires 0's and 1's
+final_pitch_model_b<- final_pitch_model%>% mutate(type2=ifelse(type == "S",0,1))
+
+train_boost<-final_pitch_model_b %>% dplyr::select(-type) %>% sample_frac(.75)
+test_boost<-anti_join(final_pitch_model_b,train_boost)
+
+boosted_tree<-gbm(type2 ~., train_boost,
 distribution = "bernoulli",
 n.trees=50,
 interaction.depth = 1,
@@ -55,10 +59,10 @@ shrinkage = 0.1)
 
 set.seed(0)
 
-boost_pred<-ifelse (predict(boosted_tree,test,type="response")>=0.5,1,0)
+boost_pred<-ifelse (predict(boosted_tree,test_boost,type="response")>=0.5,1,0)
 
 
-confusionMatrix(data=factor(boost_pred),reference=factor(test$type2))
+confusionMatrix(data=factor(boost_pred),reference=factor(test_boost$type2))
 
 ```
 
