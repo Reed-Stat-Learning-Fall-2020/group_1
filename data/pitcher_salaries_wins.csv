@@ -1,4 +1,4 @@
-mlb_id,salary,yearID,mlb_name,W,L
+mlb_id,salary,yearID,player_name,W,L
 545332,507500,2016,Jake Barrett,1,2
 545332,507500,2016,Jake Barrett,0,2
 545332,507500,2016,Jake Barrett,8,9
