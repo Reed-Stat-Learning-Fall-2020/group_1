@@ -28,24 +28,40 @@ total_2015_filtered <- read_csv("total_2015_filtered.csv")
 Wins and losses constitute the most basic of pitching statistics. Total number of pitches is pretty self explanatory too. Additionally, raw, unadjusted ERA, or the average number of runs a pitcher allows in a game is another predictor that one would expect to be associated with salary. Lastly, the number of earned runs, in a similar vein as ERA, is another predictor that stands out as potentially correlated.
 
 ```{r}
-ggplot(total_2015_filtered, aes( x=`Total Wins`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Total Wins`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Total Wins`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Total Wins`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`Total Loss`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Total Loss`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Total Loss`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Total Loss`,
+    log(total_2015_filtered$salary))
 
 
-ggplot(total_2015_filtered, aes( x=Pitches,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered, 
+       aes(
+         x = Pitches,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$Pitches,log(total_2015_filtered$salary))
+cor(total_2015_filtered$Pitches,
+    log(total_2015_filtered$salary))
 
 ```
 
@@ -54,30 +70,48 @@ Unsurprisingly, win stand out with a strong, positive correlation with future sa
 Total number of pitches has a moderate, positive correlation with salary. As we will see later on, pitching statistics having to do with productivity or volume of pitches are often quite highly correlated with salary.
 
 ```{r}
-total_2015_filtered<- total_2015_filtered %>% dplyr::mutate(Win_Percent=`Total Wins`/(`Total Wins`+`Total Loss`)) %>% drop_na()
+total_2015_filtered <- 
+  total_2015_filtered %>% 
+  mutate(Win_Percent = `Total Wins`/(`Total Wins`+`Total Loss`)) %>% 
+  drop_na()
 
-ggplot(total_2015_filtered, aes( x=Win_Percent,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered, 
+       aes(
+         x = Win_Percent,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$Win_Percent,log(total_2015_filtered$salary))
+cor(total_2015_filtered$Win_Percent,
+    log(total_2015_filtered$salary))
 
 ```
 Surprisingly, a pitcher's win percent has almost no correlation at all with salary and if any relationship exists it appears that it is a negative association. Rather, it seems like total number of wins and losses is positively correlated with salary, regardless of one's actual win percentage.
 
 
 ```{r}
-ggplot(total_2015_filtered, aes( x=`ERA`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `ERA`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`ERA`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`ERA`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`Total ER`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Total ER`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Total ER`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Total ER`,
+    log(total_2015_filtered$salary))
 ```
 
 The lack of a negative association between ERA and salary is surprising as giving up less runs is an unequivocally positive outcome. Additionally, in a trend that we will see throughout this project, earned runs is, surprisingly, positively correlated with salaries. There are a couple of reasons why this could be. The first is that only good pitchers are allowed to accumulate a lot of earned runs, less accomplished pitchers would simply lose their starting position. Additionally, it seems like total volume of pitches, regardless of pitch outcome, is generally positively correlated with salary.
@@ -87,23 +121,37 @@ The lack of a negative association between ERA and salary is surprising as givin
 While the total number of strikes, balls, and hits might have a dubious relationship to future performance. It is undeniable that season totals can be quite flashy and can lead to lucrative contracts thus might be strong predictors of next year's salary. 
 
 ```{r}
-ggplot(total_2015_filtered, aes( x=`Total Strikes`,y=log(salary))) +
+ggplot(total_2015_filtered,
+       aes(
+         x = `Total Strikes`,
+         y = log(salary))
+       ) +
   geom_point(alpha=0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Total Strikes`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Total Strikes`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`Total Balls`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Total Balls`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
 cor(total_2015_filtered$`Total Balls`,log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`Total Hit`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Total Hit`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Total Hit`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Total Hit`,
+    log(total_2015_filtered$salary))
 ```
 
 Unsurprisingly, seaon totals in general have a strong, positive correlation with salary, even undesirable outcomes like hits and balls are quite highly correlated. In terms of correlation, total strikes has the greatest R value but all 3 are quite close.
@@ -111,23 +159,38 @@ Unsurprisingly, seaon totals in general have a strong, positive correlation with
 Next we looked to see if the percent of strikes, hits, or balls has a greater correlation than just raw totals.
 
 ```{r}
-ggplot(total_2015_filtered, aes( x=`Strike Percent`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Strike Percent`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Strike Percent`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Strike Percent`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`Ball Percent`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Ball Percent`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Ball Percent`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Ball Percent`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`Hit Percent`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Hit Percent`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Hit Percent`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Hit Percent`,
+    log(total_2015_filtered$salary))
 ```
 
 Interestingly, the percentages are far less correlated with salary than the totals. The strongest correlation was with percent of pitches that are balls, with a moderate-weak, negative correlation, which is reasonable as balls are something pitchers try to reduce. Surprisingly, the percent of pitches that result in hits is positively correlated with salary, albeit with a very weak correlation. This relationship cannot be explained as easily.
@@ -137,43 +200,69 @@ Interestingly, the percentages are far less correlated with salary than the tota
 Next, we examined if the averages of certain statistics were correlated with salary, specifically looking at average speed, average effective speed, as well as average spin rate, horizontal break, and vertical break.
 
 ```{r}
-ggplot(total_2015_filtered, aes( x=`Average Pitch Speed`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Average Pitch Speed`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Average Pitch Speed`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Average Pitch Speed`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`Average Effective Pitch Speed`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Average Effective Pitch Speed`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Average Effective Pitch Speed`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Average Effective Pitch Speed`,
+    log(total_2015_filtered$salary))
 
 ```
+
 Naively, one might expect faster pitches to be harder to hit and thus expect pitchers with higher average velocities to be handsomely paid. However, the negative correlation, with a not-insignificant correlation, suggests that average pitch speed is actually inversely related to salary. There are a couple of reasons why this might be. The most obvious is that pitchers who lack speed often make up for it with stellar control or a wide variety of possible pitches. Another reason is that, just instinctively, average pitch speed might be correlated with certain negative predictors like more home runs as batters can often make hard contact against fast but poorly-placed pitches.
 
 ```{r}
-ggplot(total_2015_filtered, aes( x=`Average Spin Rate`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Average Spin Rate`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Average Spin Rate`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Average Spin Rate`,
+    log(total_2015_filtered$salary))
 ```
 
 Even though spin rate is something that pitchers place a lot of emphasis on, it seems like there is no strong correlation between salary and average spin rate. This is confirmed both quantitatively through the R value but also visually through the plot, despite the recent interest in spin rates, it seems like its not a great predictor of salary.
 
 ```{r}
-ggplot(total_2015_filtered, aes( x=`Average Horizontal Break`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+        x = `Average Horizontal Break`,
+        y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Average Horizontal Break`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Average Horizontal Break`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`Average Vertical Break`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Average Vertical Break`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Average Vertical Break`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Average Vertical Break`,
+    log(total_2015_filtered$salary))
 ```
 
 Another topic that has garnered more interest in the baseball community recently due to advances in terms of pitch tracking is horizontal and vertical break or the degree of movement of the ball in flight. Looking at the spread of the data and the low R value, it seems like, despite the emphasis certain people put on these two statistics, neither is a good predictor of salary.
@@ -185,46 +274,76 @@ Lastly, we get to our advanced statistics, namely batting average against (BAA),
 First we looked at at BAA, SLGA, BABIPA, and wOBAA.
 
 ```{r}
-ggplot(total_2015_filtered, aes( x=`BAA`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `BAA`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`BAA`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`BAA`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`SLGA`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `SLGA`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`SLGA`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`SLGA`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`BABIPA`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `BABIPA`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`BABIPA`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`BABIPA`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`wOBAA`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `wOBAA`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`wOBAA`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`wOBAA`,
+    log(total_2015_filtered$salary))
 
 ```
 
 Shockingly, not a single advanced statistic is significantly correlated with salary. Going into this project, we had expected that advanced statistics were going to be worse predictors of salary than base statistics like wins but we had not expected a complete lack of correlation. This result suggests that either these statistics do not do as good of a job as one would have expected in quantifying pitcher performance or that general managers mistakenly overlook advanced statistics.
 
 ```{r}
-ggplot(total_2015_filtered, aes( x=`Corner %`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Corner %`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Corner %`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Corner %`,
+    log(total_2015_filtered$salary))
 
-ggplot(total_2015_filtered, aes( x=`Average Barrel`,y=log(salary))) +
-  geom_point(alpha=0.5)+
+ggplot(total_2015_filtered,
+       aes(
+         x = `Average Barrel`,
+         y = log(salary))
+       ) +
+  geom_point(alpha = 0.5)+
   theme_classic()
 
-cor(total_2015_filtered$`Average Barrel`,log(total_2015_filtered$salary))
+cor(total_2015_filtered$`Average Barrel`,
+    log(total_2015_filtered$salary))
 ```
 
 We had created corner % in order to serve as a proxy for a pitcher's control by quantifying what percent of their pitches end up in one of the corner zones rather than right down the middle. Barrel % was designed to represent the percentages of pitches that resulted in hard contact. However, neither of them had a significant correlation with future.
@@ -232,11 +351,23 @@ We had created corner % in order to serve as a proxy for a pitcher's control by 
 ##Correlations Between Predictors##
 
 ```{r}
-total_quant_pred <- select_if(total_2015_filtered, is.numeric)
+total_quant_pred <- 
+  select_if(
+    total_2015_filtered,
+    is.numeric
+    )
 
-total_quant_pred <- total_quant_pred %>% dplyr::select(-yearID,-mlb_id,-W,-L,-`Average Balls`)
+total_quant_pred <- 
+  total_quant_pred %>% 
+  select(
+    -yearID,
+    -mlb_id,
+    -W,-L,
+    -`Average Balls`
+         )
 
-predictor_correlations<-cor(total_quant_pred)
+predictor_correlations <- 
+  cor(total_quant_pred)
 
 ```
 
