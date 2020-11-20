@@ -386,3 +386,6 @@ Our advanced statistics, BAA, SLGA, BABIPA, and wOBAA are all quite positively c
 An additional, interesting, observation is that ERA is positively correlated with number of losses with a medium degree of correlation (R=0.4), while not being correlated to number of wins (R=0.03). This suggests that a poor pitcher with a high ERA can easily lose games while a skilled pitcher with a low ERA cannot win games for his team alone.
 
 #Predicting Future ERA#
+
+Having explored possible predictors of salary (comparing both simple and complex variables), we then moved on to our prediction of future Earned Run Average (ERA). In this case, our selected response (ERA) can be thought of as a rough proxy for general pitching performance and outcome. Since the inception of statistic in the early 1900s, ERA has been the most ubiqitous and cited measure of pitcher effectiveness, as it represents a straightforward calculation of the average amount of runs a pitcher allows over the duration of typical game (with run prevention thought of as the ultimate aim of pitching). Despite ERA being the most functional measure of pitching performance, it is nonetheless subject to a significant deal of random noise between individual pitchers' seasons. The development of advanced analytics 
+
