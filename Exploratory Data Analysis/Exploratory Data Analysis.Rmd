@@ -410,38 +410,17 @@ An additional, interesting, observation is that ERA is positively correlated wit
 
 #Predicting Future ERA#
 
-Having explored possible predictors of salary (comparing both simple and complex variables), we move on to our prediction of future Earned Run Average (ERA). In this case, our selected response (ERA) can be thought of as a rough proxy for general pitching performance and outcome. Since the inception of the statistic in the early 1900s, ERA has been the most ubiqitous and cited measure of pitcher effectiveness, as it represents a straightforward calculation of the average amount of runs a pitcher allows over the duration of typical game (with run prevention thought of as the ultimate aim of pitching). Despite ERA being the most functional measure of pitching performance, it is nonetheless subject to a significant deal of random noise between individual pitchers' seasons. The development of advanced pitching analytics therefore may lend itself to more accurate forecasts of future ERA than simple counting statistics (such as wins, strikeouts, and innings pitched). With this in mind, we are motivated to find the statistical model that most accurately predicts ERA in a succesive season given a number of predictors generated from data in the current season. This should allow us to assess and predict player performance not based on actual (occasionally random) outcomes, but rather on an aggregation of predicted outcomes determined by a set of relevant statistical parameters. Ultimately, this model should lend itself towards making informed salary decisions by MLB general managers.
+Having explored possible predictors of salary (comparing both simple and complex variables), we move on to our prediction of future Earned Run Average (ERA). In this case, our selected response (ERA) can be thought of as a rough proxy for general pitching performance and outcome. Since the inception of the statistic in the early 1900s, ERA has been the most ubiqitous and cited measure of pitcher effectiveness, as it represents a straightforward calculation of the average amount of runs a pitcher allows over the duration of typical game (with run prevention thought of as the ultimate aim of pitching). Despite ERA being the most functional measure of pitching performance, it is nonetheless subject to a significant deal of random noise between individual pitchers' seasons. The development of advanced pitching analytics therefore may lend itself to more accurate forecasts of future ERA than simple counting statistics (such as wins, strikeouts, and innings pitched). With this in mind, we are motivated to find the statistical model that most accurately predicts ERA in a succesive season given a number of predictors generated from data in the current season. This should allow us to assess and predict player performance not based on actual (occasionally random) outcomes, but rather on an aggregation of predicted outcomes determined by a set of relevant statistical parameters. Ultimately, this model should lend itself to making informed salary decisions by MLB general managers.
 
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
 pitcher_data <- read_csv("Mega Summary.csv")
 pitch_data <- read_csv("2020_summary.csv") %>%
   rename(`Pitch Category` = pitch_category)
 ```
-```{r}
-pitch_data  %>%
-  ggplot(aes(x = `Average Pitch Speed`, y = BAA)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
-  theme_classic()
-```
-
-```{r}
-cor(pitch_data$`Average Pitch Speed`, pitch_data$BAA)
-```
 
 
-```{r}
-pitch_data  %>%
-  ggplot(aes(x = `Average Pitch Speed`, y = BAA, color =`Pitch Category`)) +
-  geom_point(size = 2, alpha = 0.5) +
-  geom_smooth(method = lm) +
-  theme_minimal()
-```
+Ostensibly, the most obvious predictor of forecasted ERA is current ERA, as we can intuitively expect pitchers who performed well in a given season to also perform well in subsequent seasons.
 
-Conclusion: average pitch speed has no meaningful relationship with BAA, even when the data is almost perfectly seperated by categorical variable level. This was also true of average spin rate. Results are consistent with different response choices (BAA, wOBAA, SLGA, etc.). In other words, pitch tracking data has no predictive power when it comes to modelling outcome and/or pitcher performance. This explains why Statcast uses batted ball variables (such as launch angle and exit velocity) as the predictors in their models for expected outcomes.
-
-
-Ostensibly, the most obvious predictor of forecasted ERA is current ERA, as we can intuitively expect pitchers who performed well in a given season to also perform well in subsequent seasons
 
 ```{r}
 pitcher_data %>%
@@ -484,7 +463,7 @@ cor(pitcher_data$SO, pitcher_data$`ERA (t+1)`)
 ```
 
 
-Interestingly, the counting statistics that were correlated with salary have little correlation with forecasted ERA. In fact, the positive correlation between wins and forecasted ERA suggests that the average forcasted ERA actually increases (albeit very marginally) as wins improve. This imntimates that there are variables that will likely be more effective in predicting future ERA, which we explore below:
+Interestingly, the counting statistics that were correlated with salary have little correlation with forecasted ERA. In fact, the positive correlation between wins and forecasted ERA suggests that the average forcasted ERA actually increases (albeit very marginally) as wins improve. This intimates that there are variables that will likely be more effective in predicting future ERA, which we explore below:
 
 
 ```{r}
@@ -525,8 +504,8 @@ pitcher_data %>%
 cor(pitcher_data$xwoba, pitcher_data$`ERA (t+1)`)
 ```
 
-Already, we see that some of the slightly more advanced analytics have stronger correlations with future ERA than the more rudimentary counting statistics. Additionally, we see that expected weighted on-base average (xwOBA) outperforms weighted on-base average (wOBA). Unlike wOBA, xwOBA attempts to mitigate some of the stochasticity in pitching outcomes by aggregating batted ball data to predict outcome. In some ways, we can think of xwOBA has a more true measure of pure pitching performance than wOBA, which helps explain why it has a stronger correlation with future ERA.
 
+Already, we see that some of the slightly more advanced analytics have stronger correlations with future ERA than the more rudimentary counting statistics. Additionally, we see that expected weighted on-base average (xwOBA) outperforms weighted on-base average (wOBA). Unlike wOBA, xwOBA attempts to mitigate some of the stochasticity in pitching outcomes by aggregating batted ball data to predict outcome. In some ways, we can think of xwOBA has a more true measure of pure pitching performance than wOBA, which helps explain why it has a stronger correlation with future ERA. This insight encouraged us to look into some more of the relationships between raw metrics (similar to wOBA) and expected metrics (similar to xwOBA), and the subsequent effect on ERA forecasting:
 
 
 ```{r}
@@ -570,4 +549,30 @@ cor(pitcher_data$`xwOBA - wOBA`, pitcher_data$`ΔERA`)
 
 Explain luck reversion. Better predictor than just ERA.
 
+Difference between raw and expected metric in accordance with ERA should be a strong predictor of future ERA (due to the correlation with change in ERA).
+
 Later: add corner %, meatball %, barrel %, ERA/barrel %. Add 2019 to data set
+
+
+```{r}
+pitch_data  %>%
+  ggplot(aes(x = `Average Pitch Speed`, y = BAA)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = lm, color = "grey50") +
+  theme_classic()
+```
+
+```{r}
+cor(pitch_data$`Average Pitch Speed`, pitch_data$BAA)
+```
+
+
+```{r}
+pitch_data  %>%
+  ggplot(aes(x = `Average Pitch Speed`, y = BAA, color =`Pitch Category`)) +
+  geom_point(size = 2, alpha = 0.5) +
+  geom_smooth(method = lm) +
+  theme_minimal()
+```
+
+Conclusion: average pitch speed has no meaningful relationship with BAA, even when the data is almost perfectly seperated by categorical variable level. This was also true of average spin rate. Results are consistent with different response choices (BAA, wOBAA, SLGA, etc.). In other words, pitch tracking data has no predictive power when it comes to modelling outcome and/or pitcher performance. This explains why Statcast uses batted ball variables (such as launch angle and exit velocity) as the predictors in their models for expected outcomes.
