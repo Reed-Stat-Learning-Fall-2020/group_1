@@ -18,6 +18,10 @@ One of the concerns going into this project was whether the relationship between
 
 ```{r}
 final_pitch_data <- read_csv("data/final_pitch_data.csv")
+
+
+final_pitch_data_try<- final_pitch_data_nob[final_pitch_data_nob$hit_location !=0,]
+
 ```
 First, it seems like xWOBA does not vary much between the years. The overall trends appear similar, namely, most of the density lies in low values of xWOBA or 0.
 ```{r}
@@ -57,7 +61,6 @@ ggplot(final_pitch_data, aes( x=release_speed,y=xwoba)) +
   theme_classic()
 
 cor(final_pitch_data$release_speed,final_pitch_data$xwoba)
-
 
 ggplot(final_pitch_data, aes( x=effective_speed,y=xwoba)) +
   geom_point(alpha=0.2,color="dodgerblue",fill="dodgerblue")+
@@ -133,6 +136,14 @@ ggplot(final_pitch_data, aes( x=vx0,y=xwoba)) +
   theme_classic()
 
 cor(final_pitch_data$vx0,final_pitch_data$xwoba)
+
+type.factor <- factor(final_pitch_data$type)
+type.numeric<- as.numeric(type.factor)
+
+cor(final_pitch_data$vx0,final_pitch_data$xwoba)
+cor(final_pitch_data$vx0,type.numeric)
+
+
 cor(abs(final_pitch_data$vx0),final_pitch_data$xwoba)
 
 
