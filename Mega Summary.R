@@ -123,6 +123,7 @@ lahman_2019 <- left_join(lahman_2019, names, by = "playerID") %>%
 # 2016 ERA
 
 ERA_2016 <- lahman_2016 %>%
+  filter(BFP >= 100) %>% 
   select(player_name, ERA) %>%
   rename(`ERA (t+1)` = ERA)
 
@@ -130,6 +131,7 @@ ERA_2016 <- lahman_2016 %>%
 # 2017 ERA
 
 ERA_2017 <- lahman_2017 %>%
+  filter(BFP >= 100) %>% 
   select(player_name, ERA) %>%
   rename(`ERA (t+1)` = ERA)
 
@@ -137,6 +139,7 @@ ERA_2017 <- lahman_2017 %>%
 # 2018 ERA
 
 ERA_2018 <- lahman_2018 %>%
+  filter(BFP >= 100) %>% 
   select(player_name, ERA) %>%
   rename(`ERA (t+1)` = ERA)
 
@@ -144,6 +147,7 @@ ERA_2018 <- lahman_2018 %>%
 # 2019 ERA
 
 ERA_2019 <- lahman_2019 %>%
+  filter(BFP >= 100) %>% 
   select(player_name, ERA) %>%
   rename(`ERA (t+1)` = ERA)
 
@@ -198,8 +202,15 @@ mega_summary <- mega_summary %>%
 # Filter
 
 mega_summary <- mega_summary %>%
-  filter(BFP >= 100)
+  filter(BFP >= 100) 
 
+mega_summary <- mega_summary %>%
+  drop_na()
+
+
+# Write CSV
+
+write_csv(mega_summary, "Mega Summary.csv")
 
 
 
