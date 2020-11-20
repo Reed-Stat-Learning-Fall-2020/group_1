@@ -123,25 +123,86 @@ lahman_2019 <- left_join(lahman_2019, names, by = "playerID") %>%
 # 2016 ERA
 
 ERA_2016 <- lahman_2016 %>%
-  select(player_name, ERA)
+  select(player_name, ERA) %>%
+  rename(`ERA (t+1)` = ERA)
 
 
 # 2017 ERA
 
 ERA_2017 <- lahman_2017 %>%
-  select(player_name, ERA)
+  select(player_name, ERA) %>%
+  rename(`ERA (t+1)` = ERA)
 
 
 # 2018 ERA
 
 ERA_2018 <- lahman_2018 %>%
-  select(player_name, ERA)
+  select(player_name, ERA) %>%
+  rename(`ERA (t+1)` = ERA)
 
 
 # 2019 ERA
 
 ERA_2019 <- lahman_2019 %>%
-  select(player_name, ERA)
+  select(player_name, ERA) %>%
+  rename(`ERA (t+1)` = ERA)
+
+
+# 2015 Summary
+
+summary_2015 <- left_join(pitchers_2015, lahman_2015, by = "player_name")
+summary_2015 <- left_join(summary_2015, ERA_2016, by = "player_name")
+
+
+# 2016 Summary
+
+summary_2016 <- left_join(pitchers_2016, lahman_2016, by = "player_name")
+summary_2016 <- left_join(summary_2016, ERA_2017, by = "player_name")
+
+
+# 2017 Summary
+
+summary_2017 <- left_join(pitchers_2017, lahman_2017, by = "player_name")
+summary_2017 <- left_join(summary_2017, ERA_2018, by = "player_name")
+
+
+# 2018 Summary
+
+summary_2018 <- left_join(pitchers_2018, lahman_2018, by = "player_name")
+summary_2018 <- left_join(summary_2018, ERA_2019, by = "player_name")
+
+
+# Mega Summary
+
+mega_summary <- rbind(summary_2015,
+                      summary_2016,
+                      summary_2017,
+                      summary_2018)
+
+
+# Variable Mutations
+
+mega_summary <- mega_summary %>%
+  mutate(ba = as.numeric(ba),
+         babip = as.numeric(babip),
+         woba = as.numeric(woba),
+         xwoba = as.numeric(xwoba),
+         xba = as.numeric(xba),
+         spin_rate = as.numeric(spin_rate),
+         velocity = as.numeric(velocity)) %>%
+  mutate(`xBA - BA` = xba - ba,
+         `xwOBA - wOBA` = xwoba - woba,
+         `ΔERA` = `ERA (t+1)` - ERA)
+
+
+# Filter
+
+mega_summary <- mega_summary %>%
+  filter(BFP >= 100)
+
+
+
+
 
 
 
