@@ -35,6 +35,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Total Wins`,
@@ -46,6 +47,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Total Loss`,
@@ -58,6 +60,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$Pitches,
@@ -81,6 +84,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$Win_Percent,
@@ -97,6 +101,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`ERA`,
@@ -108,6 +113,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Total ER`,
@@ -127,6 +133,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha=0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Total Strikes`,
@@ -138,6 +145,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Total Balls`,log(total_2015_filtered$salary))
@@ -148,6 +156,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Total Hit`,
@@ -165,6 +174,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Strike Percent`,
@@ -176,6 +186,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Ball Percent`,
@@ -187,6 +198,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Hit Percent`,
@@ -206,6 +218,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Average Pitch Speed`,
@@ -217,6 +230,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Average Effective Pitch Speed`,
@@ -233,6 +247,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Average Spin Rate`,
@@ -248,6 +263,7 @@ ggplot(total_2015_filtered,
         y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Average Horizontal Break`,
@@ -259,6 +275,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Average Vertical Break`,
@@ -280,6 +297,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`BAA`,
@@ -291,6 +309,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`SLGA`,
@@ -302,6 +321,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`BABIPA`,
@@ -313,6 +333,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`wOBAA`,
@@ -329,6 +350,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Corner %`,
@@ -340,6 +362,7 @@ ggplot(total_2015_filtered,
          y = log(salary))
        ) +
   geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 
 cor(total_2015_filtered$`Average Barrel`,
