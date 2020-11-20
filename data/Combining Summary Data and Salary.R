@@ -2,7 +2,6 @@ library(tidyverse)
 library(rvest)
 library(baseballr)
 
-
 # Scrape Data
 pitches1_2016 <- scrape_statcast_savant(start_date = "2016-4-3", 
                                         end_date = "2016-4-10", 
