@@ -1,0 +1,253 @@
+---
+title: "rvest"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rvest)
+```
+
+
+```{r}
+#teams
+team_link_df <-
+  tibble(team = c("arizona-diamondbacks",
+                  "atlanta-braves",
+                  "baltimore-orioles",
+                  "boston-red-sox",
+                  "chicago-white-sox",
+                  "chicago-cubs",
+                  "cincinnati-reds",
+                  "cleveland-indians",
+                  "colorado-rockies",
+                  "detroit-tigers",
+                  "houston-astros",
+                  "kansas-city-royals",
+                  "los-angeles-angels",
+                  "los-angeles-dodgers",
+                  "miami-marlins",
+                  "milwaukee-brewers",
+                  "minnesota-twins",
+                  "new-york-yankees",
+                  "new-york-mets",
+                  "oakland-athletics",
+                  "philadelphia-phillies",
+                  "pittsburgh-pirates",
+                  "san-diego-padres",
+                  "san-francisco-giants",
+                  "seattle-mariners",
+                  "st-louis-cardinals",
+                  "tampa-bay-rays",
+                  "texas-rangers",
+                  "toronto-blue-jays",
+                  "washington-nationals"),
+         link = paste0("https://www.spotrac.com/mlb/rankings/2017/salary/",team,"/starting-pitcher/"))
+```
+
+```{r}
+pull_salary <- function(link){
+  page <- read_html("link")
+  page <- 
+    page %>%
+      html_nodes(css = ".info") %>%
+      html_text() %>%
+      as_tibble() %>%
+      mutate(value = str_remove(value, "\\$"),
+         value = str_remove_all(value, ","),
+         value = as.double(as.character(value)),
+         id = row_number()) %>%
+      rename("salary" = value)
+  page2 <- read_html("link")
+  players <- 
+    page2 %>%
+      html_nodes(css = ".team-name") %>%
+      html_text() %>%
+      as_tibble() %>%
+      mutate(id = row_number()) %>%
+      rename("name" = value)
+  final <- 
+    players %>%
+      left_join(salary, by = "id") %>%
+      select(-id) %>%
+      mutate(year = 2017)
+  return(final)
+}
+  
+```
+
+
+```{r}
+list_of_data <- list()
+for (i in team_link_df$link){
+  list_of_data[[i]] <- pull_salary(i)
+}
+```
+
+```{r}
+salary17 <- bind_rows(list_of_data, .id = "column_label") %>%
+  select(-column_label)
+
+write_csv(salary17, "2017salary.csv")
+```
+
+
+```{r}
+team_link_df18 <-
+  tibble(team = c("arizona-diamondbacks",
+                  "atlanta-braves",
+                  "baltimore-orioles",
+                  "boston-red-sox",
+                  "chicago-white-sox",
+                  "chicago-cubs",
+                  "cincinnati-reds",
+                  "cleveland-indians",
+                  "colorado-rockies",
+                  "detroit-tigers",
+                  "houston-astros",
+                  "kansas-city-royals",
+                  "los-angeles-angels",
+                  "los-angeles-dodgers",
+                  "miami-marlins",
+                  "milwaukee-brewers",
+                  "minnesota-twins",
+                  "new-york-yankees",
+                  "new-york-mets",
+                  "oakland-athletics",
+                  "philadelphia-phillies",
+                  "pittsburgh-pirates",
+                  "san-diego-padres",
+                  "san-francisco-giants",
+                  "seattle-mariners",
+                  "st-louis-cardinals",
+                  "tampa-bay-rays",
+                  "texas-rangers",
+                  "toronto-blue-jays",
+                  "washington-nationals"),
+         link = paste0("https://www.spotrac.com/mlb/rankings/2018/salary/",team,"/starting-pitcher/"))
+```
+
+
+```{r}
+list_of_data2 <- list()
+for (i in team_link_df18$link){
+  list_of_data2[[i]] <- pull_salary(i)
+}
+```
+
+```{r}
+salary18 <- bind_rows(list_of_data2, .id = "column_label") %>%
+  select(-column_label)
+
+write_csv(salary18, "2018salary.csv")
+```
+
+
+
+```{r}
+team_link_df19 <-
+  tibble(team = c("arizona-diamondbacks",
+                  "atlanta-braves",
+                  "baltimore-orioles",
+                  "boston-red-sox",
+                  "chicago-white-sox",
+                  "chicago-cubs",
+                  "cincinnati-reds",
+                  "cleveland-indians",
+                  "colorado-rockies",
+                  "detroit-tigers",
+                  "houston-astros",
+                  "kansas-city-royals",
+                  "los-angeles-angels",
+                  "los-angeles-dodgers",
+                  "miami-marlins",
+                  "milwaukee-brewers",
+                  "minnesota-twins",
+                  "new-york-yankees",
+                  "new-york-mets",
+                  "oakland-athletics",
+                  "philadelphia-phillies",
+                  "pittsburgh-pirates",
+                  "san-diego-padres",
+                  "san-francisco-giants",
+                  "seattle-mariners",
+                  "st-louis-cardinals",
+                  "tampa-bay-rays",
+                  "texas-rangers",
+                  "toronto-blue-jays",
+                  "washington-nationals"),
+         link = paste0("https://www.spotrac.com/mlb/rankings/2019/salary/",team,"/starting-pitcher/"))
+```
+
+
+```{r}
+list_of_data3 <- list()
+for (i in team_link_df19$link){
+  list_of_data3[[i]] <- pull_salary(i)
+}
+```
+
+```{r}
+salary19 <- bind_rows(list_of_data3, .id = "column_label") %>%
+  select(-column_label)
+
+write_csv(salary19, "2019salary.csv")
+```
+
+
+```{r}
+team_link_df20 <-
+  tibble(team = c("arizona-diamondbacks",
+                  "atlanta-braves",
+                  "baltimore-orioles",
+                  "boston-red-sox",
+                  "chicago-white-sox",
+                  "chicago-cubs",
+                  "cincinnati-reds",
+                  "cleveland-indians",
+                  "colorado-rockies",
+                  "detroit-tigers",
+                  "houston-astros",
+                  "kansas-city-royals",
+                  "los-angeles-angels",
+                  "los-angeles-dodgers",
+                  "miami-marlins",
+                  "milwaukee-brewers",
+                  "minnesota-twins",
+                  "new-york-yankees",
+                  "new-york-mets",
+                  "oakland-athletics",
+                  "philadelphia-phillies",
+                  "pittsburgh-pirates",
+                  "san-diego-padres",
+                  "san-francisco-giants",
+                  "seattle-mariners",
+                  "st-louis-cardinals",
+                  "tampa-bay-rays",
+                  "texas-rangers",
+                  "toronto-blue-jays",
+                  "washington-nationals"),
+         link = paste0("https://www.spotrac.com/mlb/rankings/2020/salary/",team,"/starting-pitcher/"))
+```
+
+
+```{r}
+list_of_data4 <- list()
+for (i in team_link_df20$link){
+  list_of_data4[[i]] <- pull_salary(i)
+}
+```
+
+```{r}
+salary20 <- bind_rows(list_of_data4, .id = "column_label") %>%
+  select(-column_label)
+
+write_csv(salary20, "2020salary.csv")
+```
+
+
+
+
+
+
