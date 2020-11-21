@@ -1,0 +1,48 @@
+---
+title: "rvest"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rvest)
+```
+
+```{r}
+url_salary <- paste0("https://www.spotrac.com/mlb/rankings/2017/salary/pitching/")
+url_player <- paste0("https://www.spotrac.com/mlb/rankings/2017/salary/pitching/")
+
+page1 <- read_html(url_salary)
+
+salary <- 
+  page1 %>%
+    html_nodes(css = ".info") %>%
+    html_text() %>%
+    as_tibble() %>%
+    mutate(value = str_remove(value, "\\$"),
+         value = str_remove_all(value, ","),
+         value = as.double(as.character(value)),
+         id = row_number()) %>%
+    rename("salary" = value)
+
+page2 <- read_html(url_player)
+
+players <- 
+  page2 %>%
+    html_nodes(css = ".team-name") %>%
+    html_text() %>%
+    as_tibble() %>%
+    mutate(id = row_number()) %>%
+    rename("name" = value)
+
+
+```
+
+```{r}
+final <- 
+  players %>%
+  left_join(salary, by = "id") %>%
+  select(-id) %>%
+  mutate(year = 2017)
+```
