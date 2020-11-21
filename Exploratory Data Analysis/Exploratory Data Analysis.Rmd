@@ -457,7 +457,7 @@ cor(pitcher_data$ERA, pitcher_data$`ERA (t+1)`)
 ```
 
 
-Despite the expected existence of a postive linear association between the two variables, the correlation between ERA and ERA in the subsequent season is somewhat weak. This can likely be explained by the aforementioned influence of randomness in pitching outcomes. This leads us to believe that other variables (or a combination therof) may have more predictive power in forecasting ERA than ERA by itself. First, we look at some of the same counting stats that were significant in predicting salary:
+Despite the expected existence of a postive linear association between the two variables, the correlation between ERA and ERA in the subsequent season is somewhat weak. This can likely be explained by the aforementioned influence of randomness in pitching outcomes. This leads us to believe that other variables (or a combination therof) may have more predictive power in forecasting ERA than ERA by itself. First, we look at some of the same counting stats that were significant in predicting salary, namely total wins, total pitches, and total strikes, which were the three predictors with the highest correlation (quantified through R value) with salary:
 
 
 ```{r}
@@ -472,6 +472,23 @@ pitcher_data %>%
 cor(pitcher_data$W, pitcher_data$`ERA (t+1)`)
 ```
 
+Interestingly, the counting statistics that were correlated with salary have little correlation with forecasted ERA. In fact, the positive correlation between wins and forecasted ERA suggests that the average forcasted ERA actually increases (albeit very marginally) as wins improve. This intimates that there are variables that will likely be more effective in predicting future ERA, which we explore below:
+
+
+```{r}
+pitcher_data %>%
+  ggplot(aes(x = pitches, y = `ERA (t+1)`)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = lm, color = "grey50") +
+  theme_classic()
+```
+
+```{r}
+cor(pitcher_data$pitches, pitcher_data$`ERA (t+1)`)
+```
+
+Similar to wins, we see close to zero relationship between number of pitches and ERA in the following year. If anything, the relationship appears to be positive, albeit incredibly weak, suggesting that more pitches in the previous year is correlated with both a higher salary and a worse performance.
+
 ```{r}
 pitcher_data %>%
   ggplot(aes(x = SO, y = `ERA (t+1)`)) +
@@ -484,8 +501,9 @@ pitcher_data %>%
 cor(pitcher_data$SO, pitcher_data$`ERA (t+1)`)
 ```
 
+Lastly, we see strikeouts in the previous year shows a very weak, close to zero correlation with ERA. Here, the relationship is negative, which is what one would expect, however, the weakness of the association suggests that strikeouts are not as good of a predcitor of future performance as one would expect following the salary analysis.
 
-Interestingly, the counting statistics that were correlated with salary have little correlation with forecasted ERA. In fact, the positive correlation between wins and forecasted ERA suggests that the average forcasted ERA actually increases (albeit very marginally) as wins improve. This intimates that there are variables that will likely be more effective in predicting future ERA, which we explore below:
+From this analysis, we see that there is no relationship between the top three predictors of salary and the pitcher's ERA the next season. This already provides some evidence that GMs are not properly valuing the right attributes as the two most correlated with salary have no relationship to future performance (quantified through ERA). This finding also is intuitively not all that surprising, these basic counting statistics might seem impressive in a vaccum but provide no indication as to future performance. We hypothesize that advanced statistics such as xWOBA or xBA are going to be better predictors of future performance than the salary-correlated predictors.
 
 
 ```{r}
@@ -572,5 +590,6 @@ cor(pitcher_data$`xwOBA - wOBA`, pitcher_data$`ΔERA`)
 
 As we see in the data, there is clear statistical evidence of what we could call "mean-reversion of luck". Pitchers whose actual performances were worse than expected performances generally saw an increase in ERA the next season as there "luck" reverted closer to the mean. The opposite can be said for Pitchers who performed better than exoected. This conclusion suggests that including differences in outcome-based statistics and expected statistics should significant improve the predictive power of our model.
 
+#Conclusion#
 
-
+From our preliminary data exploration, it appears that discrepancies exist between the predictors that are associated with salary and the predictors associated with future performance. Specifically, it seems like raw, unadjusted counting stats associated with volume of pitches rather than quality are highly correlated with salary; while advanced statistics, especially statistics that calculate expected values, are better predictors of future performance. We also elucidated the phenomenon of a "mean-reversion of luck" which suggests that a pitcher's expected performance, derived from statistics such as xWOBA and xBA rather than just WOBA and BA, can help remove some of the noise associated with luck and stochastic fluctuations. Overall, it appears that the differences in strength of correlation between salary and future performance are significant, our next step will be to create and fine-tune models to predict both response variables to both futher delineate what predictors the models differ on as well as investigate both over- and under-paid or valued pitchers.
