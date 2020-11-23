@@ -32,6 +32,13 @@ pitchers_2018 <- pitchers_2018 %>%
   select(pitches, player_name, year, ba, babip, woba, xwoba, xba, hits, abs, spin_rate, velocity)
 
 
+# 2019 Data
+
+pitchers_2019 <- read_csv("Pitchers 2019.csv")
+pitchers_2019 <- pitchers_2019 %>% 
+  select(pitches, player_name, year, ba, babip, woba, xwoba, xba, hits, abs, spin_rate, velocity)
+
+
 # Names
 
 names <- People %>%
@@ -152,6 +159,29 @@ ERA_2019 <- lahman_2019 %>%
   rename(`ERA (t+1)` = ERA)
 
 
+# 2020 ERA
+
+ERA_2020 <- read_csv("ERA 2020.csv")
+ERA_2020 <- ERA_2020 %>%
+  filter(pa >= 150) %>% 
+  select(last_name, first_name, era) %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  rename(`ERA (t+1)` = era)
+
+
+# 2016 Salary
+
+salary_2016 <- read_csv("pitcher_salaries_2016.csv")
+salary_2016two <- read_csv("2017salary.csv")
+salary_2016 <- salary_2016 %>%
+  select(player_name, salary) %>%
+  rename(Salary = salary)
+salary_2016two <- salary_2016two %>%
+  select(name, salary) %>%
+  rename(player_name = name,
+         `Salary (t+1)` = salary)
+
+
 # 2015 Summary
 
 summary_2015 <- left_join(pitchers_2015, lahman_2015, by = "player_name")
@@ -176,12 +206,19 @@ summary_2018 <- left_join(pitchers_2018, lahman_2018, by = "player_name")
 summary_2018 <- left_join(summary_2018, ERA_2019, by = "player_name")
 
 
+# 2019 Summary
+
+summary_2019 <- left_join(pitchers_2019, lahman_2019, by = "player_name")
+summary_2019 <- left_join(summary_2019, ERA_2020, by = "player_name")
+
+
 # Mega Summary
 
 mega_summary <- rbind(summary_2015,
                       summary_2016,
                       summary_2017,
-                      summary_2018)
+                      summary_2018,
+                      summary_2019)
 
 
 # Variable Mutations
@@ -194,7 +231,7 @@ mega_summary <- mega_summary %>%
          xba = as.numeric(xba),
          spin_rate = as.numeric(spin_rate),
          velocity = as.numeric(velocity)) %>%
-  mutate(`BABIP - Mean BABIP` = babip - mean(babip),
+  mutate(`BABIP - Mean BABIP` = babip - mean(babip, na.rm = TRUE),
          `xBA - BA` = xba - ba,
          `xwOBA - wOBA` = xwoba - woba,
          `ΔERA` = `ERA (t+1)` - ERA)
