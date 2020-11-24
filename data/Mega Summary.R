@@ -172,6 +172,7 @@ ERA_2020 <- ERA_2020 %>%
 # 2015 Salary
 
 salary_2015 <- read_csv("2015salary.csv") %>%
+  rename(player_name = mlb_name) %>%
   distinct(player_name, .keep_all = TRUE)
 salary_2015two <- read_csv("2016salary.csv") %>%
   distinct(player_name, .keep_all = TRUE)
@@ -345,6 +346,15 @@ mega_summary <- rbind(summary_2015,
                       summary_2019)
 
 
+# Filter
+
+mega_summary <- mega_summary %>%
+  filter(BFP >= 150) 
+
+mega_summary <- mega_summary %>%
+  drop_na()
+
+
 # Variable Mutations
 
 mega_summary <- mega_summary %>%
@@ -358,11 +368,15 @@ mega_summary <- mega_summary %>%
   mutate(`BABIP - Mean BABIP` = babip - mean(babip, na.rm = TRUE),
          `xBA - BA` = xba - ba,
          `xwOBA - wOBA` = xwoba - woba,
+         `ERA/Barrel %` = ERA/`Barrel %`,
          `ERA/Hard Hit %` = ERA/`Hard Hit %`,
          `ΔERA` = `ERA (t+1)` - ERA,
          `ΔSalary` = `Salary (t+1)` - Salary) %>%
+  mutate(`ERA/Barrel %` = format(round(`ERA/Barrel %`, 3), nsmall = 3)) %>%
   mutate(`ERA/Hard Hit %` = format(round(`ERA/Hard Hit %`, 3), nsmall = 3)) %>%
+  mutate(`BABIP - Mean BABIP` = format(round(`BABIP - Mean BABIP`, 4), nsmall = 4)) %>%
   rename(Pitches = pitches,
+         Pitcher = player_name,
          Year = year,
          BA = ba,
          BABIP = babip,
@@ -374,15 +388,6 @@ mega_summary <- mega_summary %>%
          `Spin Rate` = spin_rate,
          `Velocity` = velocity)
   
-
-
-# Filter
-
-mega_summary <- mega_summary %>%
-  filter(BFP >= 150) 
-
-mega_summary <- mega_summary %>%
-  drop_na()
 
 
 # Write CSV
