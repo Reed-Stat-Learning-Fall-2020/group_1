@@ -43,13 +43,13 @@ team_link_df <-
                   "texas-rangers",
                   "toronto-blue-jays",
                   "washington-nationals"),
-         link = paste0("https://www.spotrac.com/mlb/rankings/2017/salary/",team,"/starting-pitcher/"))
+         links = paste0("https://www.spotrac.com/mlb/rankings/2017/salary/",team,"/starting-pitcher/"))
 ```
 
 ```{r}
-pull_salary <- function(link){
-  page <- read_html("link")
-  page <- 
+pull_salary <- function(x,y){
+  page <- read_html(x)
+  salary <- 
     page %>%
       html_nodes(css = ".info") %>%
       html_text() %>%
@@ -59,7 +59,7 @@ pull_salary <- function(link){
          value = as.double(as.character(value)),
          id = row_number()) %>%
       rename("salary" = value)
-  page2 <- read_html("link")
+  page2 <- read_html(x)
   players <- 
     page2 %>%
       html_nodes(css = ".team-name") %>%
@@ -71,7 +71,7 @@ pull_salary <- function(link){
     players %>%
       left_join(salary, by = "id") %>%
       select(-id) %>%
-      mutate(year = 2017)
+      mutate(year = y)
   return(final)
 }
   
@@ -80,8 +80,8 @@ pull_salary <- function(link){
 
 ```{r}
 list_of_data <- list()
-for (i in team_link_df$link){
-  list_of_data[[i]] <- pull_salary(i)
+for (i in team_link_df$links){
+  list_of_data[[i]] <- pull_salary(i, 2017)
 }
 ```
 
@@ -132,7 +132,7 @@ team_link_df18 <-
 ```{r}
 list_of_data2 <- list()
 for (i in team_link_df18$link){
-  list_of_data2[[i]] <- pull_salary(i)
+  list_of_data2[[i]] <- pull_salary(i,2018)
 }
 ```
 
@@ -184,7 +184,7 @@ team_link_df19 <-
 ```{r}
 list_of_data3 <- list()
 for (i in team_link_df19$link){
-  list_of_data3[[i]] <- pull_salary(i)
+  list_of_data3[[i]] <- pull_salary(i, 2019)
 }
 ```
 
@@ -235,7 +235,7 @@ team_link_df20 <-
 ```{r}
 list_of_data4 <- list()
 for (i in team_link_df20$link){
-  list_of_data4[[i]] <- pull_salary(i)
+  list_of_data4[[i]] <- pull_salary(i,2020)
 }
 ```
 
