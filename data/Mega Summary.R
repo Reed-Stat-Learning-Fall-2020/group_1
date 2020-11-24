@@ -246,9 +246,55 @@ salary_2019two <- salary_2019two %>%
   rename(`Salary (t+1)` = salary)
 
 
+# 2015 Statcast
+
+statcast_2015 <- read_csv("2015statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
+# 2016 Statcast
+
+statcast_2016 <- read_csv("2016statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
+# 2017 Statcast
+
+statcast_2017 <- read_csv("2017statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
+# 2018 Statcast
+
+statcast_2018 <- read_csv("2018statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
+# 2019 Statcast
+
+statcast_2019 <- read_csv("2019statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
 # 2015 Summary
 
 summary_2015 <- left_join(pitchers_2015, lahman_2015, by = "player_name")
+summary_2015 <- left_join(summary_2015, statcast_2015, by = "player_name")
 summary_2015 <- left_join(summary_2015, ERA_2016, by = "player_name")
 summary_2015 <- left_join(summary_2015, salary_2015, by = "player_name")
 summary_2015 <- left_join(summary_2015, salary_2015two, by = "player_name")
@@ -257,6 +303,7 @@ summary_2015 <- left_join(summary_2015, salary_2015two, by = "player_name")
 # 2016 Summary
 
 summary_2016 <- left_join(pitchers_2016, lahman_2016, by = "player_name")
+summary_2016 <- left_join(summary_2016, statcast_2016, by = "player_name")
 summary_2016 <- left_join(summary_2016, ERA_2017, by = "player_name")
 summary_2016 <- left_join(summary_2016, salary_2016, by = "player_name")
 summary_2016 <- left_join(summary_2016, salary_2016two, by = "player_name")
@@ -265,6 +312,7 @@ summary_2016 <- left_join(summary_2016, salary_2016two, by = "player_name")
 # 2017 Summary
 
 summary_2017 <- left_join(pitchers_2017, lahman_2017, by = "player_name")
+summary_2017 <- left_join(summary_2017, statcast_2017, by = "player_name")
 summary_2017 <- left_join(summary_2017, ERA_2018, by = "player_name")
 summary_2017 <- left_join(summary_2017, salary_2017, by = "player_name")
 summary_2017 <- left_join(summary_2017, salary_2017two, by = "player_name")
@@ -273,6 +321,7 @@ summary_2017 <- left_join(summary_2017, salary_2017two, by = "player_name")
 # 2018 Summary
 
 summary_2018 <- left_join(pitchers_2018, lahman_2018, by = "player_name")
+summary_2018 <- left_join(summary_2018, statcast_2018, by = "player_name")
 summary_2018 <- left_join(summary_2018, ERA_2019, by = "player_name")
 summary_2018 <- left_join(summary_2018, salary_2018, by = "player_name")
 summary_2018 <- left_join(summary_2018, salary_2018two, by = "player_name")
@@ -281,6 +330,7 @@ summary_2018 <- left_join(summary_2018, salary_2018two, by = "player_name")
 # 2019 Summary
 
 summary_2019 <- left_join(pitchers_2019, lahman_2019, by = "player_name")
+summary_2019 <- left_join(summary_2019, statcast_2019, by = "player_name")
 summary_2019 <- left_join(summary_2019, ERA_2020, by = "player_name")
 summary_2019 <- left_join(summary_2019, salary_2019, by = "player_name")
 summary_2019 <- left_join(summary_2019, salary_2019two, by = "player_name")
@@ -308,8 +358,22 @@ mega_summary <- mega_summary %>%
   mutate(`BABIP - Mean BABIP` = babip - mean(babip, na.rm = TRUE),
          `xBA - BA` = xba - ba,
          `xwOBA - wOBA` = xwoba - woba,
+         `ERA/Hard Hit %` = ERA/`Hard Hit %`,
          `ΔERA` = `ERA (t+1)` - ERA,
-         `ΔSalary` = `Salary (t+1)` - Salary)
+         `ΔSalary` = `Salary (t+1)` - Salary) %>%
+  mutate(`ERA/Hard Hit %` = format(round(`ERA/Hard Hit %`, 3), nsmall = 3)) %>%
+  rename(Pitches = pitches,
+         Year = year,
+         BA = ba,
+         BABIP = babip,
+         wOBA = woba,
+         xwOBA = xwoba,
+         xBA = xba,
+         Hits = hits,
+         ABs = abs,
+         `Spin Rate` = spin_rate,
+         `Velocity` = velocity)
+  
 
 
 # Filter
