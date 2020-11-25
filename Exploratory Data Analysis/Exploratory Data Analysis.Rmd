@@ -591,6 +591,19 @@ cor(pitcher_data$`xwOBA - wOBA`, pitcher_data$`ΔERA`)
 ```
 
 
+```{r}
+pitcher_data %>%
+  ggplot(aes(x = `ERA/Hard Hit %`, y = `ΔERA`)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = lm, color = "grey50") +
+  theme_classic()
+```
+
+```{r}
+cor(pitcher_data$`ERA/Hard Hit %`, pitcher_data$`ΔERA`)
+```
+
+
 As we see in the data, there is clear statistical evidence of what we could call "mean-reversion of luck". Pitchers whose actual performances were worse than expected performances generally saw an increase in ERA the next season as their "luck" reverted closer to the mean. The opposite can be said for pitchers who performed better than exopcted. This conclusion suggests that including differences in outcome-based statistics and expected statistics (especially in accordance with base year ERA) should have significant predictive power in forecasting future ERA.
 
 
