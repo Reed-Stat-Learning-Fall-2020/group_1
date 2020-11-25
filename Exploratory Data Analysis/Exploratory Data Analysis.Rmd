@@ -472,19 +472,19 @@ cor(pitcher_data$W, pitcher_data$`ERA (t+1)`)
 ```
 
 
-Counterintuitively, the positive correlation between wins and forecasted ERA suggests that the average forcasted ERA actually increases (albeit very marginally) as wins improve.
+The relationship between wins and forecasted ERA is virtually nonexistent, suggesting that the average forcasted ERA remains mostly unchanged as wins improve.
 
 
 ```{r}
 pitcher_data %>%
-  ggplot(aes(x = pitches, y = `ERA (t+1)`)) +
+  ggplot(aes(x = Pitches, y = `ERA (t+1)`)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 ```
 
 ```{r}
-cor(pitcher_data$pitches, pitcher_data$`ERA (t+1)`)
+cor(pitcher_data$Pitches, pitcher_data$`ERA (t+1)`)
 ```
 
 
@@ -525,27 +525,27 @@ cor(pitcher_data$`K %`, pitcher_data$`ERA (t+1)`)
 
 ```{r}
 pitcher_data %>%
-  ggplot(aes(x = woba, y = `ERA (t+1)`)) +
+  ggplot(aes(x = wOBA, y = `ERA (t+1)`)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 ```
 
 ```{r}
-cor(pitcher_data$woba, pitcher_data$`ERA (t+1)`)
+cor(pitcher_data$wOBA, pitcher_data$`ERA (t+1)`)
 ```
 
 
 ```{r}
 pitcher_data %>%
-  ggplot(aes(x = xwoba, y = `ERA (t+1)`)) +
+  ggplot(aes(x = xwOBA, y = `ERA (t+1)`)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = lm, color = "grey50") +
   theme_classic()
 ```
 
 ```{r}
-cor(pitcher_data$xwoba, pitcher_data$`ERA (t+1)`)
+cor(pitcher_data$xwOBA, pitcher_data$`ERA (t+1)`)
 ```
 
 
