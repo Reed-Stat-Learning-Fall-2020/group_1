@@ -1,0 +1,70 @@
+---
+title: "models"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(randomForest)
+```
+
+```{r}
+baseball_data <- read_csv("data/Mega Summary.csv")
+```
+
+```{r}
+ggplot(baseball_data,
+       aes(x = `ERA (t+1)`)) +
+  geom_histogram(bins = 50,
+                 color = "black",
+                 fill = "midnightblue") 
+```
+
+```{r}
+## randomForest didn't like our names with spaces and odd characters so I had to change them
+## if this is a problem with other models we can pull from this code
+
+baseball_edited <-
+  baseball_data %>%
+  rename(spin_rate = `Spin Rate`,
+         k_percent = `K %`,
+         BB_percent = `BB %`,
+         Hard_hit_percent = `Hard Hit %`,
+         Barrel_percent = `Barrel %`,
+         ERA_next_year = `ERA (t+1)`,
+         Salary_next_year = `Salary (t+1)`,
+         BABIP_minus_meanBABIP = `BABIP - Mean BABIP`,
+         xBA_minus_BA = `xBA - BA`,
+         xwOBA_minus_wOBA = `xwOBA - wOBA`,
+         ERA_per_barrel_percent = `ERA/Barrel %`,
+         ERA_per_Hard_hit_percent = `ERA/Hard Hit %`,
+         delta_ERA = `ΔERA`,
+         delta_Salary = `ΔSalary`)
+
+rf_model <- randomForest(ERA_next_year ~ .,
+                         data = baseball_edited  %>%
+                           dplyr::select(-delta_ERA),
+                         ntrees = 50,
+                         mtry = 3)
+```
+
+```{r}
+importance(rf_model)
+varImpPlot(rf_model)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
