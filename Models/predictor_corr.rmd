@@ -1,0 +1,36 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidymodels)
+
+data <- read_csv("data/Mega Summary.csv")
+```
+
+## Correlation Plot
+
+```{r}
+# i'm not totally sure how we should treat all of these correlated variables, we can
+# definitely drop some of them (and I already dropped a couple)
+library(corrr)
+
+data %>%
+  select(xwOBA, SO, `K %`, `Barrel %`,
+         ERA:`xwOBA - wOBA`, ERA:`xBA - BA`,
+         ERA:`BABIP - Mean BABIP`, `ERA/Hard Hit %`,
+         -`ERA (t+1)`, -`Salary (t+1)`,
+         -`ERA/Hard Hit %`) %>%
+  correlate() %>%
+  rearrange() %>%
+  shave() %>%
+  rplot(shape = 15, colours = c("darkorange", "white","midnightblue")) +
+  theme(axis.text.x = element_text(angle = 90))
+
+```
+
+
+
