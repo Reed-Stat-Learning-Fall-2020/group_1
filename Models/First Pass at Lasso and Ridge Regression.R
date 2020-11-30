@@ -31,7 +31,7 @@ my_cv_ridge<-cv.glmnet(x_train, y_train, alpha =0)
 best_L_ridge<-my_cv_ridge$lambda.min
 best_L_ridge
 
-ridge_mod<- glmnet(x_train, y_train, alpha = 0, lambda = 777682.7)
+ridge_mod<- glmnet(x_train, y_train, alpha = 0, lambda = 795626.1)
 
 
 #Recycling Josh's function for R-squared
@@ -42,7 +42,7 @@ r_sq<- function (true_y, fitted,n_obs,k_obs) {
 }
 
 #Ridge prediction on test
-ridge_predict<-predict(ridge_mod,newx=x_test,s=777682.7)
+ridge_predict<-predict(ridge_mod,newx=x_test,s=795626.1)
 
 #Calculating R-squared
 set.seed(0)
@@ -65,4 +65,37 @@ lasso_predict<-predict(lasso_mod,newx=x_test,s=81471.26)
 set.seed(0)
 lasso_r2<-r_sq(pitch_test$`Salary (t+1)`,lasso_predict,113,21)
 print(lasso_r2)
+
+
+#ERA Predictions
+
+#New Matrices
+#Creating model matrices
+x_full_model_ERA<-model.matrix(`ERA (t+1)`~.,data=data_selected)[,-1]
+y_full_model_ERA<-data_selected$`ERA (t+1)`
+
+x_train_ERA<-model.matrix(`ERA (t+1)`~.,data=pitch_train)[,-1]
+y_train_ERA<-pitch_train$`ERA (t+1)`
+
+x_test_ERA<-model.matrix(`ERA (t+1)`~.,data=pitch_test)[,-1]
+y_test_ERA<-pitch_test$`ERA (t+1)`
+
+#Selecting the best lambda for ridge
+set.seed(0)
+my_cv_ridge_ERA<-cv.glmnet(x_train_ERA, y_train_ERA, alpha =0)
+best_L_ridge_ERA<-my_cv_ridge_ERA$lambda.min
+best_L_ridge_ERA
+
+ridge_mod_ERA<- glmnet(x_train_ERA, y_train_ERA, alpha = 0, lambda = 0.546488)
+
+#Ridge pred and R-squared for ERA
+
+#Ridge prediction on test ERA
+ridge_predict_ERA<-predict(ridge_mod_ERA,newx=x_test_ERA,s=0.546488)
+
+#Calculating R-squared
+set.seed(0)
+
+ridge_r2_ERA<-r_sq(y_test_ERA,ridge_predict_ERA,113,21)
+print(ridge_r2_ERA)
 
