@@ -10,11 +10,13 @@ data_selected <- Mega_Summary %>%
          `Barrel %`, Salary, `K %`:`Barrel %`, `ERA (t+1)`,
          `Salary (t+1)`, Pitcher, Year) %>% select(-Pitcher)
 
+Mega_Summary<-Mega_Summary%>% select(-Pitcher,-Salary,-ΔSalary,-Year,-ΔERA)
+
 #Split into test and train with 80/20 splits
 set.seed(0)
 
-pitch_train<-data_selected %>% sample_frac(0.8)
-pitch_test<-anti_join(data_selected, pitch_train)
+pitch_train<-Mega_Summary %>% sample_frac(0.8)
+pitch_test<-anti_join(Mega_Summary, pitch_train)
 
 #Creating model matrices
 x_full_model<-model.matrix(`Salary (t+1)`~.,data=data_selected)[,-1]
@@ -46,7 +48,7 @@ ridge_predict<-predict(ridge_mod,newx=x_test,s=795626.1)
 
 #Calculating R-squared
 set.seed(0)
-ridge_r2<-r_sq(pitch_test$`Salary (t+1)`,ridge_predict,113,21)
+ridge_r2<-r_sq(pitch_test$`Salary (t+1)`,ridge_predict,113,19)
 print(ridge_r2)
 
 
@@ -63,7 +65,7 @@ lasso_predict<-predict(lasso_mod,newx=x_test,s=81471.26)
 
 #Calculating R-squared
 set.seed(0)
-lasso_r2<-r_sq(pitch_test$`Salary (t+1)`,lasso_predict,113,21)
+lasso_r2<-r_sq(pitch_test$`Salary (t+1)`,lasso_predict,113,19)
 print(lasso_r2)
 
 
@@ -86,7 +88,7 @@ my_cv_ridge_ERA<-cv.glmnet(x_train_ERA, y_train_ERA, alpha =0)
 best_L_ridge_ERA<-my_cv_ridge_ERA$lambda.min
 best_L_ridge_ERA
 
-ridge_mod_ERA<- glmnet(x_train_ERA, y_train_ERA, alpha = 0, lambda = 0.546488)
+ridge_mod_ERA<- glmnet(x_train_ERA, y_train_ERA, alpha = 0, lambda = 0.08326701)
 
 #Ridge pred and R-squared for ERA
 
@@ -96,6 +98,8 @@ ridge_predict_ERA<-predict(ridge_mod_ERA,newx=x_test_ERA,s=0.546488)
 #Calculating R-squared
 set.seed(0)
 
-ridge_r2_ERA<-r_sq(y_test_ERA,ridge_predict_ERA,113,21)
+ridge_r2_ERA<-r_sq(y_test_ERA,ridge_predict_ERA,113,19)
 print(ridge_r2_ERA)
 
+full_mod<-lm(`ERA (t+1)`~.,data=pitch_train)
+summary(full_mod)
