@@ -1,0 +1,211 @@
+---
+title: "stacks"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+# loading packages
+
+library(tidyverse)
+library(tidymodels)
+library(stacks)
+```
+
+```{r}
+# selecting variables
+
+data_raw <- read_csv("Models/Mega Summary.csv")
+
+data <-
+  data_raw %>%
+  select(-`ΔERA`,
+         -`ΔSalary`) %>%
+  rename(salary_new = `Salary (t+1)`)
+
+```
+
+```{r}
+# test/train splits
+
+set.seed(321)
+
+data_split <- initial_split(data)
+data_train <- training(data_split)
+data_test <- testing(data_split)
+
+# k-fold CV
+
+set.seed(345)
+
+folds <- rsample::vfold_cv(data_train, v = 5)
+```
+
+```{r}
+# setting up a recipe
+
+baseball_rec <- 
+  recipe(salary_new ~., data = data_train) %>%
+  step_normalize(all_numeric(), -all_outcomes()) %>%
+  step_zv(all_predictors(), -all_outcomes()) %>%
+  update_role(Pitcher, new_role = "Id") %>%
+  step_log(salary_new)
+
+# workflow
+
+baseball_wf <-
+  workflow() %>%
+  add_recipe(baseball_rec)
+
+# rmse metric
+metric <- metric_set(rmse)
+
+```
+
+```{r}
+
+ctrl_grid <- control_stack_grid()
+ctrl_res <- control_stack_resamples()
+
+```
+
+```{r}
+# lasso model
+
+lasso_spec <-
+  linear_reg(penalty = tune(), mixture = 1) %>%
+  set_engine("glmnet")
+
+# add to wf
+
+lasso_wf <-
+  baseball_wf %>%
+  add_model(lasso_spec)
+
+# lambda grid
+
+lambda_grid <-
+  grid_regular(penalty(),
+               levels = 50)
+
+# k-fold CV
+
+set.seed(875)
+lasso_res <- 
+  tune_grid(
+    lasso_wf,
+    resamples = folds,
+    metrics = metric,
+    control = ctrl_grid,
+    grid = lambda_grid
+  )
+
+```
+
+
+```{r}
+# ridge spec
+
+ridge_spec <- 
+  linear_reg(penalty = tune(),
+             mixture = 0) %>%
+  set_engine("glmnet")
+
+  
+# add it to a workflow
+ridge_wf <- 
+  baseball_wf %>%
+  add_model(ridge_spec)
+
+# tune deg_free and fit to the 5-fold cv
+set.seed(123)
+ridge_res <- 
+  tune_grid(
+    ridge_wf,
+    resamples = folds,
+    metrics = metric,
+    control = ctrl_grid,
+    grid = lambda_grid
+  )
+```
+
+```{r}
+# random Forest spec
+
+rf_spec <- rand_forest(
+  mtry = tune(),
+  trees = 1000,
+  min_n = tune()
+  ) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+
+rf_wf <-
+  baseball_wf %>%
+  add_model(rf_spec)
+
+rf_grid <- grid_regular(
+  mtry(range = c(1,6)),
+  min_n(range = c(2,8)),
+  levels = 5
+  )
+
+set.seed(453)
+randf_res <- tune_grid(
+  rf_wf,
+  resamples = folds,
+  grid = rf_grid,
+  metrics = metric,
+  control = ctrl_grid
+)
+```
+
+
+
+```{r}
+# create data stack
+
+baseball_d_stack <-
+```
+
+
+```{r}
+stacks() %>%
+  add_candidates(lasso_res) %>%
+  add_candidates(randf_res) %>%
+  add_candidates(ridge_res)
+
+```
+
+
+```{r}
+# blending predictions
+
+base_stack <- 
+  baseball_d_stack %>%
+  blend_predictions()
+```
+
+
+```{r}
+# fitting model
+
+base_stack <-
+  base_stack %>%
+  fit_members()
+```
+
+
+```{r}
+data_test <- 
+  data_test %>%
+  bind_cols(predict(base_stack, .))
+```
+
+
+
