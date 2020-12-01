@@ -43,7 +43,7 @@ data_test <- testing(data_split)
 
 set.seed(345)
 
-folds <- rsample::vfold_cv(data_train, v = 5)
+folds <- rsample::vfold_cv(data_train, v = 10)
 ```
 
 ```{r}
@@ -170,15 +170,11 @@ randf_res <- tune_grid(
 ```{r}
 # create data stack
 
-baseball_d_stack <-
-```
-
-
-```{r}
-stacks() %>%
-  add_candidates(lasso_res) %>%
-  add_candidates(randf_res) %>%
-  add_candidates(ridge_res)
+baseball_d_stack <- 
+  stacks() %>%
+    add_candidates(lasso_res) %>%
+    add_candidates(randf_res) %>%
+    add_candidates(ridge_res)
 
 ```
 
@@ -205,6 +201,7 @@ base_stack <-
 data_test <- 
   data_test %>%
   bind_cols(predict(base_stack, .))
+
 ```
 
 
