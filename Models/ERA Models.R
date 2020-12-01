@@ -34,3 +34,13 @@ forward_mod <- lm(data = pitchers,
 
 summary(forward_mod)$adj.r.squared
 
+#Backward Selection
+
+backward_select <- regsubsets(data = pitchers,
+                             `ERA (t+1)` ~.-Pitcher, 
+                             nvmax = 10, 
+                             method = "backward")
+summary(backward_select)
+
+backward_select <- lm(data = pitchers, `ERA (t+1)` ~ xwOBA + xBA+ `Spin Rate` +W+G+ERA+H+SO+`BB %`+`Hard Hit %`+`ERA/Barrel %`)
+summary(backward_select)$adj.r.squared
