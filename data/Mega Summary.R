@@ -354,6 +354,20 @@ mega_summary <- mega_summary %>%
 mega_summary <- mega_summary %>%
   drop_na()
 
+mega_summary <- mega_summary %>%
+  filter(G <= 35)
+
+mega_summary <- mega_summary %>%
+  mutate(`BFP/G` = BFP/G)
+
+mega_summary %>%
+  ggplot(aes(x = BFP/G)) +
+  geom_histogram(bins = 50) +
+  theme_minimal()
+
+mega_summary <- mega_summary %>%
+  filter(`BFP/G` > 16)
+
 
 # Variable Mutations
 
