@@ -6,7 +6,16 @@ library(ISLR)
 # Load Data
 
 pitchers <- read_csv("Mega Summary.csv") %>%
-  select(-Salary, -`Salary (t+1)`, -`ΔSalary`, -`ΔERA`)
+  select(-Pitcher, -Salary, -`Salary (t+1)`, -`ΔSalary`, -`ΔERA`)
+
+
+## Full Model
+
+full_mod <- lm(data = pitchers,
+                 `ERA (t+1)` ~.)
+
+
+summary(full_mod)$adj.r.squared
 
 
 ## Custom Model
