@@ -10,6 +10,7 @@ library(tidyverse)
 library(rvest)
 library(baseballr)
 library(readr)
+library(knitr)
 ```
 
 #Introduction#
@@ -24,11 +25,23 @@ For data exploration, we will explore the correlations and associations between 
 A filter was applied to salary to remove salaries lower than 600,000 or pre-arbitration salaries. These players are under team control and their contracts are artificially deflated. Because their low salaries do not reflect their true "market price", they are excluded.
 
 ```{r}
-Mega_Summary <- read_csv("Exploratory Data Analysis/Mega Summary.csv")
+Mega_Summary <- read_csv("Mega Summary.csv")
 
 #Filter out Pre-arbitration
 Mega_Summary_Filtered<-Mega_Summary_Filtered %>% filter(`Salary (t+1)`>600000)
 ```
+###Looking at Salary###
+We began by examining the structure of our first response variable- future salary.
+
+```{r}
+ggplot(Mega_Summary_Filtered, aes(x = `Salary (t+1)` ))+geom_histogram(bins = 30, alpha = .75 )+theme_bw()
+```
+As we can see, future salary is quite right skewed. This is understandable as certain superstar pitchers have salaries that are magnitudes greater than the average starting pitcher. We considered a log tranformation to try to ameliorate this skew.
+
+```{r}
+ggplot(Mega_Summary_Filtered, aes(x = log(`Salary (t+1)` )))+geom_histogram(bins = 30, alpha = .75 )+theme_bw()
+```
+It seems like the log transformation greatly reduced the degree of right skew previously observed. While a slight left skew might now exist, we will consider logging salary in our models in order to circumvent this extreme right skew.
 
 ###Basic Pitching Statistics###
 
@@ -474,15 +487,52 @@ predictor_correlations <-
 
 In the interest of saving some space, we will not be printing the entire correlation matrix. However, some salient trends stand out in terms of collinearity.
 
+```{r}
+volume_predictors<-Mega_Summary_Filtered %>%select(Pitches,W,L,BFP,H,HR,SO)
+volume_predictors_cor<-cor(volume_predictors)
+kable(volume_predictors_cor)
+```
+
 First of all, the "volume" predictors related to sheer number of pitches and games played are all very highly correlated to each other. Specifically, total pitches, total batters faced, total games, total hits, total strikeouts, total wins, total losses, total home runs all have high R values with each other. These are also some of the stronger predictors in predicting salary. In the interest of avoiding collinearity, we might want to combine these variables.
+
+```{r}
+hit_predictors<-Mega_Summary_Filtered %>%select(BA,xBA,`K %`)
+hit_predictors_cor<-cor(hit_predictors,Mega_Summary_Filtered$`Spin Rate`)
+kable(hit_predictors_cor)
+```
+
 
 Interestingly, spin rate is positively correlated with strike percent and negatively correlated with hit percent. So baseball pundits might be on to something in promoting this statistic as increasing strikes and reducing hits is a positive outcome.
 
-Average barrel percentage has a medium positive correlation with our advanced statistics BABIP, wOBA as well as expected wOBA and expected BA. It is also positively correlated with ERA. This makes sense as harder contact means more runs allowed which means more offense, thus raising the values of the advanced statistics.
+```{r}
+barrel_predictors<-Mega_Summary_Filtered %>%select(xBA,wOBA,xwOBA,ERA)
+barrel_predictors_cor<-cor(barrel_predictors,Mega_Summary_Filtered$`Barrel %`)
+kable(barrel_predictors_cor)
+```
 
-Strike and hit %'s were negatively correlated with each other which is reasonable as they are mutually exclusive. Strike % also had high, negative correlations with the BAA SLGA and wOBAA statistics while hit % had a high positive correlation with those three predictors. This is understandable as those statistics try to quantify total offensive output, which consists of accumulating hits while avoiding strikes.
+Average barrel percentage has a medium positive correlation with our advanced statistics wOBA as well as expected wOBA and expected BA. It is also positively correlated with ERA. This makes sense as harder contact means more runs allowed which means more offense, thus raising the values of the advanced statistics.
 
+```{r}
+offense_statistics<-Mega_Summary_Filtered %>%select(`K %`,BA,wOBA,xwOBA)
+strikes_and_hits<-Mega_Summary_Filtered %>%select(`K %`,BA)
+strikes_hits_statistics_cor<-cor(offense_statistics,strikes_and_hits)
+kable(strikes_hits_statistics_cor)
+```
+
+Strike and hit %'s were negatively correlated with each other which is reasonable as they are mutually exclusive. Strike % also had high, negative correlations with the wOBA and xWOBA statistics while hit % had a high positive correlation with those two statistics. This is understandable as those statistics try to quantify total offensive output, which consists of accumulating hits while avoiding strikes.
+
+```{r}
+advanced_statistics<-Mega_Summary_Filtered %>%select(BABIP,xBA,wOBA,xwOBA)
+advanced_statistics_cor<-cor(advanced_statistics,Mega_Summary_Filtered$ERA)
+kable(advanced_statistics_cor)
+```
 Our advanced statistics, BABIP, wOBA, xwOBA, xBA are all quite positively correlated with ERA. Given that the statistics all try to quantify offense and that ERA represents total offensive runs allowed, this relationship is to be expected. 
+
+```{r}
+wins_and_lossess<-Mega_Summary_Filtered %>%select(W,L)
+wins_and_lossess_cor<-cor(wins_and_lossess,Mega_Summary_Filtered$ERA)
+kable(wins_and_lossess_cor)
+```
 
 An additional, interesting, observation is that ERA is positively correlated with number of losses with a medium degree of positive correlation , while the inverse relationship between ERA and number of wins is not as strong. This suggests that a poor pitcher with a high ERA can easily lose games while a skilled pitcher with a low ERA cannot win games for his team alone.
 
