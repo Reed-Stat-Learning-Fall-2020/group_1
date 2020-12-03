@@ -584,7 +584,7 @@ cor(Mega_Summary$ERA, Mega_Summary$`ERA (t+1)`)
 ```
 
 
-Despite the expected existence of a postive linear association between the two variables, the correlation between ERA and ERA in the subsequent season is somewhat weak. This can likely be explained by the aforementioned influence of randomness in pitching outcomes. This leads us to believe that other variables (or a combination therof) may have more predictive power in forecasting ERA than ERA by itself. 
+Despite the expected existence of a postive linear association between the two variables, the correlation between ERA and ERA in the subsequent season is far from perfect. This can likely be explained by the aforementioned influence of randomness in pitching outcomes. This leads us to believe that other variables (or a combination therof) may have more predictive power in forecasting ERA than ERA by itself. 
 
 ##Correlations Between the Strongest Predictors of Salary and Future ERA##
 
