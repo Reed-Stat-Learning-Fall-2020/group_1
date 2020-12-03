@@ -15,7 +15,9 @@ knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(tidymodels)
 library(stacks)
+library(janitor)
 ```
+
 
 ```{r}
 # selecting variables
@@ -24,9 +26,10 @@ data_raw <- read_csv("Models/Mega Summary.csv")
 
 data <-
   data_raw %>%
-  select(-`ΔERA`,
-         -`ΔSalary`) %>%
-  rename(salary_new = `Salary (t+1)`)
+  clean_names() %>%
+  select(-dera,
+         -d_salary) %>%
+  rename(salary_new = salary_t_1)
 
 ```
 
@@ -53,8 +56,8 @@ baseball_rec <-
   recipe(salary_new ~., data = data_train) %>%
   step_normalize(all_numeric(), -all_outcomes()) %>%
   step_zv(all_predictors(), -all_outcomes()) %>%
-  update_role(Pitcher, new_role = "Id") %>%
-  step_log(salary_new)
+  update_role(pitcher, new_role = "Id") %>%
+  step_log(salary_new, skip = TRUE)
 
 # workflow
 
@@ -194,6 +197,7 @@ base_stack <-
 base_stack <-
   base_stack %>%
   fit_members()
+
 ```
 
 
@@ -204,5 +208,20 @@ data_test <-
 
 ```
 
+
+```{r}
+data_test %>%
+  ggplot() +
+  aes(
+    x = salary_new, 
+    y = .pred
+  ) +
+  geom_point() + 
+  coord_obs_pred()
+```
+
+```{r}
+rmse(data_test, truth = salary_new, estimate = .pred)
+```
 
 
