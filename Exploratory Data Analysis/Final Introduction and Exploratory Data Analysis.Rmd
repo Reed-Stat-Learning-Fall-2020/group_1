@@ -7,6 +7,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(tidymodels)
 library(rvest)
 library(baseballr)
 library(readr)
@@ -25,21 +26,34 @@ For data exploration, we will explore the correlations and associations between 
 A filter was applied to salary to remove salaries lower than 600,000 or pre-arbitration salaries. These players are under team control and their contracts are artificially deflated. Because their low salaries do not reflect their true "market price", they are excluded.
 
 ```{r}
-Mega_Summary <- read_csv("Mega Summary.csv")
+Mega_Summary <- read_csv("Models/Mega Summary.csv")
 
 #Filter out Pre-arbitration
-Mega_Summary_Filtered<-Mega_Summary_Filtered %>% filter(`Salary (t+1)`>600000)
+Mega_Summary_Filtered <- 
+  Mega_Summary %>% 
+  filter(`Salary (t+1)` > 600000)
 ```
 ###Looking at Salary###
 We began by examining the structure of our first response variable- future salary.
 
 ```{r}
-ggplot(Mega_Summary_Filtered, aes(x = `Salary (t+1)` ))+geom_histogram(bins = 30, alpha = .75 )+theme_bw()
+ggplot(Mega_Summary_Filtered, 
+       aes(x = `Salary (t+1)` )) + 
+  geom_histogram(
+    bins = 30, 
+    alpha = .75 
+    ) + 
+  theme_bw()
 ```
 As we can see, future salary is quite right skewed. This is understandable as certain superstar pitchers have salaries that are magnitudes greater than the average starting pitcher. We considered a log tranformation to try to ameliorate this skew.
 
 ```{r}
-ggplot(Mega_Summary_Filtered, aes(x = log(`Salary (t+1)` )))+geom_histogram(bins = 30, alpha = .75 )+theme_bw()
+ggplot(Mega_Summary_Filtered, 
+       aes(x = log(`Salary (t+1)` ))) + 
+  geom_histogram(
+    bins = 30,
+    alpha = .75 ) + 
+  theme_bw()
 ```
 It seems like the log transformation greatly reduced the degree of right skew previously observed. While a slight left skew might now exist, we will consider logging salary in our models in order to circumvent this extreme right skew.
 
@@ -55,7 +69,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$W,
@@ -68,7 +83,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$L,
@@ -81,7 +97,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$Pitches,
@@ -106,25 +123,31 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm, 
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$Win_Percent,
    Mega_Summary_Filtered$`Salary (t+1)`)
 
 ```
+
 Surprisingly, a pitcher's win percent has a lower correlation with future salary than the total number of wins. While wins and losses are inherently flawed statistics, one would have imagined that a higher win loss ratio suggests a pitcher that deserves to be paid more. Rather, it seems like the total number of wins is the more important statistic in the eyes of GMs.
 
 ```{r}
 #Games played
-Mega_Summary_Filtered2<- Mega_Summary_Filtered %>% filter(G<35)
+Mega_Summary_Filtered2 <-
+  Mega_Summary_Filtered %>% 
+  filter(G<35)
+
 ggplot(Mega_Summary_Filtered2, 
        aes(
          x = G,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered2$G,
@@ -142,7 +165,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$ERA,
@@ -164,7 +188,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha=0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$ABs,
@@ -177,7 +202,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha=0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$SO,
@@ -190,10 +216,12 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
-cor(Mega_Summary_Filtered$BB,Mega_Summary_Filtered$`Salary (t+1)`)
+cor(Mega_Summary_Filtered$BB,
+    Mega_Summary_Filtered$`Salary (t+1)`)
 
 #Total hits
 ggplot(Mega_Summary_Filtered,
@@ -202,7 +230,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$H,
@@ -215,20 +244,22 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$HR,
     Mega_Summary_Filtered$`Salary (t+1)`)
 ```
 
-Unsurprisingly, seaon totals in general have a strong, positive correlation with salary, and, following a trend that we will see again in this exploration, pitching volume can often be more predictive of future salary than pitch quality. 
+Unsurprisingly, season totals in general have a strong, positive correlation with salary, and, following a trend that we will see again in this exploration, pitching volume can often be more predictive of future salary than pitch quality. 
 
 Total strikeouts and total batters faced have the strongest positive relationship with future salary. This is to be expected as strikeouts are both the sign of a good pitcher and quite attractive to the average baseball fan and a high number of batters faced suggests a well-regarded pitcher that is entrusted with such responsibilities. More surprisingly, undesirable outcomes like hits and home runs display a medium positive relationship as well. This seemingly contradictory trend perhaps can be explained by the fact that only good pitchers are allowed to rack up hits and home runs as less-accomplished pitchers would simply be cut from the team or sent to the minor league system. If this hypothesis is true, then the batting average against (BAa) should be negatively correlated as BAa is a measurement of what percentage of hitters record a hit against a certain pitcher.
 
 Total number of batters walked on balls has a very weak positive relationship to future salary that is close to 0. This is understandable as number of batters walked can be more contingent upon an individual's style of pitching rather than their quality as a pitcher. Less batters walked simply suggests better control, and superior control in a vacuum does not necessarily suggest a better pitcher.
 
 Next we looked to see if the percent of strikeouts, balls, and hits (BAa) are correlated with future salary
+
 ```{r}
 #Strikeout Percent
 ggplot(Mega_Summary_Filtered,
@@ -237,7 +268,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`K %`,
@@ -250,7 +282,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`BB %`,
@@ -263,7 +296,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$BA,
@@ -284,7 +318,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`Hard Hit %`,
@@ -297,12 +332,14 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`Barrel %`,
     Mega_Summary_Filtered$`Salary (t+1)`)
 ```
+
 Surprisingly, neither of them seem to have a clear relationship with future salary, barrel %'s relationship is a bit stronger than hard hit % and is, shockingly, positive. However, this weak relationship could be just due to noise as it is unlikely that giving up hard hits will lead to a larger contract.
 
 ###Pitch Averages###
@@ -317,7 +354,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$Velocity,
@@ -330,7 +368,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`Spin Rate`,
@@ -345,7 +384,7 @@ Spin rate is a topic that has garnered increased attention in the baseball commu
 
 ###Advanced Statistics###
 
-Wenow get to our advanced statistics, namely weighted on base average against (wOBA), batting average on balls in play against (BABIP), expected weighted on base average against (xwOBA), and expected batting average against (xBA). The two expected statistics are notable as they try to remove some of the noise or luck from the statistic by calculating WOBA and BA based on the historical WOBA and BA's of batted balls with similar exit velocity and angles. 
+We now get to our advanced statistics, namely weighted on base average against (wOBA), batting average on balls in play against (BABIP), expected weighted on base average against (xwOBA), and expected batting average against (xBA). The two expected statistics are notable as they try to remove some of the noise or luck from the statistic by calculating WOBA and BA based on the historical WOBA and BA's of batted balls with similar exit velocity and angles. 
 
 ```{r}
 #Weighted on base average (wOBA)
@@ -355,7 +394,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$wOBA,
@@ -368,7 +408,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$BABIP,
@@ -381,7 +422,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$xwOBA,
@@ -394,7 +436,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$xBA,
@@ -415,7 +458,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`xwOBA - wOBA`,
@@ -428,7 +472,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`xBA - BA`,
@@ -441,7 +486,8 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`ERA/Hard Hit %`,
@@ -454,13 +500,15 @@ ggplot(Mega_Summary_Filtered,
          y = `Salary (t+1)`)
        ) +
   geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(method = lm,
+              color = "grey50") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`ERA/Barrel %`,
    Mega_Summary_Filtered$`Salary (t+1)`)
 
 ```
+
 While xwOBA-wOBA doesn't display any strong relationship, xBA-BA had a moderately strong positive relationship, which suggests that lucky players with lower BA's than expected are getting paid more. This further suggests that GMs really have trouble seperating out luck. This trend is further exemplified with ERA/hard hit or barrel as those with smaller values (luckier pitchers) tend to have higher salaries, as suggested by the positive relationship. This relationship is especially pertinent with ERA/Barrel % which has a sizeable correlation coefficient. Overall, it seems like while GMs are attuned to advanced statistics, they have not yet fully bought into luck-adjusted statistics.
 
 ##Correlations Between Predictors##
@@ -536,30 +584,55 @@ kable(wins_and_lossess_cor)
 
 An additional, interesting, observation is that ERA is positively correlated with number of losses with a medium degree of positive correlation , while the inverse relationship between ERA and number of wins is not as strong. This suggests that a poor pitcher with a high ERA can easily lose games while a skilled pitcher with a low ERA cannot win games for his team alone.
 
+Here we have a nice way to visualize some of the correlations that we discussed above. Unfortunately due to the large number of predictors we have, the plot is quite cluttered in some ares.
+
+```{r}
+library(corrr)
+
+total_quant_pred %>%
+  correlate() %>%
+  rearrange() %>%
+  shave() %>%
+  rplot(shape = 15, colours = c("darkorange", "white","midnightblue")) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+
 
 #Predicting Future ERA#
 
 Having explored possible predictors of salary (comparing both simple and complex variables), we move on to our prediction of future Earned Run Average (ERA). In this case, our selected response (ERA) can be thought of as a rough proxy for general pitching performance and outcome. Since the inception of the statistic in the early 1900s, ERA has been the most ubiquitous and cited measure of pitcher effectiveness, as it represents a straightforward calculation of the average amount of runs a pitcher allows over the duration of typical game (with run prevention thought of as the ultimate aim of pitching). Despite ERA being the most functional measure of pitching performance, it is nonetheless subject to a significant deal of random noise between individual pitchers' seasons. The development of advanced pitching analytics therefore may lend itself to more accurate forecasts of future ERA than simple counting statistics (such as wins, strikeouts, and innings pitched). With this in mind, we are motivated to find the statistical model that most accurately predicts ERA in a succesive season given a number of predictors generated from data in the current season. This should allow us to assess and predict player performance not based on actual (occasionally random) outcomes, but rather on an aggregation of predicted outcomes determined by a set of relevant statistical parameters. Ultimately, this model should lend itself to making informed salary decisions by MLB general managers.
 
 ```{r message=FALSE, warning=FALSE, paged.print=FALSE}
-Mega_Summary <- read_csv("Mega Summary.csv")
-pitch_data <- read_csv("2020_summary.csv") %>%
+Mega_Summary <- read_csv("Models/Mega Summary.csv")
+pitch_data <- read_csv("Exploratory Data Analysis/2020_summary.csv") %>%
   rename(`Pitch Category` = pitch_category) %>%
   rename(wOBA = wOBAA)
 ```
 
 ```{r}
 pitch_data  %>%
-  ggplot(aes(x = `Average Pitch Speed`, y = wOBA)) +
+  ggplot(aes(
+    x = `Average Pitch Speed`,
+    y = wOBA)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
 ```{r}
 pitch_data  %>%
-  ggplot(aes(x = `Average Pitch Speed`, y = wOBA, color =`Pitch Category`)) +
-  geom_point(size = 2, alpha = 0.5) +
+  ggplot(aes(
+    x = `Average Pitch Speed`,
+    y = wOBA, color =`Pitch Category`)
+    ) +
+  geom_point(
+    size = 2, 
+    alpha = 0.5) +
   geom_smooth(method = lm) +
   theme_minimal()
 ```
@@ -573,9 +646,15 @@ Ostensibly, the most obvious predictor of forcasted ERA is current ERA, as we ca
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = ERA, y = `ERA (t+1)`)) +
+  ggplot(aes(
+    x = ERA,
+    y = `ERA (t+1)`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -593,9 +672,15 @@ First, we look at some of the same counting stats that were significant in predi
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = W, y = `ERA (t+1)`)) +
+  ggplot(aes(
+    x = W,
+    y = `ERA (t+1)`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -604,13 +689,19 @@ cor(Mega_Summary$W, Mega_Summary$`ERA (t+1)`)
 ```
 
 
-The relationship between wins and forecasted ERA is somewhat weak but the negative or inverse relationship is what one would have expected as winning pitchers often have lower ERAs. Thus, while the negative correlation coefficient does support the decision to reward wins with a lucrative contract, the weaker association suggests that the relationship might not be as important as one would have expected looking at salary alone.
+The relationship between wins and forcasted ERA is somewhat weak but the negative or inverse relationship is what one would have expected as winning pitchers often have lower ERAs. Thus, while the negative correlation coefficient does support the decision to reward wins with a lucrative contract, the weaker association suggests that the relationship might not be as important as one would have expected looking at salary alone.
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = Pitches, y = `ERA (t+1)`)) +
+  ggplot(aes(
+    x = Pitches,
+    y = `ERA (t+1)`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -624,9 +715,15 @@ Similar to wins, we again see a weak, negative relationship between number of pi
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = SO, y = `ERA (t+1)`)) +
+  ggplot(aes(
+    x = SO,
+    y = `ERA (t+1)`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -647,9 +744,15 @@ The advanced statistics we considered were strikeout percent (K%), weighted on b
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = `K %`, y = `ERA (t+1)`)) +
+  ggplot(aes(
+    x = `K %`,
+    y = `ERA (t+1)`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -660,9 +763,15 @@ cor(Mega_Summary$`K %`, Mega_Summary$`ERA (t+1)`)
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = wOBA, y = `ERA (t+1)`)) +
+  ggplot(aes(
+    x = wOBA,
+    y = `ERA (t+1)`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -673,9 +782,15 @@ cor(Mega_Summary$wOBA, Mega_Summary$`ERA (t+1)`)
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = xwOBA, y = `ERA (t+1)`)) +
+  ggplot(aes(
+    x = xwOBA,
+    y = `ERA (t+1)`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -685,9 +800,15 @@ cor(Mega_Summary$xwOBA, Mega_Summary$`ERA (t+1)`)
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = BABIP, y = `ERA (t+1)`)) +
+  ggplot(aes(
+    x = BABIP,
+    y = `ERA (t+1)`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -704,9 +825,15 @@ A further extension of comparing the differences in outcome and expected outcome
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = `BABIP - Mean BABIP`, y = `ΔERA`)) +
+  ggplot(aes(
+    x = `BABIP - Mean BABIP`,
+    y = `ΔERA`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -717,9 +844,15 @@ cor(Mega_Summary$`BABIP - Mean BABIP`, Mega_Summary$`ΔERA`)
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = `xBA - BA`, y = `ΔERA`)) +
+  ggplot(aes(
+    x = `xBA - BA`,
+    y = `ΔERA`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -730,9 +863,15 @@ cor(Mega_Summary$`xBA - BA`, Mega_Summary$`ΔERA`)
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = `xwOBA - wOBA`, y = `ΔERA`)) +
+  ggplot(aes(
+    x = `xwOBA - wOBA`,
+    y = `ΔERA`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
@@ -743,9 +882,15 @@ cor(Mega_Summary$`xwOBA - wOBA`, Mega_Summary$`ΔERA`)
 
 ```{r}
 Mega_Summary %>%
-  ggplot(aes(x = `ERA/Hard Hit %`, y = `ΔERA`)) +
+  ggplot(aes(
+    x = `ERA/Hard Hit %`,
+    y = `ΔERA`)
+    ) +
   geom_point(alpha = 0.5) +
-  geom_smooth(method = lm, color = "grey50") +
+  geom_smooth(
+    method = lm, 
+    color = "grey50"
+    ) +
   theme_classic()
 ```
 
