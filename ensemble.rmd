@@ -225,3 +225,5 @@ rmse(data_test, truth = salary_new, estimate = .pred)
 ```
 
 
+
+
