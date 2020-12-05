@@ -136,11 +136,7 @@ Surprisingly, a pitcher's win percent has a lower correlation with future salary
 
 ```{r}
 #Games played
-Mega_Summary_Filtered2 <-
-  Mega_Summary_Filtered %>% 
-  filter(G<35)
-
-ggplot(Mega_Summary_Filtered2, 
+ggplot(Mega_Summary_Filtered, 
        aes(
          x = G,
          y = `Salary (t+1)`)
@@ -150,12 +146,11 @@ ggplot(Mega_Summary_Filtered2,
               color = "grey50") +
   theme_classic()
 
-cor(Mega_Summary_Filtered2$G,
-   Mega_Summary_Filtered2$`Salary (t+1)`)
+cor(Mega_Summary_Filtered$G,
+   Mega_Summary_Filtered$`Salary (t+1)`)
 
 ```
-FIX GAMES AND COME BACK
-
+Games seemingly has a very weak positive relationship with future salary. This is understandable for two reasons, the first is that only very good pitchers make a lot of appearances and highly skilled pitchers are paid well. The other is that, as we have seen throughout this exploration so far, volume-related statistics tend to result in a larger paycheck.
 
 ```{r}
 #Current ERA
