@@ -456,3 +456,22 @@ write_csv(salary_2018, "2018 Salaries.csv")
 write_csv(salary_2019, "2019 Salaries.csv")
 write_csv(salary_2019two, "2020 Salaries.csv")
 
+
+# Load MegaMegaSummary
+
+MegaMegaSummary <- read_csv("MegeMegaSummary.csv")
+
+MegaMegaSummary <- MegaMegaSummary %>%
+  filter(BFP > 150) %>%
+  mutate(`BFP/G` = BFP/G)  %>%
+  filter(`BFP/G` > 16) %>%
+  filter(G <= 35) %>%
+  rename(Pitcher = pitcher) %>%
+  select(-Salary) %<%
+ 
+
+# Write CSV
+
+write_csv(MegaMegaSummary, "MegaMegaERA.csv")
+
+
