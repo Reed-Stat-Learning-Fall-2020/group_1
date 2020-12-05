@@ -10,24 +10,25 @@ library(ISLR)
 pitchers <- read_csv("MegaMegaERA.csv")
 
 pitchers <- pitchers %>%
-  mutate(`Standardized wOBA Luck` = scale(`xwOBA - wOBA`)) %>%
   mutate(`Standardized Barrel Luck` = -scale(`ERA/Barrel %`)) %>%
   mutate(`Standardized Hard Hit Luck` = -scale(`ERA/Hard Hit %`)) %>%
-  mutate(`Standardized Luck` = (`Standardized wOBA Luck` + `Standardized Barrel Luck` + `Standardized Hard Hit Luck`)/3) %>%
+  mutate(`Standardized Luck` = (`Standardized Barrel Luck` + `Standardized Hard Hit Luck`)/2) %>%
   mutate(`Luck Adjusted ERA` = ERA + (1/3)*`Standardized Luck`)
 
 pitchers <- pitchers %>%
-  select(-`BABIP - Mean BABIP`, -`xBA - BA`, -`xwOBA - wOBA`,
-         -`ERA/Barrel %`, -`ERA/Hard Hit %`, -`Standardized wOBA Luck`,
-         -`Standardized Barrel Luck`, -`Standardized Hard Hit Luck`, 
-         -`Standardized Luck`)
+  select(-`BABIP - Mean BABIP`, -`xBA - BA`, -`ERA/Barrel %`, -`ERA/Hard Hit %`,-`Standardized Barrel Luck`, 
+         -`Standardized Hard Hit Luck`, -`Standardized Luck`)
 
 write_csv(pitchers, "Luck Mega Summary.csv")
 
 pitchers <- pitchers %>%
   select(-Pitcher, -`ΔERA`)
 
+pitchers <- pitchers %>%
+  filter(`ERA (t+1)` < 7.00) %>%
+  filter(`Luck Adjusted ERA` < 7.00)
 
+write_csv(pitchers, "Luck Mega Summary.csv")
 
 ## Single Variable Model
 
@@ -96,9 +97,12 @@ summary(custom_mod4)$adj.r.squared
 ## Custom Model 5
 
 custom_mod5 <- lm(data = pitchers, 
-                  `ERA (t+1)` ~ `Spin Rate` + W + G + SO + `K %` + `BB %` + `Hard Hit %` + `Barrel %` + ERA+`ERA/Barrel %` + ERA)
+                  `ERA (t+1)` ~ `Spin Rate` + G + SO + `K %` + 
+                    ERA:`Hard Hit %` + ERA:`Barrel %` + `Luck Adjusted ERA`)
 
 summary(custom_mod5)$adj.r.squared
+
+plot(custom_mod5)
 
 
 
@@ -108,12 +112,13 @@ summary(custom_mod5)$adj.r.squared
 
 forward_select <- regsubsets(data = pitchers,
                              `ERA (t+1)` ~., 
-                             nvmax = 10, 
+                             nvmax = 9, 
                              method = "forward")
 summary(forward_select)
 
 forward_mod <- lm(data = pitchers, 
-                   `ERA (t+1)` ~ xwOBA + `Spin Rate` + W + G + SO + `K %` + `BB %` + `Hard Hit %` + `Barrel %` + `ERA/Barrel %` + ERA)
+                   `ERA (t+1)` ~ `Spin Rate` + BFP +  SO + `K %` + 
+                    `Hard Hit %` + `Barrel %` + `BFP/G` + `Luck Adjusted ERA`)
 
 summary(forward_mod)$adj.r.squared
 
