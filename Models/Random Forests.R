@@ -24,7 +24,7 @@ ERA_pitchers <- ERA_pitchers %>%
   filter(`Luck Adjusted ERA` < 7.00)
 
 Salary_pitchers <- ERA_pitchers %>%
-  select(-Pitcher, -`ΔERA`, -`ERA (t+1)`, -`ΔSalary`)
+  select(-Pitcher, -`ΔERA`, -`ERA (t+1)`, -`ΔSalary`, -Salary)
 
 ERA_pitchers <- ERA_pitchers %>%
   select(-Pitcher, -`ΔERA`, -Salary, -`Salary (t+1)`, -`ΔSalary`)
@@ -39,6 +39,9 @@ Salary_pitchers <- Salary_pitchers %>%
          BFP_per_G = `BFP/G`,
          xwOBA_minus_wOBA = `xwOBA - wOBA`,
          luck_adj_ERA = `Luck Adjusted ERA`)
+
+Salary_pitchers <- Salary_pitchers %>%
+  select(-Salary)
 
 write_csv(Salary_pitchers, "Legally Named Salary.csv")
 
@@ -61,24 +64,27 @@ write_csv(ERA_pitchers, "Legally Named ERA.csv")
 # Salary Forest Model
 
 set.seed(11)
-salary_forest <- randomForest(data = Salary_pitchers, `Salary (t+1)`~., 
-                              ntrees = 10)
+salary_forest <- randomForest(data = Salary_pitchers, salary_t1 ~., 
+                              ntrees = 11)
 
 salary_forest
 
 importance(salary_forest)
+
+varImpPlot(salary_forest)
 
 
 
 # ERA Forest Model
 
 set.seed(11)
-ERA_forest <- randomForest(data = ERA_pitchers, `ERA (t+1)`~., 
-                              ntrees = 10)
+ERA_forest <- randomForest(data = ERA_pitchers, `ERA_t1`~., 
+                              ntrees = 11)
 
 ERA_forest
 
 importance(ERA_forest)
 
+varImpPlot(ERA_forest)
 
 
