@@ -1,0 +1,205 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidymodels)
+library(janitor)
+```
+
+### summary data
+
+```{r}
+summary_raw <- read_csv("data/Uncut Mega Summary.csv")
+```
+
+
+## 2015
+
+```{r}
+salary15_raw <- read_csv("data/2015 Salaries.csv")
+```
+
+```{r}
+summary15 <- summary_raw %>% 
+  filter(Year == 2015)
+
+pitcher15 <- make_clean_names(summary15$Pitcher)
+
+cleaned_summary15 <- cbind(summary15, pitcher15) %>%
+  select(-Pitcher)
+```
+
+```{r}
+pitcher_name15 <- make_clean_names(salary15_raw$player_name)
+
+cleaned_salary15 <- cbind(salary15_raw, pitcher_name15) %>%
+  select(-player_name)
+```
+
+```{r}
+final15 <- cleaned_salary15 %>%
+  left_join(cleaned_summary15, by = c("pitcher_name15" = "pitcher15")) %>%
+  rename(pitcher = pitcher_name15) %>%
+  drop_na()
+```
+
+
+## 2016
+
+```{r}
+salary16_raw <- read_csv("data/2016 Salaries.csv")
+```
+
+```{r}
+summary16 <- summary_raw %>% 
+  filter(Year == 2016)
+
+pitcher16 <- make_clean_names(summary16$Pitcher)
+
+cleaned_summary16 <- cbind(summary16, pitcher16) %>%
+  select(-Pitcher)
+```
+
+```{r}
+pitcher_name16 <- make_clean_names(salary16_raw$player_name)
+
+cleaned_salary16 <- cbind(salary16_raw, pitcher_name16) %>%
+  select(-player_name)
+```
+
+```{r}
+final16 <- cleaned_salary16 %>%
+  left_join(cleaned_summary16, by = c("pitcher_name16" = "pitcher16")) %>%
+  rename(pitcher = pitcher_name16) %>%
+  drop_na()
+```
+
+
+## 2017
+
+```{r}
+salary17_raw <- read_csv("data/2017 Salaries.csv")
+```
+
+```{r}
+summary <- summary_raw %>% 
+  filter(Year == 2017)
+
+pitcher <- make_clean_names(summary$Pitcher)
+
+cleaned_summary <- cbind(summary, pitcher) %>%
+  select(-Pitcher)
+```
+
+```{r}
+pitcher_name <- make_clean_names(salary17_raw$player_name)
+
+cleaned_salary <- cbind(salary17_raw, pitcher_name) %>%
+  select(-player_name)
+```
+
+```{r}
+final17 <- cleaned_salary %>%
+  left_join(cleaned_summary, by = c("pitcher_name" = "pitcher")) %>%
+  rename(pitcher = pitcher_name) %>%
+  drop_na()
+```
+
+## 2018
+
+```{r}
+salary18_raw <- read_csv("data/2018 Salaries.csv")
+```
+
+```{r}
+summary18 <- summary_raw %>% 
+  filter(Year == 2018)
+
+pitcher18 <- make_clean_names(summary18$Pitcher)
+
+cleaned_summary18 <- cbind(summary18, pitcher18) %>%
+  select(-Pitcher)
+```
+
+```{r}
+pitcher_name18 <- make_clean_names(salary18_raw$player_name)
+
+cleaned_salary18 <- cbind(salary18_raw, pitcher_name18) %>%
+  select(-player_name)
+```
+
+```{r}
+final18 <- cleaned_salary18 %>%
+  left_join(cleaned_summary18, by = c("pitcher_name18" = "pitcher18")) %>%
+  rename(pitcher = pitcher_name18) %>%
+  drop_na()
+
+```
+
+## 2019
+
+```{r}
+salary19_raw <- read_csv("data/2019 Salaries.csv")
+```
+
+```{r}
+summary19 <- summary_raw %>% 
+  filter(Year == 2019)
+
+pitcher19 <- make_clean_names(summary19$Pitcher)
+
+cleaned_summary19 <- cbind(summary19, pitcher19) %>%
+  select(-Pitcher)
+```
+
+```{r}
+pitcher_name19 <- make_clean_names(salary19_raw$player_name)
+
+cleaned_salary19 <- cbind(salary19_raw, pitcher_name19) %>%
+  select(-player_name)
+```
+
+```{r}
+final19 <- cleaned_salary19 %>%
+  left_join(cleaned_summary19, by = c("pitcher_name19" = "pitcher19")) %>%
+  rename(pitcher = pitcher_name19) %>%
+  drop_na()
+
+```
+
+
+## 2020
+
+```{r}
+salary20_raw <- read_csv("data/2020 Salaries.csv")
+```
+
+```{r}
+summary20 <- summary_raw %>% 
+  filter(Year == 2020)
+
+pitcher20 <- make_clean_names(summary20$Pitcher)
+
+cleaned_summary20 <- cbind(summary20, pitcher20) %>%
+  select(-Pitcher)
+```
+
+```{r}
+pitcher_name20 <- make_clean_names(salary20_raw$player_name)
+
+cleaned_salary20 <- cbind(salary20_raw, pitcher_name20) %>%
+  select(-player_name)
+```
+
+```{r}
+final20 <- cleaned_salary20 %>%
+  left_join(cleaned_summary20, by = c("pitcher_name20" = "pitcher20")) %>%
+  rename(pitcher = pitcher_name20) %>%
+  drop_na()
+
+```
+

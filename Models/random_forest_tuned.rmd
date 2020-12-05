@@ -160,4 +160,118 @@ final_df %>%
   geom_abline(slope = 1, alpha = 0.5)
 ```
 
+## RF for ERA
 
+
+
+```{r}
+pitcher_rec_era <- recipe(`ERA (t+1)` ~ ., data = baseball_train) %>%
+  update_role(Pitcher, new_role = "ID") 
+
+pitcher_prep <- prep(pitcher_rec)
+juiced <- juice(pitcher_prep)
+```
+
+
+```{r}
+rf_spec <- rand_forest(
+  mtry = tune(),
+  trees = 1000,
+  min_n = tune()
+  ) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+```
+
+```{r}
+tune_wf_era <- workflow() %>%
+  add_recipe(pitcher_rec_era) %>%
+  add_model(rf_spec)
+```
+
+
+```{r}
+set.seed(987)
+baseball_fold_era <- vfold_cv(baseball_train, v = 5)
+```
+
+
+```{r}
+rf_grid_era <- grid_regular(
+  mtry(range = c(1,6)),
+  min_n(range = c(2,8)),
+  levels = 5
+  )
+```
+
+```{r}
+set.seed(453)
+
+tune_res <- tune_grid(
+  tune_wf_era,
+  resamples = baseball_fold,
+  grid = rf_grid_era
+)
+```
+
+```{r}
+tune_res %>%
+  collect_metrics() %>%
+  filter(.metric == "rsq") %>%
+  mutate(min_n = factor(min_n)) %>%
+  ggplot(aes(mtry, mean, color = min_n)) +
+  geom_line(alpha = 0.5, size = 1.5) +
+  geom_point()
+```
+
+```{r}
+best_rsq <- select_best(tune_res, "rsq")
+
+final_rf <- finalize_model(
+  rf_spec,
+  best_rsq
+)
+```
+
+
+
+```{r}
+# variable importance plot
+
+library(vip)
+final_rf %>%
+  set_engine("ranger", importance = "permutation") %>%
+  fit(`ERA (t+1)` ~.,
+      data = juice(pitcher_prep) %>% select(-Pitcher)) %>%
+  vip(geom = "point")
+```
+
+```{r}
+final_wf <- workflow() %>%
+  add_recipe(pitcher_rec) %>%
+  add_model(final_rf)
+
+final_res <- final_wf %>%
+  last_fit(baseball_split)
+
+final_res %>%
+  collect_metrics()
+
+# since the rmse on the test set is so similar to that which we found when tuning
+# it's fairly likely that we did not overfit
+```
+
+```{r}
+final_df <- final_res %>%
+  collect_predictions() %>%
+  bind_cols(baseball_test)
+```
+
+```{r}
+# visualizing how our model did
+
+final_df %>%
+  ggplot(aes(.pred, `ERA (t+1)...4`)) +
+  geom_point() +
+  geom_abline(slope = 1, alpha = 0.5)
+```

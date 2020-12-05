@@ -345,6 +345,12 @@ mega_summary <- rbind(summary_2015,
                       summary_2018,
                       summary_2019)
 
+mega_summary_uncut <- rbind(summary_2015,
+                      summary_2016,
+                      summary_2017,
+                      summary_2018,
+                      summary_2019)
+
 
 # Filter
 
@@ -403,12 +409,50 @@ mega_summary <- mega_summary %>%
          `Velocity` = velocity)
   
 
+mega_summary_uncut <- mega_summary_uncut %>%
+  mutate(ba = as.numeric(ba),
+         babip = as.numeric(babip),
+         woba = as.numeric(woba),
+         xwoba = as.numeric(xwoba),
+         xba = as.numeric(xba),
+         spin_rate = as.numeric(spin_rate),
+         velocity = as.numeric(velocity)) %>%
+  mutate(`BABIP - Mean BABIP` = babip - mean(babip, na.rm = TRUE),
+         `xBA - BA` = xba - ba,
+         `xwOBA - wOBA` = xwoba - woba,
+         `ERA/Barrel %` = ERA/`Barrel %`,
+         `ERA/Hard Hit %` = ERA/`Hard Hit %`,
+         `ΔERA` = `ERA (t+1)` - ERA,
+         `ΔSalary` = `Salary (t+1)` - Salary) %>%
+  mutate(`ERA/Barrel %` = format(round(`ERA/Barrel %`, 3), nsmall = 3)) %>%
+  mutate(`ERA/Hard Hit %` = format(round(`ERA/Hard Hit %`, 3), nsmall = 3)) %>%
+  mutate(`BABIP - Mean BABIP` = format(round(`BABIP - Mean BABIP`, 4), nsmall = 4)) %>%
+  rename(Pitches = pitches,
+         Pitcher = player_name,
+         Year = year,
+         BA = ba,
+         BABIP = babip,
+         wOBA = woba,
+         xwOBA = xwoba,
+         xBA = xba,
+         Hits = hits,
+         ABs = abs,
+         `Spin Rate` = spin_rate,
+         `Velocity` = velocity) %>%
+  select(-Salary, -`Salary (t+1)`, -`ΔSalary`) %>%
+  mutate(`BFP/G` = BFP/G)
+
 
 # Write CSV
 
 write_csv(mega_summary, "Mega Summary.csv")
 
+write_csv(mega_summary_uncut, "Uncut Mega Summary.csv")
 
-
-
+write_csv(salary_2015, "2015 Salaries.csv")
+write_csv(salary_2016, "2016 Salaries.csv")
+write_csv(salary_2017, "2017 Salaries.csv")
+write_csv(salary_2018, "2018 Salaries.csv")
+write_csv(salary_2019, "2019 Salaries.csv")
+write_csv(salary_2019two, "2020 Salaries.csv")
 
