@@ -7,8 +7,25 @@ library(ISLR)
 
 # Load Data
 
-pitchers <- read_csv("Mega Summary.csv") %>%
-  select(-Pitcher, -Salary, -`Salary (t+1)`, -`ΔSalary`, -`ΔERA`)
+pitchers <- read_csv("MegaMegaERA.csv")
+
+pitchers <- pitchers %>%
+  mutate(`Standardized wOBA Luck` = scale(`xwOBA - wOBA`)) %>%
+  mutate(`Standardized Barrel Luck` = -scale(`ERA/Barrel %`)) %>%
+  mutate(`Standardized Hard Hit Luck` = -scale(`ERA/Hard Hit %`)) %>%
+  mutate(`Standardized Luck` = (`Standardized wOBA Luck` + `Standardized Barrel Luck` + `Standardized Hard Hit Luck`)/3) %>%
+  mutate(`Luck Adjusted ERA` = ERA + (1/3)*`Standardized Luck`)
+
+pitchers <- pitchers %>%
+  select(-`BABIP - Mean BABIP`, -`xBA - BA`, -`xwOBA - wOBA`,
+         -`ERA/Barrel %`, -`ERA/Hard Hit %`, -`Standardized wOBA Luck`,
+         -`Standardized Barrel Luck`, -`Standardized Hard Hit Luck`, 
+         -`Standardized Luck`)
+
+write_csv(pitchers, "Luck Mega Summary.csv")
+
+pitchers <- pitchers %>%
+  select(-Pitcher, -`ΔERA`)
 
 
 
@@ -57,7 +74,7 @@ summary(custom_mod2)$adj.r.squared
 
 custom_mod3 <- lm(data = pitchers,
                   `ERA (t+1)` ~ xwOBA + SO + W + `K %` + 
-                    ERA:`ERA/Hard Hit %` + ERA: `xwOBA - wOBA`)
+                    ERA:`ERA/Hard Hit %` + ERA:`xwOBA - wOBA`)
 
 
 summary(custom_mod3)$adj.r.squared
@@ -67,12 +84,21 @@ summary(custom_mod3)$adj.r.squared
 ## Custom Model 4
 
 custom_mod4 <- lm(data = pitchers, 
-                   `ERA (t+1)` ~ xwOBA + W + BFP + SO + `K %` + 
-                    `Hard Hit %` + ERA:`ERA/Barrel %`)
+                   `ERA (t+1)` ~ xwOBA + `Spin Rate` + W + G + SO + `K %` + `BB %` +
+                    `Hard Hit %` + `Barrel %` + ERA:`ERA/Barrel %`)
 
 
 
-summary(custom_mod4)
+summary(custom_mod4)$adj.r.squared
+
+
+
+## Custom Model 5
+
+custom_mod5 <- lm(data = pitchers, 
+                  `ERA (t+1)` ~ `Spin Rate` + W + G + SO + `K %` + `BB %` + `Hard Hit %` + `Barrel %` + ERA+`ERA/Barrel %` + ERA)
+
+summary(custom_mod5)$adj.r.squared
 
 
 
@@ -81,15 +107,28 @@ summary(custom_mod4)
 # Forward Selection
 
 forward_select <- regsubsets(data = pitchers,
-                             `ERA (t+1)` ~.-Pitcher, 
+                             `ERA (t+1)` ~., 
                              nvmax = 10, 
                              method = "forward")
 summary(forward_select)
 
 forward_mod <- lm(data = pitchers, 
-                   `ERA (t+1)` ~ xwOBA + `Spin Rate` + W + G + BFP + SO + `K %` + `Hard Hit %` + `Barrel %` + `ERA/Barrel %` + ERA)
+                   `ERA (t+1)` ~ xwOBA + `Spin Rate` + W + G + SO + `K %` + `BB %` + `Hard Hit %` + `Barrel %` + `ERA/Barrel %` + ERA)
 
 summary(forward_mod)$adj.r.squared
+
+
+# Best Subset
+
+best_subset <- regsubsets(data = pitchers,
+                             `ERA (t+1)` ~.,
+                             nvmax = 8)
+summary(best_subset)
+
+best_mod <- lm(data = pitchers, 
+                  `ERA (t+1)` ~ `Spin Rate` + ABs + H + BFP + `BB %` + `K %` + `Hard Hit %` + `Barrel %` + `ERA/Barrel %` + `ERA/Hard Hit %`)
+
+summary(best_mod)$adj.r.squared
 
 
 
