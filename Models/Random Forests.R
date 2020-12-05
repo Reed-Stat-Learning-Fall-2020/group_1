@@ -35,9 +35,27 @@ Salary_pitchers <- Salary_pitchers %>%
          BB_percent = `BB %`,
          hard_hit_percent = `Hard Hit %`,
          barrel_percent = `Barrel %`,
-         salary_t1 = `Salary t(+1)`)
+         salary_t1 = `Salary (t+1)`,
+         BFP_per_G = `BFP/G`,
+         xwOBA_minus_wOBA = `xwOBA - wOBA`,
+         luck_adj_ERA = `Luck Adjusted ERA`)
 
-names(ERA_pitchers) <- make.names(names(ERA_pitchers))
+write_csv(Salary_pitchers, "Legally Named Salary.csv")
+
+ERA_pitchers <- ERA_pitchers %>%
+  rename(spin_rate = `Spin Rate`,
+         K_percent = `K %`,
+         BB_percent = `BB %`,
+         hard_hit_percent = `Hard Hit %`,
+         barrel_percent = `Barrel %`,
+         ERA_t1 = `ERA (t+1)`,
+         BFP_per_G = `BFP/G`,
+         xwOBA_minus_wOBA = `xwOBA - wOBA`,
+         luck_adj_ERA = `Luck Adjusted ERA`)
+
+
+write_csv(ERA_pitchers, "Legally Named ERA.csv")
+
 
 
 # Salary Forest Model
