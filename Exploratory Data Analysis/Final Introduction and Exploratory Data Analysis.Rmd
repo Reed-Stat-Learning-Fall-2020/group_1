@@ -40,10 +40,11 @@ We began by examining the structure of our first response variable- future salar
 ggplot(Mega_Summary_Filtered, 
        aes(x = `Salary (t+1)` )) + 
   geom_histogram(
+    color="grey100",
     bins = 30, 
     alpha = .75 
     ) + 
-  theme_bw()
+  theme_classic()
 ```
 As we can see, future salary is quite right skewed. This is understandable as certain superstar pitchers have salaries that are magnitudes greater than the average starting pitcher. We considered a log tranformation to try to ameliorate this skew.
 
@@ -663,7 +664,12 @@ Despite the expected existence of a postive linear association between the two v
 ##Future ERA distribution##
 
 ```{r}
-ggplot(Mega_Summary, aes(x = `ERA (t+1)` ))+geom_histogram(bins = 30, alpha = .75 )+theme_bw()
+ggplot(Mega_Summary, aes(x = `ERA (t+1)` ))+
+  geom_histogram(
+    color="grey100",
+    bins = 30, 
+    alpha = .75 )+
+  theme_classic()
 ```
 We can see that, unlike future salary, future ERA displays a decently normal distribution. While there is a tiny right tail, the low number of observations in that region make it so that it is unlikely to skew our model. This normal distribution is understandable as the MLB has pitchers with a range of talent, with the majority of them falling around the average. The few outliers in the right tail likely represent injury-ridden seasons or seasons where a pitcher experienced bad luck.
 
