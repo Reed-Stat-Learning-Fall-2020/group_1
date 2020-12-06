@@ -167,9 +167,14 @@ lasso_MSE_ERA<-data.frame(lasso_mod_ERA_CV$cvm)
 lasso_MSE_ERA %>%
   summarise(MSE = min(lasso_mod_ERA_CV$cvm))
 
+#Below is code for the various MSE and R-squared models, you don't need to pay attention to it
+
 ridge_statistics<-c(ridge_r2,min(ridge_MSE_salary),ridge_r2_ERA,min(ridge_MSE_ERA))
 lasso_statistics<-c(lasso_r2,min(lasso_MSE_salary),lasso_r2_ERA,min(lasso_MSE_ERA))
+forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
+domain_knowledge_statistics<-c("NA","NA",0.1573634,0.972449)
+full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
 labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
 
-all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics)
+all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_statistics,domain_knowledge_statistics,full_statistics)
 view(all_statistics)
