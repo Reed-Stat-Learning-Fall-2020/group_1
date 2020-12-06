@@ -8,13 +8,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-There were quite a few components that went into creating our final data set:
+There were quite a few data wrangling and processing strategies that went into constructing our final data set:
 
 ## Pitching Statistics and Advanced Pitching statistics
 
-  - Much of our advanced pitching statistics data came from Baseball Savant's "statcast" which     is a massive searchable data base. Most of the advanced pitching statistics only exist in     statcast from 2015 and onwards so we pulled data for 2016-2019. We chose to avoid 2020 
-    because of how unorthodox of a season it was due to Covid-19. The data from statcast
-    is easily accessible as the data is readily downloadable as a csv.
+Much of our advanced pitching metric data came from Baseball Savant's "Statcast", a massive searchable online database developed by the MLB. Because of its recent inception, most of the advanced pitching statistics have only been recorded by Statcast from 2015 onwards, so we were limited to the past five years in pulling this data. We chose to avoid pulling advanced data from 2020, both because of the unorthodox nature of a COVID-shortened season and the fact that one-year forward variables were frequently implemented as a response (and 2021 data doesn't yet exist). Fortunately, the data from Statcast is easily accessible as the data is open source and readily downloadable.
     
 ## Salary Data
 
