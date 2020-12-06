@@ -44,7 +44,7 @@ $$
 {Luck \ Adjusted \ ERA}_t = 
 {ERA}_t + 
 \frac{1}{3} \cdot 
-\frac{({\frac{ERA}{Barrel \ \%}}_t - \frac{\sum_{i}^{n}(\frac{ERA}{Barrel \ \%})}{n}) + ({\frac{ERA}{Hard \ Hit \ \%}}_t - \frac{\sum_{i}^{n}(\frac{ERA}{Hard \ Hit \ \%})}{n})}{2}
+\frac{-({\frac{ERA}{Barrel \ \%}}_t - \frac{\sum_{i}^{n}(\frac{ERA}{Barrel \ \%})}{n}) - ({\frac{ERA}{Hard \ Hit \ \%}}_t - \frac{\sum_{i}^{n}(\frac{ERA}{Hard \ Hit \ \%})}{n})}{2}
 $$
 
 A more detailed discussion of the definition, concept, and implications of "luck" in pitching outcomes is included in our exploratory data analysis.
