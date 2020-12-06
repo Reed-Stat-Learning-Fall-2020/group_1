@@ -174,7 +174,8 @@ lasso_statistics<-c(lasso_r2,min(lasso_MSE_salary),lasso_r2_ERA,min(lasso_MSE_ER
 forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
 domain_knowledge_statistics<-c("NA","NA",0.1573634,0.972449)
 full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
+PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
 labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
 
-all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_statistics,domain_knowledge_statistics,full_statistics)
+all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_statistics,domain_knowledge_statistics,full_statistics,PCR_statistics)
 view(all_statistics)

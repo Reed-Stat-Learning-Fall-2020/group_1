@@ -1,0 +1,86 @@
+---
+title: "PCR Model"
+author: "Group 1-Josh Yamamoto, Riley Leonard, Andy Zhao"
+date: "12/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(pls)
+```
+
+Loading the data
+
+```{r}
+mega <- read_csv("data/Final Mega Summary.csv")
+
+salary_data<-mega %>% dplyr::select(-Pitcher,-ΔERA,-ERA_t1,-ΔSalary) #I'm sorry about the dplyr::, I guess I must have libraried a weird package
+
+salary_data <- salary_data %>% filter(salary_t1>600000)
+
+pitchers <- mega %>%
+  dplyr::select(-Pitcher,-ΔERA,-salary_t1,-ΔSalary)
+
+pitchers <- pitchers %>%
+  filter(ERA_t1 < 7.00) %>%
+  filter(luck_adj_ERA < 7.00)
+```
+
+
+```{r}
+my_pcr_ERA <- pcr(formula = ERA_t1 ~ ., data = pitchers, scale = T, validation = "CV",     kfold = 5, folds = 5)
+
+#To get CV and adjusted CV
+
+summary(my_pcr_ERA)
+
+#To plot CV of MSE
+
+validationplot(my_pcr_ERA, val.type = "MSEP")
+```
+
+
+
+It seems like 4 is the best number of principal components based off CV. Based off the above summary, the RMSE for a PCR with 4 components is 0.9986, so its MSE should be 0.9986*0.9986=0.997202.
+
+```{r}
+PCR_predict_ERA<-predict(my_pcr_ERA,pitchers,4)
+
+PCR_MSE_ERA<-(sum((PCR_predict_ERA-pitchers$ERA_t1)^2))/(length(pitchers$ERA_t1))
+
+r_sq<- function (true_y, fitted,n_obs,k_obs) {
+  rss = sum((fitted - true_y)^2)
+  tss=sum(((true_y-mean(true_y))^2))
+  return (1 - ((rss/(n_obs - k_obs - 1)) / (tss/(n_obs - 1))))
+}
+
+PCR_ERA_r2<-r_sq(pitchers$ERA_t1,PCR_predict_ERA,467,4)
+
+```
+
+
+```{r}
+my_pcr_salary <- pcr(formula = log(salary_t1) ~ ., data = salary_data, scale = T, validation = "CV",     kfold = 5, folds = 5)
+
+#To get CV and adjusted CV
+
+summary(my_pcr_salary)
+
+#To plot CV of MSE
+
+validationplot(my_pcr_salary, val.type = "MSEP")
+```
+
+For salary, it seems like 13 principal components is the best choice and the RMSE is 0.5756*0.5756 or 0.3313.
+
+```{r}
+PCR_predict_salary<-predict(my_pcr_salary,salary_data,13)
+
+PCR_MSE_Salary<-(sum((PCR_predict_salary-salary_data$salary_t1^2))/(length(salary_data$salary_t1))
+
+PCR_salary_r2<-r_sq(log(salary_data$salary_t1),PCR_predict_salary,467,4)
+
+```
+
