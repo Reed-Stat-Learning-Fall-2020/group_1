@@ -508,6 +508,9 @@ FinalMegaSummary <- FinalMegaSummary %>%
          xwOBA_minus_wOBA = `xwOBA - wOBA`,
          luck_adj_ERA = `Luck Adjusted ERA`)
 
+FinalMegaSummary <- FinalMegaSummary %>%
+  rename(BABIP_minus_meanBABIP = `BABIP - Mean BABIP`)
+
 write_csv(FinalMegaSummary, "Final Mega Summary.csv")
 
 
