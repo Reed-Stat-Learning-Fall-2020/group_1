@@ -11,7 +11,11 @@ library(tidyverse)
 library(tidymodels)
 library(ranger)
 
-data <- read_csv("data/Final Mega Summary.csv")
+data_raw <- read_csv("data/Final Mega Summary.csv") 
+
+data <- data_raw %>%
+  filter(salary_t1 > 600000) %>%
+  select(-`ΔERA`, -`ΔSalary`)
 ```
 
 
@@ -28,8 +32,6 @@ baseball_test <- testing(baseball_split)
 ```{r}
 pitcher_rec <- recipe(salary_t1 ~ ., data = baseball_train) %>%
   update_role(Pitcher, new_role = "ID") %>%
-  update_role(`ΔERA`, new_role = "alt") %>%
-  update_role(`ΔSalary`, new_role = "alt2") %>%
   step_log(salary_t1) %>%
   step_zv(all_predictors())
 
@@ -64,7 +66,7 @@ baseball_fold <- vfold_cv(baseball_train)
 
 ```{r}
 rf_grid <- grid_regular(
-  mtry(range = c(1,6)),
+  mtry(range = c(4,12)),
   min_n(range = c(2,8)),
   levels = 5
   )
@@ -107,7 +109,7 @@ final_rf <- finalize_model(
 library(vip)
 final_rf %>%
   set_engine("ranger", importance = "permutation") %>%
-  fit(`Salary (t+1)` ~.,
+  fit(salary_t1 ~.,
       data = juice(pitcher_prep) %>% select(-Pitcher)) %>%
   vip(geom = "point")
 ```
@@ -147,22 +149,35 @@ final_df %>%
 rmse(final_df, truth = `salary_t1...4`,estimate = .pred )
 rsq(final_df, truth = `salary_t1...4`,estimate = .pred)
 
-# rmse = 0.629
-# so mse = 0.395641
-# rsq = 0.805
+# rmse = 0.521
+# so mse = 0.2714
+# rsq = 0.770
 ```
 
 
 ## RF for ERA
 
+```{r}
+data1 <- data_raw %>%
+  filter(ERA_t1 < 7.00) %>%
+  filter(luck_adj_ERA < 7.00) %>%
+  select(-`ΔERA`, -`ΔSalary`)
+```
+
+```{r}
+set.seed(132)
+baseball_split_era <- initial_split(data1, prop = 0.8)
+
+baseball_train_era <- training(baseball_split_era)
+baseball_test_era <- testing(baseball_split_era)
+```
+
 
 
 ```{r}
-pitcher_rec_era <- recipe(ERA_t1 ~ ., data = baseball_train) %>%
+pitcher_rec_era <- recipe(ERA_t1 ~ ., data = baseball_train_era) %>%
   update_role(Pitcher, new_role = "ID") %>%
-  update_role(`ΔERA`, new_role = "alt") %>%
-  update_role(`ΔSalary`, new_role = "alt2") %>%
-  step_log(salary_t1) %>%
+  step_log(Salary) %>%
   step_zv(all_predictors())
 
 pitcher_prep_era <- prep(pitcher_rec_era)
@@ -189,13 +204,13 @@ tune_wf_era <- workflow() %>%
 
 ```{r}
 set.seed(987)
-baseball_fold_era <- vfold_cv(baseball_train, v = 5)
+baseball_fold_era <- vfold_cv(baseball_train_era, v = 5)
 ```
 
 
 ```{r}
 rf_grid_era <- grid_regular(
-  mtry(range = c(1,6)),
+  mtry(range = c(4,12)),
   min_n(range = c(2,8)),
   levels = 5
   )
@@ -206,7 +221,7 @@ set.seed(453)
 
 tune_res_era <- tune_grid(
   tune_wf_era,
-  resamples = baseball_fold,
+  resamples = baseball_fold_era,
   grid = rf_grid_era
 )
 ```
@@ -236,9 +251,9 @@ final_rf_era <- finalize_model(
 # variable importance plot
 
 library(vip)
-final_rf %>%
+final_rf_era %>%
   set_engine("ranger", importance = "permutation") %>%
-  fit(`ERA (t+1)` ~.,
+  fit(ERA_t1 ~.,
       data = juice(pitcher_prep) %>% select(-Pitcher)) %>%
   vip(geom = "point")
 ```
@@ -249,7 +264,7 @@ final_wf_era <- workflow() %>%
   add_model(final_rf_era)
 
 final_res_era <- final_wf_era %>%
-  last_fit(baseball_split)
+  last_fit(baseball_split_era)
 
 final_res_era %>%
   collect_metrics()
@@ -261,7 +276,7 @@ final_res_era %>%
 ```{r}
 final_df_era <- final_res_era %>%
   collect_predictions() %>%
-  bind_cols(baseball_test)
+  bind_cols(baseball_test_era)
 ```
 
 ```{r}
@@ -278,8 +293,8 @@ final_df_era %>%
 rmse(final_df_era, truth = `ERA_t1...4`,estimate = .pred )
 rsq(final_df_era, truth = `ERA_t1...4`,estimate = .pred)
 
-# so mse = 0.8464
-# and rsq = 0.0987
+# so mse = 1.1236
+# and rsq = 0.0171
 ```
 
 
