@@ -1,0 +1,52 @@
+---
+title: "Methods"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+There were quite a few components that went into creating our final data set:
+
+## Pitching Statistics and Advanced Pitching statistics
+
+  - Much of our advanced pitching statistics data came from Baseball Savant's "statcast" which     is a massive searchable data base. Most of the advanced pitching statistics only exist in     statcast from 2015 and onwards so we pulled data for 2016-2019. We chose to avoid 2020 
+    because of how unorthodox of a season it was due to Covid-19. The data from statcast
+    is easily accessible as the data is readily downloadable as a csv.
+    
+## Salary Data
+
+  - Our salary data came from two different sources due to the fact that our primary source
+    had a paywall for 2015 and our secondary source did not include salary data for 2016 and      onward. 
+  - Therefore for 2015 we downloaded our salary data from Sean Lahman's data base. The
+    salary data was really easy to pull as his data could just be downloaded as a csv.
+  - For 2016-2019 we had to get a little bit creative. Salary data for mlb pitchers from
+    2016-2019 is available on the website spotrac.com, but it is not downloadable as a csv so 
+    we had to use `rvest` to scrape the data from the html source code. We ran into an issue 
+    where if we tried to scrape the data from an entire year, rvest would only pull the first 
+    100 observations. To get around this problem we created vector of links where each one 
+    corresponded to the page of an individual mlb team for a specific year. We then wrote a       function to pull the data from the html source code from that page. We then ran that          function through a for loop where the index was the list of links to each team and then       used rbind to combine all of our individual team dataframes. We did this for each year
+    and then combined this with our salary data from lahman.com for 2015 to get all of our 
+    salary data.
+    
+## Combining these data sets
+
+One thing to note is that we only pulled salary data for starting pitchers because it was a more feasible task and also because we thought it might be a more consistent data set to analyze. Since our pitching statistics dataset contained data for all pitchers we had to filter that data set so that it only contained pitchers who were also present in our salary dataset. In order to try to minimize any joining mistakes we use the function `make_clean_names()` from the `janitor` package to clean each pitchers name before joining. In the end we lost a few observations when joining the filtered pitches data with the salary data, but we kept a sizeable enough data set that we weren't concerned about that.
+
+When all was said and done we ended up with a data set with 804 observations and 33 variables. The observational unit is a individual mlb pitcher from the the years between 2015 and 2019. Importantly each observation is not unique as players continue to play year in an year out, but we also do not have data for each pitcher for every year since sometimes players get injured, retire, etc.
+
+```{r}
+data <- read_csv("data/MegeMegaSummary.csv")
+
+nrow(data)
+ncol(data)
+```
+
+We then added a couple of variables of our own. We first added a new column that represented the salary for the given pitcher in the next year. This allowed us to have both a `Salary` column and a `Salary (t+1)` column. We did the same thing for ERA to give us an `ERA (t+1)` column. Next we created a few variables with the primary goal of compensating for the luck that a player might experience from year to year. These added variables include: `BABIP - Mean BABIP`, `xBA - BA`, `xwOBA - wOBA`, `ERA/Barrel %`, and `ERA/Hard Hit %`. Finally we added columns for the change in ERA and change in Salary.
+    
+    
+    
+    
+  
