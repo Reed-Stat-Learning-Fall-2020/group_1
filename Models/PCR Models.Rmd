@@ -78,7 +78,7 @@ For salary, it seems like 13 principal components is the best choice and the RMS
 ```{r}
 PCR_predict_salary<-predict(my_pcr_salary,salary_data,13)
 
-PCR_MSE_Salary<-(sum((PCR_predict_salary-salary_data$salary_t1^2))/(length(salary_data$salary_t1))
+PCR_MSE_Salary<-sum((PCR_predict_salary-salary_data$salary_t1^2))/(length(salary_data$salary_t1))
 
 PCR_salary_r2<-r_sq(log(salary_data$salary_t1),PCR_predict_salary,467,4)
 
