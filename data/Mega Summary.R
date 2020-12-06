@@ -475,3 +475,39 @@ MegaMegaSummary <- MegaMegaSummary %>%
 write_csv(MegaMegaSummary, "MegaMegaERA.csv")
 
 
+# Final Mega Summary
+
+FinalMegaSummary <- read_csv("Mega Summary.csv")
+
+FinalMegaSummary <- FinalMegaSummary %>%
+  mutate(`Standardized Barrel Luck` = -scale(`ERA/Barrel %`)) %>%
+  mutate(`Standardized Hard Hit Luck` = -scale(`ERA/Hard Hit %`)) %>%
+  mutate(`Standardized Luck` = (`Standardized Barrel Luck` + `Standardized Hard Hit Luck`)/2) %>%
+  mutate(`Luck Adjusted ERA` = ERA + (1/3)*`Standardized Luck`) %>%
+  mutate(`Luck Adjusted ERA` = as.numeric(`Luck Adjusted ERA`)) 
+
+FinalMegaSummary <- FinalMegaSummary %>%
+  select(-`xBA - BA`, -`Standardized Barrel Luck`, 
+         -`Standardized Hard Hit Luck`, -`Standardized Luck`)
+
+FinalMegaSummary <- FinalMegaSummary %>%
+  mutate(`Luck Adjusted ERA` = format(round(`Luck Adjusted ERA`, 2), nsmall = 2)) %>%
+  filter(`ERA (t+1)` < 7.00) %>%
+  filter(`ERA` < 7.00) %>%
+  filter(`Luck Adjusted ERA` < 7.00)
+
+FinalMegaSummary <- FinalMegaSummary %>%
+  rename(spin_rate = `Spin Rate`,
+         K_percent = `K %`,
+         BB_percent = `BB %`,
+         hard_hit_percent = `Hard Hit %`,
+         barrel_percent = `Barrel %`,
+         salary_t1 = `Salary (t+1)`,
+         ERA_t1 = `ERA (t+1)`,
+         BFP_per_G = `BFP/G`,
+         xwOBA_minus_wOBA = `xwOBA - wOBA`,
+         luck_adj_ERA = `Luck Adjusted ERA`)
+
+write_csv(FinalMegaSummary, "Final Mega Summary.csv")
+
+

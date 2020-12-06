@@ -65,7 +65,7 @@ write_csv(ERA_pitchers, "Legally Named ERA.csv")
 
 set.seed(11)
 salary_forest <- randomForest(data = Salary_pitchers, salary_t1 ~., 
-                              ntrees = 11)
+                              ntrees = 100)
 
 salary_forest
 
@@ -79,7 +79,7 @@ varImpPlot(salary_forest)
 
 set.seed(11)
 ERA_forest <- randomForest(data = ERA_pitchers, `ERA_t1`~., 
-                              ntrees = 11)
+                              ntrees = 100)
 
 ERA_forest
 
