@@ -35,10 +35,10 @@ There were quite a few components that went into creating our final data set:
 
 One thing to note is that we only pulled salary data for starting pitchers because it was a more feasible task and also because we thought it might be a more consistent data set to analyze. Since our pitching statistics dataset contained data for all pitchers we had to filter that data set so that it only contained pitchers who were also present in our salary dataset. In order to try to minimize any joining mistakes we use the function `make_clean_names()` from the `janitor` package to clean each pitchers name before joining. In the end we lost a few observations when joining the filtered pitches data with the salary data, but we kept a sizeable enough data set that we weren't concerned about that.
 
-When all was said and done we ended up with a data set with 804 observations and 33 variables. The observational unit is a individual mlb pitcher from the the years between 2015 and 2019. Importantly each observation is not unique as players continue to play year in an year out, but we also do not have data for each pitcher for every year since sometimes players get injured, retire, etc.
+When all was said and done we ended up with a data set with 457 observations and 36 variables. The observational unit is a individual mlb pitcher from the the years between 2015 and 2019. Importantly each observation is not unique as players continue to play year in an year out, but we also do not have data for each pitcher for every year since sometimes players get injured, retire, etc.
 
 ```{r}
-data <- read_csv("data/MegeMegaSummary.csv")
+data <- read_csv("data/Final Mega Summary.csv")
 
 nrow(data)
 ncol(data)
