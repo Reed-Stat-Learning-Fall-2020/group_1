@@ -323,3 +323,27 @@ ggplot(final_table %>%
 
 ```
 
+#Conclusions#
+
+We have split our conclusions into two parts, predictive and inferential. The reason for this was that the more complex ensemble models that excelled in prediction are not as amenable to interpretation as some simpler models such as the custom linear regression models or the lasso penalized regression.
+
+##Inferential Conclusions##
+```{r}
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1)~Year+SO+
+                           Salary+W*luck_adj_ERA)
+```
+
+Above, we see the two linear regressions we created for our custom models, which was built using domain knowledge to create initial multiple linear regressions, and then performing manual stepwise selection by dropping insignificant predictors and adding new ones. 
+
+In broad strokes, they both are pretty simple. The ERA model has 7 total predictors, and the salary model has 5 total predictors including an interaction term. Our hypothesis as to why the simpler models outperformed the full model is due to a high amount of correlation between predictors. In our data, the volume-correlated statistics such as total wins, total pitches, total strikeouts, were highly correlated and the advanced statistics such as xwOBA, xBA and BABIP were also correlated with each other as well. These simple models circumvent this issue by only using some of the correlated predictors and dropping the rest.
+
+When it comes to performing interpretation on the models, we looked at both the predictors that were included as well as the significance (in p-value) of each predictor. First, looking at the ERA model, in terms of predictor inclusion, we see a mix of counting statistics such as games and strikeouts as well as advanced statistics such as spin rate, barrel %, and luck-adjusted ERA. Of the 7 variables, 2 of them fall into the counting statistics category, strikeout percent is unique in that it is a slightly processed form of a basic counting statistic, while the other 4 are closer to advanced statistics, suggesting that statistics-driven analytics might be more helpful in performing predictions of future ERA. Then, looking at significance, ERA*barrel % stands out as having the smallest p-value. As previously discussed, this term attempts to remove some of the noise from the base ERA metric. The positive coefficient makes sense as higher ERA or higher barrel % are both likely to lead to a higher ERA next year. The next smallest p-value belongs to luck-adjusted ERA, which penalizes “lucky” pitchers with a regression to their mean. The other two predictors with low p-values were the related predictors of total strikeouts and strikeout rates, with strikeout rate having a lower p-value. The inclusion of the basic counting statistic of total strikeout as well as the minimally processed statistics of strikeout rates suggest that, while advanced analytics are useful, counting statistics still have an important role as well. Overall, even though the ERA prediction model integrates both counting statistics and advanced statistics, it seems like it relies quite heavily upon advanced analytics, even though basic metrics still play a role.
+
+Then, looking at the salary model, we can see that the 5 included predictors consist mostly of basic metrics such as total strikeouts, previous salary, total wins, and even the year. The one included metric that utilized advanced statistics was the luck adjusted ERA, which uses Sabermetric statistics such as xwOBA to help quantify luck. Already, we can see a pretty significant difference from the ERA model in terms of predictors chosen. Unsurprisingly, the most important predictor of future salary was past salary, as quantified through comparison of p-values. However, to our surprise, year was the only other significant (p-value<0.05) predictor suggesting that the different economic climates of the league in different years plays an important role. Even more shockingly, the coefficient was negative, while we had expected a positive relationship suggesting inflation, the negative coefficient rather suggests that teams are paying less and less for pitchers. Other predictors of note with low p-values were total strikeouts as well as luck adjusted ERA. The positive coefficient on total strikeouts and the negative relationship with ERA makes sense as both increasing strikeouts and decreasing ERA are indicators of success and thus should be compensated as such.
+
+Lastly, we can compare the predictors included in each as well as their associated significance. Just from the basis of included predictors, we can already see a difference in terms of representation of advanced analytics. While the majority of predictors used in predicting ERA were advanced statistics such as hard-hit percent or barrel percent, those Sabermetric statistics don’t appear in the salary model, save for luck adjusted ERA. What this suggests is that front offices have perhaps not fully integrated Sabermetrics into their contract discussions. In fact, luck adjusted ERA can be switched out for ERA without any decrease in model accuracy for salary, suggesting that front offices have yet to embrace luck reversion.
