@@ -1,0 +1,214 @@
+---
+title: "Final Data Section"
+author: "Group 1-Josh Yamamoto, Riley Leonard, Andy Zhao"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(knitr)
+
+```
+
+#Data#
+
+After describing some of the trends we observe in the data, we then turn towards the variety of models that we have created as well as their respective performances, measured in adjusted R-squared as well as 5-fold cross-validation MSE.
+
+##Full Model##
+```{r}
+# Full Model for ERA
+
+full_mod <- lm(data = pitchers,
+                 ERA_t1 ~.)
+
+# Full Model for Salary
+
+full_mod <- lm(data = pitchers,
+                 ERA_t1 ~.)
+```
+
+Above, we see the code for the full model on both salary and ERA. We expected that the full model would do decently well as we had picked every variable included in our dataset and thus we expected all of our variables to be at least somewhat significant. However, one of the issues we had forsaw was the presence of a great deal of collinearity, which could make our parameter estimates quite unstable, and the full model doesn't really have any way to counter said collinearity.
+
+###Full Model Results##
+```{r}
+full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+full_model_table<-data.frame(labels,full_statistics) 
+full_model_table<-full_model_table %>%  rename(
+    `Full Model Statistics` = full_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels,
+    )
+
+kable(full_model_table)
+
+```
+
+It seems like our full model struggles with the data compared to our other models. This is understandable for the reasons listed above, namely the presence of correlation between predictors. Interestingly, even the full model has a 5-fold CV MSE for ERA above that of the null model of SIERA (see introduction for a full discussion of the null model), suggesting that even the weakest full model still outperformed existing ERA projection methodologies. It is also notable that the adjusted R-squared for ERA is far weaker than that of salary, this is understandable as the irreducible error or noise in the ERA data far exceeds that of the salary data. While there is some stochasticity in contract negotiations, there is far more noise when it comes to on-field performance.
+
+##Forward Selection##
+```{r}
+# Forward Selection Model for ERA
+
+forward_mod <- lm(data = pitchers, 
+                   ERA_t1 ~ wOBA+L+BFP+SO+K_percent+hard_hit_percent+
+                    barrel_percent+`ERA/Barrel %`+luck_adj_ERA)
+
+# Forward Selection Model for salary
+forward_mod_salary <- lm(data = salary_data,
+                         log(salary_t1)~Pitches+Year+xBA+spin_rate+
+                           Velocity+K_percent+Salary+luck_adj_ERA)
+```
+
+We next moved on to forward selection, which is an efficient alternative to best subset. We set nvmax or the maximum complexity of the model to be considered at 12. We chose this because of the aforementioned problems with collinearity. Subset selection gives us a way to reduce collinearity by simply dropping some of the correlated predictors. We set the maximum to 12 because we wanted a relatively parsimonious model. Ultimately, the adjusted R-squared of the model with 9 predictors performed the best among all the 12 ERA models while the 8 predictor model performed the best for salary.
+
+While a more detailed discussion will be left for the conclusion. In broad strokes, the predictors included in the two models are not as different as one would expect. The presence of expected batting averaged (xBA) and spin rate in the salary model suggests that these sabermetric statistics actually result in a larger contract, but, conversely, base counting statistics like total pitches and even year is also included.
+
+The forward model for ERA includes a number of advanced statistics such as wOBA, hard hit %, barrel %, and even ERA/barrel %. However, it also includes counting statistics like total strikeouts and total batters faced. Ultimately, the forward model for the two are more similar than one would have expected. 
+
+###Full Model Results##
+```{r}
+forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+forward_model_table<-data.frame(labels,forward_statistics) 
+forward_model_table<-forward_model_table %>%  rename(
+    `Forward Model Statistics` = forward_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels,
+    )
+
+kable(forward_model_table)
+
+```
+
+The forward selection method of subset selection led to improvements over the full model, likely due to reduction in collinearity by dropping some of the correlated predictors. Interestingly, the improvement is quite marginal and did not lead to as major of an increase in 5-fold CV MSE or adjusted R-squared as one would have predicted.
+
+##Ridge and lasso Regression##
+
+Both forms of penalized regression-ridge and lasso-struck us as potentially valuable in that the full model did pretty well on its own, thus a penalized regression might improve its accuracy by potentially reducing variance with only a small concomittant increase in bias. Due to the large number of predictors in the full model (30), we were quite concerned about variance thus we hoped that ridge and lasso would help.
+
+```{r}
+#Ridge Model for ERA
+ridge_mod_ERA<- glmnet(x_full_model_ERA, y_full_model_ERA, alpha = 0, lambda = best_L_ridge_ERA)
+
+#Ridge Model for Salary
+ridge_mod<- glmnet(x_full_model_salary, y_full_model_salary, alpha = 0, lambda = best_L_ridge)
+
+#Lasso Model for ERA
+lasso_mod<- glmnet(x_full_model_salary, y_full_model_salary, alpha = 0, lambda = best_L_lasso)
+
+#Lasso Model for Salary
+lasso_mod_ERA<- glmnet(x_full_model_ERA, y_full_model_ERA, alpha = 1, lambda = best_L_lasso_ERA)
+
+```
+
+Above we see the 4 models, one for salary and one for ERA for each of the penalized regressions. The best lambda value for cost-complexity tuning was determined through cross-validation using a range of values.
+
+###Ridge and Lasso Results##
+
+```{r}
+ridge_statistics<-c(0.62543602, 0.33715364, 0.09284193, 0.99001384)
+lasso_statistics<-c(0.6299247, 0.3284793, 0.1072762, 0.9734646)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+penalized_reg_table<-data.frame(labels,ridge_statistics,lasso_statistics) 
+penalized_reg_table<-penalized_reg_table %>%  rename(
+    `Ridge Regression Statistics` = ridge_statistics,
+    `Lasso Regression Statistics` = lasso_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels,
+    )
+
+kable(penalized_reg_table)
+
+```
+
+As seen above, both forms of penalized regression led to pretty significant reductions in 5-fold CV MSE for both ERA and salary but especially for salary. The CV MSE for salary was more than cut in half after applying the penalty to the full model. This suggests that the two methods achieved their desired function by trading off a small amount of bias for a larger decrease in variance.
+
+Interestingly, lasso performed better than ridge for both future salary and ERA. What this suggests is that, perhaps due to a high degree of correlation among predictors, certain predictor coefficients can be set to 0 in the interest of predictive accuracy. Similar to best subet, lasso is performing variable selection which perhaps explains its increased effectiveness.
+
+##Principal Component Regression##
+
+Best subset offers us one solution against collinearity by dropping some of the correlated predictors. Principal component regression offers us another way as we can simply combine various predictors into new ones that adequately explain much of the variation in the data. By doing so, we can perhaps remedy some of the correlations among our predictors.
+
+The number of principal components to use in each model was chosen based off crossed-validation. Interestingly, ERA only required 4 principal components while salary required 13. This could suggest that, while 4 principal components are sufficient to capture the variability in future ERA, more principal components are necessary to capture the variance in future salary.
+```{r}
+#PCR Model for ERA
+my_pcr_ERA <- pcr(formula = ERA_t1 ~ ., ncomp=4,data = pitchers)
+
+#PCR Model for Salary
+my_pcr_salary <- pcr(formula = log(salary_t1) ~ ., ncomp=13, data = salary_data)
+```
+
+##PCR Results##
+```{r}
+PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+PCR_table<-data.frame(labels,PCR_statistics) 
+PCR_table<-PCR_table %>%  rename(
+    `Principal Component Regression Statistics` = PCR_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels,
+    )
+
+kable(PCR_table)
+
+```
+
+While principal component regression did lead to an improvement from the full model, it did not lead to as much of an improvement as we expected. While PCR performed at around the same level as ridge, lasso out-performed both of them. It is also notable that ridge, lasso, and PCR resulted in large reductions in salary 5-fold CV MSE but not for ERA, suggesting that the salary data benefits more from the various attempt at reducing collinearity.
+
+##Custom Model##
+
+For the custom model, we relied on a mixture of domain knowledge as well as stepwise selection. We began with the forward selection model which performed quite well and then removed some of the predictors we did not believe to be important such as losses (which we changed to games) as well as batters faced while adding different predictors and ultimately settiling on spin rate. We also included ERA*hard hit % and barrel %. The reason behind this is that we saw barrel and hard hit % as proxies for the amount of hard contact a pitcher gives up. Thus if a pitcher's ERA is low but their hard hit and barrel % are high, their low ERA is more a result of luck than their performance. Those two terms deal with that situation.
+
+Still need a custom salary model.
+
+```{r}
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+```
+
+###Custom Model Results###
+```{r}
+domain_knowledge_statistics<-c("NA","NA",0.1573634,0.972449)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+custom_table<-data.frame(labels,domain_knowledge_statistics) 
+custom_table<-custom_table %>%  rename(
+    `Custom Model Statistics` = domain_knowledge_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels,
+    )
+
+kable(custom_table)
+
+```
+
+As seen above, our custom model actually produced the lowest 5-fold MSE among the sampled models. This is somewhat understandable as we combined stepwise selection with domain knowledge to produce a model that intuitively "makes sense". This model is also less complex than the forward model, perhaps contributing to its reduced MSE as it is less susceptible to variance.
+
+##Overall Results##
+
+```{r}
+ridge_statistics<-c(0.62543602, 0.33715364, 0.09284193, 0.99001384)
+lasso_statistics<-c(0.6299247, 0.3284793, 0.1072762, 0.9734646)
+forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
+domain_knowledge_statistics<-c("NA","NA",0.1573634,0.972449)
+full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
+PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_statistics,domain_knowledge_statistics,full_statistics,PCR_statistics)
+
+all_statistics<-all_statistics %>%  rename(
+    `Full Model` =full_statistics,
+    `Forward Model` = forward_statistics,
+    `Ridge Regression`=ridge_statistics,
+    `Lasso Regression`=lasso_statistics,
+    `Custom Model`=domain_knowledge_statistics,
+    `Principal Regression` = PCR_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels,
+    )
+
+kable(all_statistics)
+```
+
