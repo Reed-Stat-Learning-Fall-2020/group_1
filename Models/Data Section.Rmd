@@ -24,7 +24,7 @@ full_mod <- lm(data = pitchers,
 # Full Model for Salary
 
 full_mod <- lm(data = pitchers,
-                 ERA_t1 ~.)
+                 salary_t1 ~.)
 ```
 
 Above, we see the code for the full model on both salary and ERA. We expected that the full model would do decently well as we had picked every variable included in our dataset and thus we expected all of our variables to be at least somewhat significant. However, one of the issues we had forsaw was the presence of a great deal of collinearity, which could make our parameter estimates quite unstable, and the full model doesn't really have any way to counter said collinearity.
@@ -195,9 +195,10 @@ forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
 domain_knowledge_statistics<-c("NA","NA",0.1573634,0.972449)
 full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
 PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
+ensemble_statistics <-c(0.776,0.2209,0.149,0.970225)
 labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
 
-all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_statistics,domain_knowledge_statistics,full_statistics,PCR_statistics)
+all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_statistics,domain_knowledge_statistics,full_statistics,PCR_statistics, ensemble_statistics)
 
 all_statistics<-all_statistics %>%  rename(
     `Full Model` =full_statistics,
@@ -210,5 +211,115 @@ all_statistics<-all_statistics %>%  rename(
     )
 
 kable(all_statistics)
+```
+
+```{r}
+final_table <- tibble(
+    Model = c("Ridge", "Lasso", "Forward","Custom","Full","PCR", "Ensemble"),
+    `Rsq for ERA` = c(0.092,0.107,0.164,0.157,0.139,0.138,0.149),
+    `5-fold MSE for ERA` = c(0.990,0.973,0.999,0.972,1.043, 0.997,0.970),
+    `Rsq for Salary` = c(0.625,0.629,0.616,NA,0.609,0.654,0.776),
+    `5-fold MSE for Salary` = c(0.337,0.328,0.765,NA,0.831,0.331,0.220))
+
+kable(final_table)
+```
+
+We can see that in terms of R^2 the forward model performed the best, and that in terms of 5-fold MSE the ensemble model performed the best. The 5-fold MSE difference might seem marginal, but we have to remember that the MSE is in `log(Salary)` units.
+
+```{r}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`Rsq for ERA`)),
+       aes(
+           x = factor(Model),
+           y = `Rsq for ERA`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.6
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(x = "Model") +
+    expand_limits(x = 0, y = 0)
+
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`5-fold MSE for ERA`)),
+       aes(
+           x = factor(Model),
+           y = `5-fold MSE for ERA`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.6
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(x = "Model") +
+    expand_limits(x = 0, y = 0)
+
+
+```
+
+For salary we can see that the ensemble model far outperforms the other models in terms of R^2. Similarly, for 5-fold MSE the ensemble model outperforms all other models.
+
+```{r}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`Rsq for Salary`)),
+       aes(
+           x = factor(Model),
+           y = `Rsq for Salary`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.6
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(x = "Model") +
+    expand_limits(x = 0, y = 0)
+
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`5-fold MSE for Salary`)),
+       aes(
+           x = factor(Model),
+           y = `5-fold MSE for Salary`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.6
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(x = "Model") +
+    expand_limits(x = 0, y = 0)
+
 ```
 
