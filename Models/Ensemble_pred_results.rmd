@@ -1,0 +1,55 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Predictive Conclusions for the Ensemble model
+
+We saw a clear winner in terms of predictive accuracy with our Ensemble model. In the end it was just made up of a lasso regression model and random forest model. We avoided using models like boosted trees and ridge regression because of how similar they are to the two that we used.
+
+```{r}
+ensemble_results <- read_csv("Models/ensemblepreds.csv") %>%
+  select(.pred, salary_t1, Year, Pitcher)
+```
+
+We can see that overall our ensemble model does a pretty decent job in terms of it's predictive accuracy. Additionally it looks like our model had a pretty difficult time predicting salaries that were on the lower end of things, it tended to overpredict them pretty consistently.
+
+```{r}
+ensemble_results %>%
+  ggplot() +
+  aes(
+    x = salary_t1, 
+    y = .pred
+  ) +
+  geom_point() + 
+  coord_obs_pred() +
+  geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2) 
+
+```
+
+Lets take a look to see if that discrepancy is consistent for each year
+
+```{r}
+ensemble_results %>%
+  ggplot() +
+  aes(
+    x = salary_t1, 
+    y = .pred
+  ) +
+  geom_point() + 
+  coord_obs_pred() +
+  geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2) +
+  facet_wrap(~Year)
+```
+
+It seems like we likely don't quite have enough data to say anything too conclusive about this, but it does seem like most of the problems occured in 2019 and there were just a couple of big misses in 2015 and 2018.
+
+Overall we're a bit unsurprised by the fact that the ensemble model performed so well because it was essentially a combination of two of our other successful models. We were able explain a good amount of the variation in the next year's salary and out test MSE was impressively better than any other model.
+
+
+
