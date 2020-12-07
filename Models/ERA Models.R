@@ -147,7 +147,23 @@ custom_mod_MSE_ERA_CV<- cv.glm(pitchers, custom_mod_salary_glm,K=5)
 
 custom_mod_MSE_ERA<-custom_mod_MSE_ERA_CV$delta[1]
 
+#Custom Model Salary
 
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1)~Year+SO+
+                           Salary+W*luck_adj_ERA)
+
+summary(custom_mod_salary)
+
+#Custom salary model 5 5-fold CV MSE
+
+custom_mod_salary_glm <- glm(data = salary_data,
+                             log(salary_t1)~Year+SO+
+                               Salary+W*luck_adj_ERA)
+
+custom_mod_MSE_salary_CV<- cv.glm(salary_data, custom_mod_salary_glm,K=5)
+
+custom_mod_MSE_salary<-custom_mod_MSE_salary_CV$delta[1]
 
 ## Subset Selection Models
 
