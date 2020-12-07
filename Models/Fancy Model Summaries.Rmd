@@ -1,6 +1,6 @@
 ---
 title: "Fancy Model Summaries"
-author: "Riley Leonard"
+author: "Group 1: Josh Yamamoto, Riley Leonard, Andy Zhao"
 date: "12/7/2020"
 output: pdf_document
 ---
@@ -23,12 +23,12 @@ custom_mod <- lm(data = pitchers,
 
 Presenting Multivariate Regression Results:
 
-```{r, results='asis'}
+```{r, results='asis', echo=FALSE}
 kable(summary(custom_mod)$coef, digits = c(3, 3, 3, 4),
 "latex", booktabs=T)
 ```
 
-```{r, results='asis'}
+```{r, results='asis', echo=FALSE}
 stargazer(custom_mod,
 title = "Custom ERA Forecasting Model",
 covariate.labels = c("Spin Rate", "Games",
