@@ -1,0 +1,125 @@
+---
+title: "Extensions and Discussion"
+author: "Group 1-Josh Yamamoto, Riley Leonard, Andy Zhao"
+date: "12/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pitchers <- read_csv("Final Mega Summary.csv")
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pitchers_2019 <- pitchers %>%
+  filter(Year == 2019) %>%
+  arrange(desc(salary_t1)) %>%
+  head(50) %>%
+  select(Pitcher, Year, W, L, G, ERA, spin_rate, SO, BB, K_percent, 
+         hard_hit_percent, barrel_percent, luck_adj_ERA, ERA_t1, salary_t1)
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+custom_pred <- predict(custom_mod, pitchers_2019, type = "response")
+
+pitchers_2019 <- cbind(pitchers_2019, custom_pred)
+
+normalize_salary <- function(x) {
+    (x - min(pitchers_2019$salary_t1)) / (max(pitchers_2019$salary_t1) - min(pitchers_2019$salary_t1))
+}
+
+normalize_ERA <- function(x) {
+    (x - min(pitchers_2019$custom_pred)) / (max(pitchers_2019$custom_pred) - min(pitchers_2019$custom_pred))
+  }
+
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = -scale(custom_pred)) %>%
+  mutate(`Standardized Salary` = scale(salary_t1)) %>%
+  mutate(`Normalized Forecasted Adjusted ERA` = normalize_ERA(custom_pred)) %>%
+  mutate(`Compensation` = ((salary_t1)/(10 -custom_pred))/100000)
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = format(round(`Standardized Forecasted Adjusted ERA`, 2), nsmall = 2)) %>%
+  mutate(`Standardized Salary` = format(round(`Standardized Salary`, 2), nsmall = 2))
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = as.numeric(`Standardized Forecasted Adjusted ERA`)) %>%
+  mutate(`Standardized Salary` = as.numeric(`Standardized Salary`))
+
+pitchers_2019$ERA_type <- ifelse(pitchers_2019$`Standardized Forecasted Adjusted ERA` < 0, "below", "above")
+
+pitchers_2019$salary_type <- ifelse(pitchers_2019$`Standardized Salary` < 0, "below", "above")
+```
+
+
+# Extensions and Discussion
+
+### Most Overcompensated and Undercompensated Pitchers Based on Forecasted ERA (2020)
+
+Using forecasted ERA as a measure of predicted performance, we can determine which pitchers were overpaid or underpaid relative to both their contemporaries and their expected pitching outcome. The following visualizations display the standardized forecasted ERA and standardized salaries for the 50 highest-paid starting pitchers in the year 2020, as well as pitcher compensation relative to forecasted ERA:
+
+```{r, echo=FALSE, fig.width=9,fig.height=7}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted ERA`),
+                          y = `Standardized Forecasted Adjusted ERA`,
+                          label = `Standardized Forecasted Adjusted ERA`)) + 
+  geom_bar(stat = 'identity', aes(fill = ERA_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="#00ba38", "below"="#f8766d")) + 
+  labs(subtitle = "Standardized Forecasted ERA (2020)", 
+       title =  "Diverging Bar Plot",
+       x = "Pitcher",
+       y = "Standardized ERA Forecast (Adjusted)") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r, echo=FALSE, fig.width=9,fig.height=7}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
+                          y = `Standardized Salary`,
+                          label = `Standardized Salary`)) + 
+  geom_bar(stat = 'identity', aes(fill = salary_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="#00ba38", "below"="#f8766d")) + 
+  labs(subtitle = "Standardized Salary (2020)", 
+       title =  "Diverging Bar Plot",
+       x = "Pitcher",
+       y = "Standardized Salary") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r, echo=FALSE, fig.width=10,fig.height=6}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
+                          y = Compensation,
+                          label = Compensation)) + 
+  geom_col(aes(fill = Compensation)) +
+  scale_fill_continuous(type = "viridis") +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Starting Pitcher Compensation",
+       x = "Pitcher",
+       y = "Compensation (Salary/Adjusted Forecasted ERA)") + 
+  theme_minimal()
+```
+
+
+
+
+
+
+
+
+
+
