@@ -1,0 +1,40 @@
+---
+title: "Fancy Model Summaries"
+author: "Riley Leonard"
+date: "12/7/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(kableExtra)
+library(stargazer)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pitchers <- read_csv("Final Mega Summary.csv")
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+```
+
+
+Presenting Multivariate Regression Results:
+
+```{r, results='asis'}
+kable(summary(custom_mod)$coef, digits = c(3, 3, 3, 4),
+"latex", booktabs=T)
+```
+
+```{r, results='asis'}
+stargazer(custom_mod,
+title = "Custom ERA Forecasting Model",
+covariate.labels = c("Spin Rate", "Games",
+"Strikeouts", "Strikeout Percent", "ERA:Hard Hit Percent",
+"ERA:Barrel Percent", "Luck Adjusted Era"),
+dep.var.caption = "",
+dep.var.labels.include = FALSE,
+type = 'latex', header=FALSE)
+```
