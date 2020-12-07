@@ -48,10 +48,10 @@ normalize_ERA <- function(x) {
 
 
 pitchers_2019 <- pitchers_2019 %>%
-  mutate(`Standardized Forecasted Adjusted ERA` = -scale(custom_pred)) %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = -scale(custom_pred_2019)) %>%
   mutate(`Standardized Salary` = scale(salary_t1)) %>%
-  mutate(`Normalized Forecasted Adjusted ERA` = normalize_ERA(custom_pred)) %>%
-  mutate(`Compensation` = ((salary_t1)/(10 -custom_pred))/100000)
+  mutate(`Normalized Forecasted Adjusted ERA` = normalize_ERA(custom_pred_2019)) %>%
+  mutate(`Compensation` = ((salary_t1)/(10 -custom_pred_2019))/100000)
 
 pitchers_2019 <- pitchers_2019 %>%
   mutate(`Standardized Forecasted Adjusted ERA` = format(round(`Standardized Forecasted Adjusted ERA`, 2), nsmall = 2)) %>%
@@ -71,6 +71,8 @@ pitchers_2019_tidy <- pitchers_2019 %>%
   pivot_longer(cols = c(custom_pred_2019, ERA_t1), 
                names_to = "type",
                values_to = "value")
+
+#pitchers_2019_tidy$difference <- ifelse(pitchers_2019_tidy$custom_pred_2019  > #pitchers_2019_tidy$ERA_t1 , "lower", "higher")
 ```
 
 
@@ -78,7 +80,7 @@ pitchers_2019_tidy <- pitchers_2019 %>%
 
 ### Predicted ERA vs Actual ERA
 
-```{r, fig.width=9,fig.height=6}
+```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot(pitchers,
        aes(x = custom_pred, y = ERA_t1)) +
   geom_point(alpha = 0.5, color = "dodgerblue2") +
@@ -89,18 +91,22 @@ ggplot(pitchers,
   theme_classic()
 ```
 
-```{r, echo=FALSE, fig.width=10,fig.height=6}
+```{r echo=FALSE, fig.width=10,fig.height=6}
 ggplot(pitchers_2019_tidy, aes(x = Pitcher,
                           y = value,
                           label = value)) + 
-  geom_point(aes(fill = type), size = 2.5) +
-  scale_fill_manual(name = "Value", 
+  geom_point(stat = 'identity',
+             aes(color = type), 
+             size = 2.5) +
+  scale_color_manual(name = "Value", 
                     labels = c("Predicted ERA", "Actual ERA"), 
-                    values = c("above"="deepskyblue", "below"="palevioletred2")) +
+                    values = c("custom_pred_2019" = "deepskyblue", 
+                               "ERA_t1" = "palevioletred2")) +
   scale_x_discrete(guide = guide_axis(angle = 50)) +
   labs(title =  "Predicted ERA vs. Actual ERA (2020)",
        x = "Pitcher",
        y = "ERA Value") + 
+  geom_line() +
   theme_minimal()
 ```
 
@@ -119,8 +125,7 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted
   scale_fill_manual(name = " ", 
                     labels = c("Above Average", "Below Average"), 
                     values = c("above"="deepskyblue", "below"="palevioletred2")) + 
-  labs(subtitle = "Standardized Forecasted ERA (2020)", 
-       title =  "Diverging Bar Plot",
+  labs(title = "Diverging Standardized Forecasted ERA (2020)",
        x = "Pitcher",
        y = "Standardized ERA Forecast (Adjusted)") + 
   coord_flip() +
@@ -135,8 +140,7 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
   scale_fill_manual(name = " ", 
                     labels = c("Above Average", "Below Average"), 
                     values = c("above"="deepskyblue", "below"="palevioletred2")) + 
-  labs(subtitle = "Standardized Salary (2020)", 
-       title =  "Diverging Bar Plot",
+  labs(title = "Diverging Standardized Salary (2020)",
        x = "Pitcher",
        y = "Standardized Salary") + 
   coord_flip() +
@@ -151,7 +155,7 @@ ggplot() +
   scale_y_continuous(name = "Standardized Salary",
                      breaks = seq(-3, 3, 1),
                      limits =c(-3, 3)) +
-  ggtitle("Standardized Forecasted ERA vs. Standardized Salary") +
+  ggtitle("Standardized Forecasted ERA vs. Standardized Salary (2020)") +
   geom_rect(aes(xmin = 0, ymin = 0, xmax = 3, ymax = 3), 
             fill = "deepskyblue", alpha = 0.2) +
   geom_rect(aes(xmin = -3, ymin = -3, xmax = 0, ymax = 0), 
@@ -159,7 +163,7 @@ ggplot() +
   geom_density_2d(data = pitchers_2019, 
              aes(x = `Standardized Forecasted Adjusted ERA`, 
                  y = `Standardized Salary`),
-             color = "dodgerblue", alpha = 0.5) +
+             color = "dodgerblue2", alpha = 0.3) +
   geom_point(data = pitchers_2019, 
              aes(x = `Standardized Forecasted Adjusted ERA`, 
                  y = `Standardized Salary`),
