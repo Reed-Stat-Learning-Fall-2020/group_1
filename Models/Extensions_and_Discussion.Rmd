@@ -108,7 +108,7 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
   geom_col(aes(fill = Compensation)) +
   scale_fill_continuous(type = "viridis") +
   scale_x_discrete(guide = guide_axis(angle = 50)) +
-  labs(title =  "Starting Pitcher Compensation",
+  labs(title =  "Starting Pitcher Compensation (2020)",
        x = "Pitcher",
        y = "Compensation (Salary/Adjusted Forecasted ERA)") + 
   theme_minimal()
