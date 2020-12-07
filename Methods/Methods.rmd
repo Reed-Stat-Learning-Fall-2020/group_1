@@ -29,7 +29,7 @@ Worth noting is that we only pulled salary data for starting pitchers, both beca
 
 When all was said and done, we ended up with a dataset of 457 observations and 36 variables. Each observational unit in our dataset represents the season of an individual MLB pitcher between 2015 and 2019. Importantly, certain pitchers appear multiple times in the dataset, as many players sustain careers spanning the entire time series comprised in our data.
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 data <- read_csv("Final Mega Summary.csv")
 
 nrow(data)

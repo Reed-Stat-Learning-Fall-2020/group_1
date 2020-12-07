@@ -207,17 +207,7 @@ summary {
 <h2>Combining Data Sets</h2>
 <p>Worth noting is that we only pulled salary data for starting pitchers, both because it was a more feasible task in regards to controlling sample size and because pitching statistics and salary data vary greatly between the two principal types of pitchers (starting pitchers and relief pitchers). Including relief pitchers in our data would have resulted in less consistent and insightful modelling outcomes, motivating our decision to exclude relief pitchers from our data. That being said, because our pitching statistics dataset contained data for all pitchers, we were required to filter the data to only contain the starting pitchers present in our salary dataset, which were able to achieve by filtering on a combination of total games played and the number of batters faced per game (both of which varied substantially between the two pitcher classes). In order to minimize any joining mistakes, we used the function <code>make_clean_names()</code> from the <code>janitor</code> package to clean each pitcher's name before joining. Following the join, we included several filters (specifically to ensure a sufficient volume of batters faced) in order to drop outliers and make certain that our data was as robust as possible. Ultimately, the data wrangling process resulted in a handful of lost observations and an overall decrease in sample size, but we maintanined a sizeable enough dataset that we weren't too concerned about adverse variance.</p>
 <p>When all was said and done, we ended up with a dataset of 457 observations and 36 variables. Each observational unit in our dataset represents the season of an individual MLB pitcher between 2015 and 2019. Importantly, certain pitchers appear multiple times in the dataset, as many players sustain careers spanning the entire time series comprised in our data.</p>
-<pre class="r"><code>data &lt;- read_csv(&quot;Final Mega Summary.csv&quot;)</code></pre>
-<pre><code>## 
-## ── Column specification ────────────────────────────────────────────────────────
-## cols(
-##   .default = col_double(),
-##   Pitcher = col_character()
-## )
-## ℹ Use `spec()` for the full column specifications.</code></pre>
-<pre class="r"><code>nrow(data)</code></pre>
 <pre><code>## [1] 457</code></pre>
-<pre class="r"><code>ncol(data)</code></pre>
 <pre><code>## [1] 36</code></pre>
 </div>
 <div id="creating-new-variables" class="section level2">
