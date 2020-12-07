@@ -62,6 +62,8 @@ PCR_ERA_r2<-r_sq(pitchers$ERA_t1,PCR_predict_ERA,467,4)
 
 
 ```{r}
+crossval(my_pcr_salary, segments = 5)
+
 my_pcr_salary <- pcr(formula = log(salary_t1) ~ ., data = salary_data, scale = T, validation = "CV",     kfold = 5, folds = 5)
 
 #To get CV and adjusted CV
