@@ -642,6 +642,12 @@ rsq(data_test_s, truth = salary_t1, estimate = .pred)
 # 0.829
 ```
 
+```{r}
+autoplot(base_stack_s, type = "weights")
+```
 
+```{r}
+autoplot(base_stack_s)
+```
 
 
