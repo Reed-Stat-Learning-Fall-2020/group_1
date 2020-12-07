@@ -29,10 +29,13 @@ data <-
   data_raw %>%
   select(-`ΔERA`,
          -`ΔSalary`) %>%
-  mutate(salary_t1 = log(salary_t1))
+  mutate(salary_t1 = log(salary_t1)) %>%
+  filter(ERA_t1 < 7.00) %>%
+  filter(luck_adj_ERA < 7.00)
 
 ```
 
+## Era
 
 ```{r}
 # test/train splits
@@ -223,8 +226,208 @@ data_test %>%
 
 ```{r}
 rmse(data_test, truth = ERA_t1, estimate = .pred)
+rsq(data_test, truth = ERA_t1, estimate = .pred)
+```
+
+
+## Salary
+
+```{r}
+data_s <-
+  data_raw %>%
+  select(-`ΔERA`,
+         -`ΔSalary`) %>%
+  filter(salary_t1 > 600000) %>%
+  mutate(salary_t1 = log(salary_t1)) 
+  
+# test/train splits
+
+set.seed(321)
+
+data_split_s <- initial_split(data_s)
+data_train_s <- training(data_split_s)
+data_test_s <- testing(data_split_s)
+
+# k-fold CV
+
+set.seed(345)
+
+folds_s <- vfold_cv(data_train, v = 5)
+```
+
+```{r}
+# setting up a recipe
+
+baseball_rec_s <- 
+  recipe(salary_t1 ~., data = data_train_s) %>%
+  step_normalize(all_numeric(), -all_outcomes()) %>%
+  step_zv(all_predictors(), -all_outcomes()) %>%
+  update_role(Pitcher, new_role = "Id") %>%
+  step_corr(all_numeric(), -all_outcomes(), threshold = 0.75) 
+
+# workflow
+
+baseball_wf_s <-
+  workflow() %>%
+  add_recipe(baseball_rec_s)
+
+# rmse metric
+metric_s <- metric_set(rmse)
+
+```
+
+```{r}
+
+ctrl_grid <- control_stack_grid()
+ctrl_res <- control_stack_resamples()
+
+```
+
+```{r}
+# lasso model
+
+lasso_spec_s <-
+  linear_reg(penalty = tune(), mixture = 1) %>%
+  set_engine("glmnet")
+
+# add to wf
+
+lasso_wf_s <-
+  baseball_wf_s %>%
+  add_model(lasso_spec_s)
+
+# lambda grid
+
+lambda_grid_s <-
+  grid_regular(penalty(),
+               levels = 50)
+
+# k-fold CV
+
+set.seed(875)
+lasso_res_s <- 
+  tune_grid(
+    lasso_wf_s,
+    resamples = folds_s,
+    metrics = metric_s,
+    control = ctrl_grid,
+    grid = lambda_grid_s
+  )
+
+```
+
+
+```{r}
+# ridge spec
+
+ridge_spec_s <- 
+  linear_reg(penalty = tune(),
+             mixture = 0) %>%
+  set_engine("glmnet")
+
+  
+# add it to a workflow
+ridge_wf_s <- 
+  baseball_wf_s %>%
+  add_model(ridge_spec_s)
+
+# tune deg_free and fit to the 5-fold cv
+set.seed(123)
+ridge_res_s <- 
+  tune_grid(
+    ridge_wf_s,
+    resamples = folds_s,
+    metrics = metric_s,
+    control = ctrl_grid,
+    grid = lambda_grid_s
+  )
+```
+
+```{r}
+# random Forest spec
+
+rf_spec_s <- rand_forest(
+  mtry = tune(),
+  trees = 1000,
+  min_n = tune()
+  ) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+
+rf_wf_s <-
+  baseball_wf_s %>%
+  add_model(rf_spec_s)
+
+rf_grid_s <- grid_regular(
+  mtry(range = c(1,6)),
+  min_n(range = c(2,8)),
+  levels = 5
+  )
+
+set.seed(453)
+randf_res_s <- tune_grid(
+  rf_wf_s,
+  resamples = folds_s,
+  grid = rf_grid_s,
+  metrics = metric_s,
+  control = ctrl_grid
+)
 ```
 
 
 
+```{r}
+# create data stack
+
+baseball_d_stack_s <- 
+  stacks() %>%
+    add_candidates(lasso_res_s) %>%
+    add_candidates(randf_res_s) %>%
+    add_candidates(ridge_res_s)
+
+```
+
+
+```{r}
+# blending predictions
+
+base_stack_s <- 
+  baseball_d_stack_s %>%
+  blend_predictions()
+```
+
+
+```{r}
+# fitting model
+
+base_stack_s <-
+  base_stack_s %>%
+  fit_members()
+
+```
+
+
+```{r}
+data_test_s <- 
+  data_test_s %>%
+  bind_cols(predict(base_stack_s, .))
+
+```
+
+
+```{r}
+data_test_s %>%
+  ggplot() +
+  aes(
+    x = salary_t1, 
+    y = .pred
+  ) +
+  geom_point() + 
+  coord_obs_pred()
+```
+
+```{r}
+rmse(data_test_s, truth = salary_t1, estimate = .pred)
+rsq(data_test_s, truth = salary_t1, estimate = .pred)
+```
 
