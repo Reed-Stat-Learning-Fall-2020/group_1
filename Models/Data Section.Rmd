@@ -12,7 +12,7 @@ library(knitr)
 
 #Data#
 
-After describing some of the trends we observe in the data, we then turn towards the variety of models that we have created as well as their respective performances, measured in adjusted R-squared as well as 5-fold cross-validation MSE.
+After describing some of the trends we observe in the data, we then turn towards the variety of models that we have created as well as their respective performances, measured in adjusted R-squared as well as 5-fold cross-validation mean-squared error (MSE).
 
 ##Full Model##
 ```{r}
