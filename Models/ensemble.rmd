@@ -16,22 +16,23 @@ library(tidyverse)
 library(tidymodels)
 library(stacks)
 library(janitor)
+library(corrr)
+
 ```
 
-
 ```{r}
-# selecting variables
+# loading data
 
-data_raw <- read_csv("Models/Mega Summary.csv")
+data_raw <- read_csv("data/Final Mega Summary.csv")
 
 data <-
   data_raw %>%
-  clean_names() %>%
-  select(-dera,
-         -d_salary) %>%
-  rename(salary_new = salary_t_1)
+  select(-`ΔERA`,
+         -`ΔSalary`) %>%
+  mutate(salary_t1 = log(salary_t1))
 
 ```
+
 
 ```{r}
 # test/train splits
@@ -46,18 +47,18 @@ data_test <- testing(data_split)
 
 set.seed(345)
 
-folds <- rsample::vfold_cv(data_train, v = 10)
+folds <- vfold_cv(data_train, v = 5)
 ```
 
 ```{r}
 # setting up a recipe
 
 baseball_rec <- 
-  recipe(salary_new ~., data = data_train) %>%
+  recipe(ERA_t1 ~., data = data_train) %>%
   step_normalize(all_numeric(), -all_outcomes()) %>%
   step_zv(all_predictors(), -all_outcomes()) %>%
-  update_role(pitcher, new_role = "Id") %>%
-  step_log(salary_new, skip = TRUE)
+  update_role(Pitcher, new_role = "Id") %>%
+  step_corr(all_numeric(), -all_outcomes(), threshold = 0.75) 
 
 # workflow
 
@@ -213,7 +214,7 @@ data_test <-
 data_test %>%
   ggplot() +
   aes(
-    x = salary_new, 
+    x = ERA_t1, 
     y = .pred
   ) +
   geom_point() + 
@@ -221,7 +222,7 @@ data_test %>%
 ```
 
 ```{r}
-rmse(data_test, truth = salary_new, estimate = .pred)
+rmse(data_test, truth = ERA_t1, estimate = .pred)
 ```
 
 
