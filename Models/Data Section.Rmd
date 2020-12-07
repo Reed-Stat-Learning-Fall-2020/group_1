@@ -37,11 +37,10 @@ labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fo
 full_model_table<-data.frame(labels,full_statistics) 
 full_model_table<-full_model_table %>%  rename(
     `Full Model Statistics` = full_statistics,
-    `Adjusted R-squared and 5-Fold CV MSE` = labels,
-    )
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
 
-kable(full_model_table)
-
+kable(full_model_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
 It seems like our full model struggles with the data compared to our other models. This is understandable for the reasons listed above, namely the presence of correlation between predictors. Interestingly, even the full model has a 5-fold CV MSE for ERA above that of the null model of SIERA (see introduction for a full discussion of the null model), suggesting that even the weakest full model still outperformed existing ERA projection methodologies. It is also notable that the adjusted R-squared for ERA is far weaker than that of salary, this is understandable as the irreducible error or noise in the ERA data far exceeds that of the salary data. While there is some stochasticity in contract negotiations, there is far more noise when it comes to on-field performance.
@@ -77,8 +76,8 @@ forward_model_table<-forward_model_table %>%  rename(
     `Adjusted R-squared and 5-Fold CV MSE` = labels,
     )
 
-kable(forward_model_table)
-
+kable(forward_model_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
 The forward selection method of subset selection led to improvements over the full model, likely due to reduction in collinearity by dropping some of the correlated predictors. Interestingly, the improvement is quite marginal and did not lead to as major of an increase in 5-fold CV MSE or adjusted R-squared as one would have predicted.
@@ -115,11 +114,10 @@ penalized_reg_table<-data.frame(labels,ridge_statistics,lasso_statistics)
 penalized_reg_table<-penalized_reg_table %>%  rename(
     `Ridge Regression Statistics` = ridge_statistics,
     `Lasso Regression Statistics` = lasso_statistics,
-    `Adjusted R-squared and 5-Fold CV MSE` = labels,
-    )
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
 
-kable(penalized_reg_table)
-
+kable(penalized_reg_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
 As seen above, both forms of penalized regression led to pretty significant reductions in 5-fold CV MSE for both ERA and salary but especially for salary. The CV MSE for salary was more than cut in half after applying the penalty to the full model. This suggests that the two methods achieved their desired function by trading off a small amount of bias for a larger decrease in variance.
@@ -147,11 +145,10 @@ labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fo
 PCR_table<-data.frame(labels,PCR_statistics) 
 PCR_table<-PCR_table %>%  rename(
     `Principal Component Regression Statistics` = PCR_statistics,
-    `Adjusted R-squared and 5-Fold CV MSE` = labels,
-    )
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
 
-kable(PCR_table)
-
+kable(PCR_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
 While principal component regression did lead to an improvement from the full model, it did not lead to as much of an improvement as we expected. While PCR performed at around the same level as ridge, lasso out-performed both of them. It is also notable that ridge, lasso, and PCR resulted in large reductions in salary 5-fold CV MSE but not for ERA, suggesting that the salary data benefits more from the various attempt at reducing collinearity.
@@ -177,10 +174,10 @@ labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fo
 custom_table<-data.frame(labels,domain_knowledge_statistics) 
 custom_table<-custom_table %>%  rename(
     `Custom Model Statistics` = domain_knowledge_statistics,
-    `Adjusted R-squared and 5-Fold CV MSE` = labels,
-    )
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
 
-kable(custom_table)
+kable(custom_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 
 ```
 
@@ -192,7 +189,7 @@ As seen above, our custom model actually produced the lowest 5-fold MSE among th
 ridge_statistics<-c(0.62543602, 0.33715364, 0.09284193, 0.99001384)
 lasso_statistics<-c(0.6299247, 0.3284793, 0.1072762, 0.9734646)
 forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
-domain_knowledge_statistics<-c("NA","NA",0.1573634,0.972449)
+domain_knowledge_statistics<-c("NA","NA",0.157,0.972)
 full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
 PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
 ensemble_statistics <-c(0.776,0.2209,0.149,0.970225)
@@ -205,12 +202,13 @@ all_statistics<-all_statistics %>%  rename(
     `Forward Model` = forward_statistics,
     `Ridge Regression`=ridge_statistics,
     `Lasso Regression`=lasso_statistics,
-    `Custom Model`=domain_knowledge_statistics,
+    `Custom Model`= domain_knowledge_statistics,
     `Principal Regression` = PCR_statistics,
-    `Adjusted R-squared and 5-Fold CV MSE` = labels,
-    )
+    `Ensemble Model` = ensemble_statistics,
+    ` ` = labels)
 
-kable(all_statistics)
+kable(all_statistics, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
 ```{r}
@@ -221,7 +219,8 @@ final_table <- tibble(
     `Rsq for Salary` = c(0.625,0.629,0.616,0.6429,0.609,0.654,0.829),
     `5-fold MSE for Salary` = c(0.337,0.328,0.765,0.3293462,0.831,0.331,0.181))
 
-kable(final_table)
+kable(final_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
 We can see that in terms of R^2 the forward model performed the best, and that in terms of 5-fold MSE the ensemble model performed the best. The 5-fold MSE difference might seem marginal, but we have to remember that the MSE is in `log(Salary)` units.
