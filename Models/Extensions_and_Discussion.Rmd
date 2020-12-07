@@ -30,9 +30,13 @@ custom_mod <- lm(data = pitchers,
                   ERA_t1 ~ spin_rate + G + SO + K_percent + 
                     ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
 
-custom_pred <- predict(custom_mod, pitchers_2019, type = "response")
+custom_pred_2019 <- predict(custom_mod, pitchers_2019, type = "response")
 
-pitchers_2019 <- cbind(pitchers_2019, custom_pred)
+custom_pred <- predict(custom_mod, pitchers, type = "response")
+
+pitchers_2019 <- cbind(pitchers_2019, custom_pred_2019)
+
+pitchers <- cbind(pitchers, custom_pred)
 
 normalize_salary <- function(x) {
     (x - min(pitchers_2019$salary_t1)) / (max(pitchers_2019$salary_t1) - min(pitchers_2019$salary_t1))
@@ -62,8 +66,46 @@ pitchers_2019$ERA_type <- ifelse(pitchers_2019$`Standardized Forecasted Adjusted
 pitchers_2019$salary_type <- ifelse(pitchers_2019$`Standardized Salary` < 0, "below", "above")
 ```
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pitchers_2019_tidy <- pitchers_2019 %>%
+  pivot_longer(cols = c(custom_pred_2019, ERA_t1), 
+               names_to = "type",
+               values_to = "value")
+```
+
 
 # Extensions and Discussion
+
+### Predicted ERA vs Actual ERA
+
+```{r, fig.width=9,fig.height=6}
+ggplot(pitchers,
+       aes(x = custom_pred, y = ERA_t1)) +
+  geom_point(alpha = 0.5, color = "dodgerblue2") +
+  geom_smooth(method = lm, color = "dodgerblue") +
+  labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
+       x = "Predicted ERA",
+       y = "Actual ERA") + 
+  theme_classic()
+```
+
+```{r, echo=FALSE, fig.width=10,fig.height=6}
+ggplot(pitchers_2019_tidy, aes(x = Pitcher,
+                          y = value,
+                          label = value)) + 
+  geom_point(aes(fill = type), size = 2.5) +
+  scale_fill_manual(name = "Value", 
+                    labels = c("Predicted ERA", "Actual ERA"), 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Predicted ERA vs. Actual ERA (2020)",
+       x = "Pitcher",
+       y = "ERA Value") + 
+  theme_minimal()
+```
+
+
+
 
 ### Most Overcompensated and Undercompensated Pitchers Based on Forecasted ERA (2020)
 
@@ -76,7 +118,7 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted
   geom_bar(stat = 'identity', aes(fill = ERA_type), width = .5)  +
   scale_fill_manual(name = " ", 
                     labels = c("Above Average", "Below Average"), 
-                    values = c("above"="#00ba38", "below"="#f8766d")) + 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
   labs(subtitle = "Standardized Forecasted ERA (2020)", 
        title =  "Diverging Bar Plot",
        x = "Pitcher",
@@ -92,7 +134,7 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
   geom_bar(stat = 'identity', aes(fill = salary_type), width = .5)  +
   scale_fill_manual(name = " ", 
                     labels = c("Above Average", "Below Average"), 
-                    values = c("above"="#00ba38", "below"="#f8766d")) + 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
   labs(subtitle = "Standardized Salary (2020)", 
        title =  "Diverging Bar Plot",
        x = "Pitcher",
@@ -101,7 +143,54 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
   theme_minimal()
 ```
 
-```{r, echo=FALSE, fig.width=10,fig.height=6}
+```{r echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot() +
+  scale_x_continuous(name = "Standardized Forecasted ERA (adjusted)",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  scale_y_continuous(name = "Standardized Salary",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  ggtitle("Standardized Forecasted ERA vs. Standardized Salary") +
+  geom_rect(aes(xmin = 0, ymin = 0, xmax = 3, ymax = 3), 
+            fill = "deepskyblue", alpha = 0.2) +
+  geom_rect(aes(xmin = -3, ymin = -3, xmax = 0, ymax = 0), 
+            fill = "palevioletred2", alpha = 0.2) +
+  geom_density_2d(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             color = "dodgerblue", alpha = 0.5) +
+  geom_point(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             shape = 21,
+             colour = "dodgerblue", 
+             fill = "grey100", 
+             size = 5) +
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` > 1 | 
+                          `Standardized Salary` > 1),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.2) + 
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` < -2),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.3) + 
+  theme_minimal()
+```
+
+
+```{r echo=FALSE, fig.width=10,fig.height=6}
 ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
                           y = Compensation,
                           label = Compensation)) + 
