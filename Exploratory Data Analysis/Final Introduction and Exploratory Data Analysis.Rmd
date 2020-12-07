@@ -16,10 +16,27 @@ library(knitr)
 
 #Introduction#
 
-In this project, we aim to predict both future salary and earned run average (ERA) of a MLB pitcher using statistics from their past year. The rationale behind this exploration is that, we believe, baseball general managers can become enamored with statistics that are ostensibly important but do not actually predict future performance. For example, a pitcher's total wins is a flashy statistic but the outcome of the game is dependent on several factors outside of the pitcher's control such as their team's offense as well as the opposing pitcher's performance. Thus, the ultimate goal of this project is to investigate if baseball general managers are valuing and paying for the "correct" pitching statistics or the statistics that are actually correlated with or predictive of future performance. To do so, we will fit two models on the same group of predictors, one using salary in year T+1 as a response and the other using ERA in year T+1. We will then compare the relative weights of the various predictors across the two models to investigate any discrepancies.
+Since the sport’s inception in the nineteenth century, baseball has remained a fascination of statisticians and data scientists. More recently, the advent of sabermetrics and Statcast technology has propelled the mathematical study of baseball to new heights, with the ubiquity and accessibility of baseball metrics encouraging more and more professional baseball organizations to adopt an increasingly analytical approach.
+
+A common refrain one hears from baseball fans is that general managers, those responsible for making personnel decisions such as trading a player or signing a free agent to a contract, are slow in adapting to the current trends in analytics. While some front offices, such as the Houston Astros who boast a nine-man Sabermetric staff, have bought into an analytics-oriented approach; other teams have made their aversion to analytics clear, perhaps best encapsulated by the former Philadelphia Phillies GM Ruben Amaro claiming, back in 2014, that their team was “"not a statistics-driven organization by any means". While such a sentiment seems outmoded now, the question remains over how earnestly baseball decision-makers have actually accepted the growing Sabermetrics movement. 
+
+To investigate this question, we decided to build a variety of models in order to attempt to predict a pitcher’s future contract using their statistics from the past season. The rationale behind this was that, while baseball GMs might profess a certain belief in analytics publicly, the contracts they hand out represent a truer illustration what they actually value. Fitting a model to predict future salary will help answer this question as it will allow us to perform inference on the various coefficients or weights placed on different metrics- including both basic counting statistics as well as more advanced statistics. If baseball front offices really have accepted Sabermetrics to the degree that they claim, then we would expect to see that advanced statistics such as expected weighted on base average (xwoBA) or batting average on balls in play (BABIP) to be the strongest predictors of future salary. If, on the other hand, we find that basic counting statistics such as total pitches or total wins are the strongest predictors, then that suggests that baseball GMs are more enamored with counting statistics than they would like to admit.
+
+The second half of our project is fit a variety of models to try to predict a pitcher’s earned run average (ERA) in the coming season using statistics from this season. The reason for this exploration is that we wished to determine if the novel Sabermetric statistics are truly more useful in predicting future performance than basic statistics such as total strikeouts. ERA describes the average number of runs given up by a pitcher over nine innings and was the chosen metric to act as a proxy for pitcher performance as it exemplifies a wholistic representation of a pitcher’s performance.
+
+The aims and methods of this exploration differ from previous investigations in the application of statistical learning models allow for more complexity compared to the single-metric methods that have traditionally been used. While front offices certainly have proprietary models predicting a suite of different outcomes, online, the two methods used for predicting future salary and ERA both rely on basic statistics. For ERA, a post on the baseball statistics website Fangraphs attempted to predict 2011 ERA using 2010 statistics and identified skilled-interactive earned run average (SIERA) as the best predictor of future ERA (1). While the formula behind SIERA is quite complex, its calculation does not utilize Sabermetrics analytics (which were introduced in the 2014 season) in its calculation and its variables are restricted to basic statistics such as total strikeouts/plate appearances. In terms of predicting salary, a commonly used method is to calculate contract value/wins above replacement (WAR) to get the “cost of a win in free agency” (2). The formula for a pitcher’s WAR is quite complex but still does not fully integrate Sabermetrics statistics. Additionally, this method presupposes a linear relationship, which is to say that a 4-win player costs the same as two 2-win players, an assumption that we can circumvent with certain models.
+
+Ultimately, in this project we aimed to predict both future performance and salary for MLB pitchers in order not only to understand the metrics that underlie either response variables but also to investigate if a discrepancy exists between the predictors responsible for forthcoming success and those responsible for a lucrative contract. 
 
 
-#Salary Data Exploration#
+(1) https://blogs.fangraphs.com/are-pitching-projections-better-than-era-estimators/
+(2) https://blogs.fangraphs.com/the-cost-of-a-win-in-free-agency-in-2020/
+
+
+#Data Exploration#
+
+
+##Salary Data Exploration##
 
 For data exploration, we will explore the correlations and associations between pitching statistics from the 2016-2019 seasons in order to determine if performance in the past year can predict future salary.
 
@@ -443,7 +460,7 @@ cor(Mega_Summary_Filtered$xBA,
 
 Surprisingly, all 4 advanced statistics had negative correlations, albeit weak ones. This suggests that GMs perhaps are not as adverse to advanced statistics as one would expect. The negative relationship is understandable as these statistics measure the offensive production against the pitcher, thus, smaller values and less potent offenses are desirable. Both wOBA and BABIP have stronger relationships with future salary than expected wOBA and expected BA, which suggests that GMs are still not adequately seperating out noise or luck. 
 
-##Luck Reversion##
+###Luck Reversion###
 These predictors will come in handy later but the idea behind luck reversion was that if a pitcher's wOBA was significantly lower than their expected wOBA, then they would appear to be a better pitcher due to luck alone. Luck reversion for us takes 4 forms, the first two (xwOBA-wOBA and xBA-BA) are simply the difference between expected and observed statistics. The second two (ERA/Hard hit% and ERA/barrel %) operate under the assumption that hard contacts (hard hit% and barrel%) will result in more earned runs and a higher ERA, and if a pitcher's ERA/barrel % is low, then that means that they were lucky in terms of having a lower ERA than their pitching truly warrants.
 
 ```{r}
@@ -507,7 +524,7 @@ cor(Mega_Summary_Filtered$`ERA/Barrel %`,
 
 While xwOBA-wOBA doesn't display any strong relationship, xBA-BA had a moderately strong positive relationship, which suggests that lucky players with lower BA's than expected are getting paid more. This further suggests that GMs really have trouble seperating out luck. This trend is further exemplified with ERA/hard hit or barrel as those with smaller values (luckier pitchers) tend to have higher salaries, as suggested by the positive relationship. This relationship is especially pertinent with ERA/Barrel % which has a sizeable correlation coefficient. Overall, it seems like while GMs are attuned to advanced statistics, they have not yet fully bought into luck-adjusted statistics.
 
-##Correlations Between Predictors##
+###Correlations Between Predictors###
 
 ```{r}
 total_quant_pred <- 
@@ -595,7 +612,7 @@ total_quant_pred %>%
 
 
 
-#Predicting Future ERA#
+##Predicting Future ERA##
 
 Having explored possible predictors of salary (comparing both simple and complex variables), we move on to our prediction of future Earned Run Average (ERA). In this case, our selected response (ERA) can be thought of as a rough proxy for general pitching performance and outcome. Since the inception of the statistic in the early 1900s, ERA has been the most ubiquitous and cited measure of pitcher effectiveness, as it represents a straightforward calculation of the average amount of runs a pitcher allows over the duration of typical game (with run prevention thought of as the ultimate aim of pitching). Despite ERA being the most functional measure of pitching performance, it is nonetheless subject to a significant deal of random noise between individual pitchers' seasons. The development of advanced pitching analytics therefore may lend itself to more accurate forecasts of future ERA than simple counting statistics (such as wins, strikeouts, and innings pitched). With this in mind, we are motivated to find the statistical model that most accurately predicts ERA in a succesive season given a number of predictors generated from data in the current season. This should allow us to assess and predict player performance not based on actual (occasionally random) outcomes, but rather on an aggregation of predicted outcomes determined by a set of relevant statistical parameters. Ultimately, this model should lend itself to making informed salary decisions by MLB general managers.
 
