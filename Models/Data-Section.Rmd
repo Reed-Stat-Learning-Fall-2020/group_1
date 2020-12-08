@@ -9,22 +9,12 @@ library(tidyverse)
 library(knitr)
 ```
 
-```{r echo=FALSE}
-pitchers <- read_csv("Final Mega Summary.csv")
-
-salary_data <- pitchers %>%
-  select(-Pitcher, -ΔERA, -ERA_t1, -ΔSalary)
-
-pitchers <- pitchers %>%
-  select(-Pitcher, -ΔERA,- salary_t1, -ΔSalary)
-```
 
 #Data#
 
-After describing some of the trends we observed in the data, we then turn towards the variety of models that we have created, as well as their respective performances, measured in adjusted R-squared as well as 5-fold cross-validation mean-squared error (MSE).
+After describing some of the trends we observe in the data, we then turn towards the variety of models that we have created as well as their respective performances, measured in adjusted R-squared as well as 5-fold cross-validation mean-squared error (MSE).
 
 ##Full Model##
-
 ```{r}
 # Full Model for ERA
 

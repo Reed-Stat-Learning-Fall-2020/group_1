@@ -83,8 +83,8 @@ pitchers_2019_tidy <- pitchers_2019 %>%
 ```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot(pitchers,
        aes(x = custom_pred, y = ERA_t1)) +
-  geom_point(alpha = 0.5, color = "dodgerblue2") +
-  geom_smooth(method = lm, color = "dodgerblue") +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm, color = "midnightblue") +
   labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
        subtitle = "Modelling Predictions",
        x = "Predicted ERA (t+1)",
@@ -99,8 +99,8 @@ cor(as.numeric(pitchers$custom_pred), pitchers$ERA_t1)
 ```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot(pitchers,
        aes(x = ERA, y = ERA_t1)) +
-  geom_point(alpha = 0.5, color = "dodgerblue2") +
-  geom_smooth(method = lm, color = "dodgerblue") +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm, color = "midnightblue") +
   labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
        subtitle = "Null Predictions",
        x = "ERA",

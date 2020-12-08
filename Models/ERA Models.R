@@ -9,8 +9,8 @@ library(boot)
 
 pitchers <- read_csv("data/Final Mega Summary.csv")
 
-salary_data<-pitchers %>%
-  select(-Pitcher,-ΔERA,-ERA_t1,-ΔSalary)
+salary_data <- pitchers %>%
+  select(-Pitcher,-ΔERA, -ERA_t1, -ΔSalary)
 
   
 
