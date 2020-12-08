@@ -1,6 +1,6 @@
 ---
 title: "Introduction and Exploratory Data Analysis"
-author: "Group 1-Josh Yamamoto, Riley Leonard, Andy Zhao"
+author: "Group 1: Josh Yamamoto, Riley Leonard, Andy Zhao"
 output: html_document
 ---
 
@@ -14,121 +14,155 @@ library(readr)
 library(knitr)
 ```
 
-#Introduction#
+## Introduction
 
-Since the sport’s inception in the nineteenth century, baseball has remained a fascination of statisticians and data scientists. More recently, the advent of sabermetrics and Statcast technology has propelled the mathematical study of baseball to new heights, with the ubiquity and accessibility of baseball metrics encouraging more and more professional baseball organizations to adopt an increasingly analytical approach.
+Since the sport’s inception in the nineteenth century, baseball has remained a fascination of statisticians and data scientists. More recently, the advent of sabermetrics and ball tracking technology has propelled the mathematical study of baseball to new heights, with the ubiquity and accessibility of baseball metrics encouraging more and more professional baseball organizations to adopt an increasingly analytical approach.
 
-A common refrain one hears from baseball fans is that general managers, those responsible for making personnel decisions such as trading a player or signing a free agent to a contract, are slow in adapting to the current trends in analytics. While some front offices, such as the Houston Astros who boast a nine-man Sabermetric staff, have bought into an analytics-oriented approach; other teams have made their aversion to analytics clear, perhaps best encapsulated by the former Philadelphia Phillies GM Ruben Amaro claiming, back in 2014, that their team was “"not a statistics-driven organization by any means". While such a sentiment seems outmoded now, the question remains over how earnestly baseball decision-makers have actually accepted the growing Sabermetrics movement. 
+A common refrain one hears from baseball fans is that general managers, those responsible for making personnel decisions such as trading a player or signing a free agent to a contract, are slow in adapting to the current trends in analytics. While some front offices, such as the Houston Astros (who boast a nine-man Sabermetric staff), have bought into an analytics-oriented approach, other teams have made their aversion to analytics clear. This disinclination is perhaps best encapsulated by the former Philadelphia Phillies GM Ruben Amaro claiming, back in 2014, that their team was "not a statistics-driven organization by any means". While such a sentiment seems outmoded now, the question remains over how earnestly baseball decision-makers have realistically accepted the growing Sabermetrics movement. 
 
-To investigate this question, we decided to build a variety of models in order to attempt to predict a pitcher’s future contract using their statistics from the past season. The rationale behind this was that, while baseball GMs might profess a certain belief in analytics publicly, the contracts they hand out represent a truer illustration what they actually value. Fitting a model to predict future salary will help answer this question as it will allow us to perform inference on the various coefficients or weights placed on different metrics- including both basic counting statistics as well as more advanced statistics. If baseball front offices really have accepted Sabermetrics to the degree that they claim, then we would expect to see that advanced statistics such as expected weighted on base average (xwoBA) or batting average on balls in play (BABIP) to be the strongest predictors of future salary. If, on the other hand, we find that basic counting statistics such as total pitches or total wins are the strongest predictors, then that suggests that baseball GMs are more enamored with counting statistics than they would like to admit.
+To investigate this question, we decided to build a variety of models in order to attempt to predict a pitcher’s future contract using their statistics from the past season. The rationale behind this was that, while baseball GMs might profess a certain belief in analytics publicly, the contracts they hand out represent a more verifiable illustration of what they actually value. Fitting a model to predict future salary will help answer this question, as it will allow us to perform inference on the various coefficients or weights placed on different metrics---including both basic counting statistics and more advanced statistics. If baseball front offices have genuinely accepted Sabermetrics to the degree that they claim, then we would expect to see that advanced statistics such as expected weighted on base average (xwoBA) or spin rate to be the strongest predictors of future salary. If, on the other hand, we find that basic counting statistics such as total pitches or total wins are the strongest predictors, it would suggest that baseball GMs are more enamored with counting statistics than they would like to admit.
 
-The second half of our project is fit a variety of models to try to predict a pitcher’s earned run average (ERA) in the coming season using statistics from this season. The reason for this exploration is that we wished to determine if the novel Sabermetric statistics are truly more useful in predicting future performance than basic statistics such as total strikeouts. ERA describes the average number of runs given up by a pitcher over nine innings and was the chosen metric to act as a proxy for pitcher performance as it exemplifies a wholistic representation of a pitcher’s performance.
+The second half of our project involves fitting a variety of models to try to predict a pitcher’s earned run average (ERA) in the coming season using statistics from the current season. The reason for this exploration is that we wished to determine if the novel Sabermetric statistics are truly more useful in predicting future performance than basic statistics such as total strikeouts. ERA describes the average number of runs given up by a pitcher over nine innings, and was the chosen metric to act as a proxy for pitching outcome, as it exemplifies a wholistic representation of a pitcher’s performance.
 
-The aims and methods of this exploration differ from previous investigations in the application of statistical learning models allow for more complexity compared to the single-metric methods that have traditionally been used. While front offices certainly have proprietary models predicting a suite of different outcomes, online, the two methods used for predicting future salary and ERA both rely on basic statistics. For ERA, a post on the baseball statistics website Fangraphs attempted to predict 2011 ERA using 2010 statistics and identified skilled-interactive earned run average (SIERA) as the best predictor of future ERA (1). While the formula behind SIERA is quite complex, its calculation does not utilize Sabermetrics analytics (which were introduced in the 2014 season) in its calculation and its variables are restricted to basic statistics such as total strikeouts/plate appearances. In terms of predicting salary, a commonly used method is to calculate contract value/wins above replacement (WAR) to get the “cost of a win in free agency” (2). The formula for a pitcher’s WAR is quite complex but still does not fully integrate Sabermetrics statistics. Additionally, this method presupposes a linear relationship, which is to say that a 4-win player costs the same as two 2-win players, an assumption that we can circumvent with certain models.
+The aims and methods of this exploration differ from previous investigations in that the application of statistical learning models allow for more complexity compared to the single-metric methods that have been used traditionally. While front offices certainly have proprietary models predicting a suite of different outcomes, online, the two methods used for predicting future salary and ERA both rely on basic statistics. For ERA, a post on the baseball statistics website Fangraphs attempted to predict 2011 ERA using 2010 statistics and identified skilled-interactive earned run average (SIERA) as the best predictor of future ERA (1). While the formula behind SIERA is quite complex, its calculation does not utilize Sabermetrics analytics (which were introduced in the 2014 season) in its calculation and its variables are restricted to basic statistics such as total strikeouts and plate appearances. In terms of predicting salary, a commonly used method is to calculate contract value over wins above replacement (WAR) to get the “cost of a win in free agency” (2). The formula for a pitcher’s WAR is quite complex but still does not fully integrate Sabermetrics statistics. Additionally, this method presupposes a linear relationship, which is to say that a 4-win player costs the same as two 2-win players, an assumption that we can circumvent with certain models.
 
-Ultimately, in this project we aimed to predict both future performance and salary for MLB pitchers in order not only to understand the metrics that underlie either response variables but also to investigate if a discrepancy exists between the predictors responsible for forthcoming success and those responsible for a lucrative contract. 
+Ultimately, in this project, we aimed to predict both future performance and salary for MLB pitchers. This endeavor allows us to not only understand the metrics that underlie the two response variables, but also to investigate if a discrepancy exists between the predictors responsible for prospective pitching success and those responsible for a lucrative contract. 
 
 
 (1) https://blogs.fangraphs.com/are-pitching-projections-better-than-era-estimators/
 (2) https://blogs.fangraphs.com/the-cost-of-a-win-in-free-agency-in-2020/
 
 
-#Data Exploration#
+
+## Data Exploration
 
 
-##Salary Data Exploration##
+### Salary Data Exploration
 
 For data exploration, we will explore the correlations and associations between pitching statistics from the 2016-2019 seasons in order to determine if performance in the past year can predict future salary.
 
 A filter was applied to salary to remove salaries lower than 600,000 or pre-arbitration salaries. These players are under team control and their contracts are artificially deflated. Because their low salaries do not reflect their true "market price", they are excluded.
 
-```{r}
-Mega_Summary <- read_csv("Models/Mega Summary.csv")
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+Mega_Summary <- read_csv("Final Mega Summary.csv")
 
 #Filter out Pre-arbitration
 Mega_Summary_Filtered <- 
   Mega_Summary %>% 
-  filter(`Salary (t+1)` > 600000)
+  filter(salary_t1 > 600000)
 ```
-###Looking at Salary###
-We began by examining the structure of our first response variable- future salary.
 
-```{r}
+### Looking at Salary
+
+We began by examining the structure of our first response variable: future salary.
+
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6}
 ggplot(Mega_Summary_Filtered, 
-       aes(x = `Salary (t+1)` )) + 
+       aes(x = salary_t1)) + 
   geom_histogram(
-    color="grey100",
+    color = "grey100",
+    fill = "midnightblue",
     bins = 30, 
     alpha = .75 
     ) + 
+  labs(x = "Salary (t+1)",
+       y = "Count") +
   theme_classic()
 ```
-As we can see, future salary is quite right skewed. This is understandable as certain superstar pitchers have salaries that are magnitudes greater than the average starting pitcher. We considered a log tranformation to try to ameliorate this skew.
 
-```{r}
+
+
+As we can see, future salary is quite right skewed. This is understandable, as certain superstar pitchers have salaries that are magnitudes greater than the average starting pitcher. We considered a log tranformation to try to ameliorate this skew.
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6}
 ggplot(Mega_Summary_Filtered, 
-       aes(x = log(`Salary (t+1)` ))) + 
+       aes(x = log(salary_t1))) + 
   geom_histogram(
-    bins = 30,
-    alpha = .75 ) + 
-  theme_bw()
+    color = "grey100",
+    fill = "midnightblue",
+    bins = 30, 
+    alpha = .75 
+    ) + 
+  labs(x = "log(Salary (t+1))",
+       y = "Count") +
+  theme_classic()
 ```
-It seems like the log transformation greatly reduced the degree of right skew previously observed. While a slight left skew might now exist, we will consider logging salary in our models in order to circumvent this extreme right skew.
 
-###Basic Pitching Statistics###
 
-Wins and losses constitute the most basic of pitching statistics. Total number of pitches is pretty self explanatory too. Additionally, raw, unadjusted ERA, or the average number of runs a pitcher allows in a game is another predictor that one would expect to be associated with salary. Lastly, the number of earned runs, in a similar vein as ERA, is another predictor that stands out as potentially correlated.
 
-```{r}
+It would appear as though the log transformation greatly reduced the degree of the previously observed right skew. While a slight left skew may now exist, we will consider log-transforming salary in our models in order to circumvent this extreme right skew.
+
+
+
+
+### Basic Pitching Statistics
+
+Total wins and total losses constitute the most basic pitching statistics, indicating nothing more than the possible discrete outcomes resulting from a pitcher's contribution to a game. Total number of pitches also represents a fairly rudimentary measure of pitching performance and durability. Additionally, raw, unadjusted ERA (or the average number of runs a pitcher allows in a game) is another predictor that one would expect to be associated with salary. Lastly, the number of earned runs (the unprocessed counting statistic used to calculate ERA) stands out as anohter basic predictor in determining future salary.
+
+```{r echo=FALSE. fig.height=4, fig.width=6, message=FALSE}
 #Total Wins
 ggplot(Mega_Summary_Filtered,
        aes(
          x = W,
-         y = `Salary (t+1)`)
+         y = `salary_t1`)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Wins",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$W,
-   Mega_Summary_Filtered$`Salary (t+1)`)
+   Mega_Summary_Filtered$salary_t1)
 
 #Total Losses
 ggplot(Mega_Summary_Filtered,
        aes(
          x = L,
-         y = `Salary (t+1)`)
+         y = `salary_t1`)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Losses",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$L,
-   Mega_Summary_Filtered$`Salary (t+1)`)
+   Mega_Summary_Filtered$salary_t1)
 
 #Total Pitches
 ggplot(Mega_Summary_Filtered, 
        aes(
          x = Pitches,
-         y = `Salary (t+1)`)
+         y = `salary_t1`)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Pitches",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$Pitches,
-   Mega_Summary_Filtered$`Salary (t+1)`)
+   Mega_Summary_Filtered$salary_t1)
 
 ```
 
-Unsurprisingly, wins stand out with a moderate, positive correlation with future salary while losses has, essentially, no relationship with future salary. This pattern makes sense as a pitcher's total number of wins is a seemingly-impressive statistic that many baseball fans would know. Despite the previously-mentioned factors beyond a pitcher's control, GMs are likely to accure high praise by signing a "winning" pitcher, regardless of how much the pitcher contributed to the team's total wins.
 
-Total number of pitches has a moderate, positive correlation with salary. As we will see later on, pitching statistics having to do with productivity or volume of pitches are often quite highly correlated with salary.
 
-```{r}
+Unsurprisingly, total wins illustrates a moderate, positive correlation with future salary, while total losses shows virtually no relationship with future salary. This observed pattern makes sense, as a pitcher's total number of wins is a historically omnipresent and oft-cited measurement by casual and serious baseball fans alike. Despite the aforementioned factors beyond a pitcher's control, GMs are likely to accure high praise by signing a "winning" pitcher, regardless of how much the pitcher contributed to the team's total wins.
+
+Meanwhile total number of pitches exhibits a moderate, positive correlation with salary. As we will see later on, pitching statistics having to do with productivity or volume of pitches are often highly correlated with salary.
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
 #Win percent
 Mega_Summary_Filtered <- 
   Mega_Summary_Filtered %>% 
@@ -138,161 +172,193 @@ Mega_Summary_Filtered <-
 ggplot(Mega_Summary_Filtered, 
        aes(
          x = Win_Percent,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
-  geom_smooth(method = lm, 
-              color = "grey50") +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Win %",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$Win_Percent,
-   Mega_Summary_Filtered$`Salary (t+1)`)
+   Mega_Summary_Filtered$salary_t1)
 
 ```
 
-Surprisingly, a pitcher's win percent has a lower correlation with future salary than the total number of wins. While wins and losses are inherently flawed statistics, one would have imagined that a higher win loss ratio suggests a pitcher that deserves to be paid more. Rather, it seems like the total number of wins is the more important statistic in the eyes of GMs.
 
-```{r}
+
+Strikingly, a pitcher's win percentage has a lower correlation with future salary than the total number of wins. While wins and losses are inherently flawed statistics, one would imagine that a higher win-loss ratio implies that a pitcher is contributing more directly to a team's sucess and thus deserves a higher salary. Rather, it seems like the total number of wins is the more important statistic in the eyes of GMs.
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
 #Games played
 ggplot(Mega_Summary_Filtered, 
        aes(
          x = G,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Games (G)",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$G,
-   Mega_Summary_Filtered$`Salary (t+1)`)
+   Mega_Summary_Filtered$salary_t1)
 
 ```
-Games seemingly has a very weak positive relationship with future salary. This is understandable for two reasons, the first is that only very good pitchers make a lot of appearances and highly skilled pitchers are paid well. The other is that, as we have seen throughout this exploration so far, volume-related statistics tend to result in a larger paycheck.
 
-```{r}
+
+
+Total games played appears to possess a very weak positive relationship with future salary. This is understandable for two reasons, the first being that pitchers who make a lot of appearances are generally more skilled and therefore trusted to appear in more games by managers. Concurrently, highly skilled pitchers are paid well. Secondly, as we have seen throughout this exploration so far, an increase in volume-related statistics generally tends to result in a larger paycheck.
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
 #Current ERA
 ggplot(Mega_Summary_Filtered,
        aes(
          x = `ERA`,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "ERA",
+       y = "Salary (t+1)") +
   theme_classic()
-
 cor(Mega_Summary_Filtered$ERA,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+    Mega_Summary_Filtered$salary_t1)
 
 ```
 
-While ERA does have a negative correlation with future salary, the weakness of the relationship is surprising as giving up less runs is an unequivocally positive outcome. The comparison of the relationship between future salary and ERA and future salary and total wins is fascinating as total wins appears to be more highly valued in the eyes of a GM despite a pitcher only having a limited amount of control over their team performance. In contrast, a pichter's ERA is independent of his team's performance, but it has a weaker relationship than total wins. What this suggests is that GMs generally do not do good enough of a job in isolating an individual pitcher's abilities and places too much weight on statistics such as wins which are more stochastic and more susceptible to noise.
 
-###Season Totals and Percentages###
 
-While season totals might have a murkey relationship to future performance, it is undeniable that season totals such as strikeouts can be quite flashy and can lead to lucrative contracts thus might be strong predictors of next year's salary. We first examined total batters faced, total strikeouts, total number of batters walked on balls, total hits, and total home runs given up.
+While ERA does exhibit a negative correlation with future salary, the weakness of the relationship is surprising, as giving up fewer runs is an unequivocally positive outcome for pitchers. The comparison of the relationship between future salary and ERA and future salary and total wins is fascinating, as total wins appears to be more highly valued in the eyes of a GM (despite a pitcher only having a limited amount of control over their team's performance and subsequent game outcomes). In contrast, a pichter's ERA is independent of his team's performance, but nonetheless has a weaker relationship than total wins. What this suggests is that GMs generally do not do a sufficient enough job of isolating an individual pitcher's abilities, and instead place too much weight on counting statistics (such as wins) that are more stochastic and susceptible to noise.
 
-```{r}
+
+
+
+### Season Totals and Percentages 
+
+While season totals might have a murkey relationship with future performance, it is undeniable that statistics such as strikeouts are quite flashy and can therefore lead to lucrative contracts. As a result, season totals might be strong predictors of next year's salary. We first examined total batters faced, total strikeouts, total number of batters walked on balls, total hits, and total home runs allowed.
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
 #Total batters faced
 ggplot(Mega_Summary_Filtered,
        aes(
          x = ABs,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha=0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "At Bats (ABs)",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$ABs,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+    Mega_Summary_Filtered$salary_t1)
 
 #Total strikeouts
 ggplot(Mega_Summary_Filtered,
        aes(
          x = SO,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha=0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Strikeouts (K)",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$SO,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+    Mega_Summary_Filtered$salary_t1)
 
 #Total batters walked
 ggplot(Mega_Summary_Filtered,
        aes(
          x = BB,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Walks (BB)",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$BB,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+    Mega_Summary_Filtered$salary_t1)
 
 #Total hits
 ggplot(Mega_Summary_Filtered,
        aes(
          x = H,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Hits (H)",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$H,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+    Mega_Summary_Filtered$salary_t1)
 
 #Total Home Runs
 ggplot(Mega_Summary_Filtered,
        aes(
          x = HR,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Home Runs (HR)",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$HR,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+    Mega_Summary_Filtered$salary_t1)
 ```
 
-Unsurprisingly, season totals in general have a strong, positive correlation with salary, and, following a trend that we will see again in this exploration, pitching volume can often be more predictive of future salary than pitch quality. 
 
-Total strikeouts and total batters faced have the strongest positive relationship with future salary. This is to be expected as strikeouts are both the sign of a good pitcher and quite attractive to the average baseball fan and a high number of batters faced suggests a well-regarded pitcher that is entrusted with such responsibilities. More surprisingly, undesirable outcomes like hits and home runs display a medium positive relationship as well. This seemingly contradictory trend perhaps can be explained by the fact that only good pitchers are allowed to rack up hits and home runs as less-accomplished pitchers would simply be cut from the team or sent to the minor league system. If this hypothesis is true, then the batting average against (BAa) should be negatively correlated as BAa is a measurement of what percentage of hitters record a hit against a certain pitcher.
+As anticipated, season totals in general have a strong, positive correlation with salary, and, following a trend that we will see again in this exploration, pitching volume can often be more predictive of future salary than pitch quality. 
 
-Total number of batters walked on balls has a very weak positive relationship to future salary that is close to 0. This is understandable as number of batters walked can be more contingent upon an individual's style of pitching rather than their quality as a pitcher. Less batters walked simply suggests better control, and superior control in a vacuum does not necessarily suggest a better pitcher.
+Total strikeouts and total batters faced have the strongest positive relationships with future salary. This is to be expected, as strikeouts are both the sign of a good pitcher and quite attractive to the average baseball fan. Similarly, a high number of batters faced suggests a well-regarded pitcher that is entrusted with such responsibilities. More unexpectedly, undesirable outcomes like hits and home runs display a medium positive relationship as well. This seemingly contradictory trend perhaps can be explained by the fact that only good pitchers are permitted (by their managers) to play enough games to surrender such a high volume hits and home runs, whereaas less-accomplished pitchers would be given limited playing time. If this hypothesis is true, then batting average against (BAA) should be negatively correlated, as BAA is a measurement of what percentage of hitters record a hit against a certain pitcher.
 
-Next we looked to see if the percent of strikeouts, balls, and hits (BAa) are correlated with future salary
+Total number of batters walked on balls has a very weak (close to 0) positive relationship with future salary. This is understandable, as number of batters walked can be more contingent on an individual's style of pitching rather than their quality as a pitcher. Less batters walked simply suggests better control, and superior control in a vacuum does not necessarily suggest a better pitcher.
 
-```{r}
+Next we looked to see if the percent of strikeouts, balls, and hits (BAA) are correlated with future salary.
+
+
+```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
 #Strikeout Percent
 ggplot(Mega_Summary_Filtered,
        aes(
-         x = `K %`,
-         y = `Salary (t+1)`)
+         x = K_percent,
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Home Runs (HR)",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$`K %`,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+    Mega_Summary_Filtered$salary_t1)
 
 #Percent of Batters walked
 ggplot(Mega_Summary_Filtered,
        aes(
-         x = `BB %`,
-         y = `Salary (t+1)`)
+         x = BB_percent,
+         y = salary_t1)
        ) +
   geom_point(alpha = 0.5)+
   geom_smooth(method = lm,
