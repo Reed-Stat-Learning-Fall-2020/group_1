@@ -1,0 +1,67 @@
+---
+title: "Methods"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Methods
+
+There were a number of data wrangling and processing strategies that were implemented in the construction of our final data set:
+
+
+
+### Pitching Statistics and Advanced Pitching Statistics
+
+Much of our advanced pitching metric data came from Baseball Savant's "Statcast", a (massive) searchable online database developed by Major League Baseball. Because of its recent inception, most of the advanced pitching statistics have only been recorded by Statcast from 2015 onwards, so we were limited to the past five seasons when pulling this data. We made the decision to avoid pulling advanced data from the year 2020, both because of the unorthodox nature of a COVID-shortened season and the fact that one-year forward variables were frequently implemented as a response in our models (and 2021 data doesn't yet exist). Fortunately, the data from Statcast is easily accessible, as it is open source and readily downloadable.
+
+
+    
+### Salary Data
+
+Our salary data had to be obtained from two different sources, since our primary data source had a paywall for the year 2015 and our secondary data  source did not include salary data for any year past 2016. 
+
+To start, we downloaded our 2015 salary data from Sean Lahman's baseball database. The Lahman salary data was easy to pull, as it was included as a dataframe in the `Lahman` R package. 
+
+Conversely, in order to acquire data for the 2016 through 2020 seasons, we had to get a little more creative. Salary data for MLB pitchers from 2016 through 2020 is publicly available on the Sportrac website, but it is not readily downloadable as a csv. As a result, we had to use the `rvest` package to scrape the data from the HTML source code. We consistently confronted an issue where, when attempting to scrape the salary data for an entire season, `rvest` would only pull the first 100 observations to limit memory usage. To circumvent this problem, we created a vector of links where each link corresponded to the page of an individual MLB team for a specific year. We then wrote a function to pull the data from the HTML source code from that page. We then ran the function through a for loop where the index was the list of links to each team, eventually constructing our dataset by using the `rbind()` function to combine all of the individual team dataframes. We repeated this process for each season, subsequently combining the Sportrac salary data with our salary data from `lahman` to get each individual pitcher's annual salary from 2015 through 2020.
+
+
+
+### Combining Data Sets
+
+Worth noting is that we only pulled salary data for starting pitchers, both because it was a more feasible task in regards to controlling sample size and because pitching statistics and salary data vary greatly between the two principal types of pitchers (starting pitchers and relief pitchers). Including relief pitchers in our data would have resulted in less consistent and insightful modelling outcomes, motivating our decision to exclude relief pitchers from our data. That being said, because our pitching statistics dataset contained data for all pitchers, we were required to filter the data to only contain the starting pitchers present in our salary dataset, which were able to achieve by filtering on a combination of total games played and the number of batters faced per game (both of which varied substantially between the two pitcher classes). In order to minimize any joining mistakes, we used the function `make_clean_names()` from the `janitor` package to clean each pitcher's name before joining. Following the join, we included several filters (specifically to ensure a sufficient volume of batters faced) in order to drop outliers and make certain that our data was as robust as possible. Ultimately, the data wrangling process resulted in a handful of lost observations and an overall decrease in sample size, but we maintanined a sizeable enough dataset that we weren't too concerned about adverse variance.
+
+When all was said and done, we ended up with a dataset of 457 observations and 36 variables. Each observational unit in our dataset represents the season of an individual MLB pitcher between 2015 and 2019. Importantly, certain pitchers appear multiple times in the dataset, as many players sustain careers spanning the entire time series comprised in our data.
+
+```{r echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+data <- read_csv("Final Mega Summary.csv")
+
+nrow(data)
+ncol(data)
+```
+
+
+### Creating New Variables
+
+In addition to joining a variety of variables from different sources, we also used the `mutate()` function to create several variables of our own. We first added a new column that represented the salary for an individual pitcher in the succeeding year. This resulted in two unique variables: `Salary` and `Salary (t+1)`. We added a similar column for ERA, giving us `ERA (t+1)`. Next, we created a number of unique variables with the intent of quantifying the amount of "luck" that a pitch might experience in a given season. First, we performed some simple arithmetic transformations to create the following variables, each attemting to measure some sort of mean expected outcome in terms of mean actual outcome: `BABIP - Mean BABIP`, `xBA - BA`, `xwOBA - wOBA`, `ERA/Barrel %`, and `ERA/Hard Hit %`. We then standardized and aggregated the most statistically significant of these "luck" variables, creating a variable that we appropriately named `Standardized Luck`. After determining an appropriate scale, we added a fraction of `Standardized Luck` to `ERA` to create a measure of `Luck Adjusted ERA`, represented by the equation below:
+
+$$
+{Luck \ Adjusted \ ERA}_t = 
+{ERA}_t + 
+\frac{1}{3} \cdot 
+\frac{-(\frac{{\frac{ERA}{Barrel \ \%}}_t - \frac{\sum_{i}^{n} \frac{ERA}{Barrel \ \%}_i}{n}}{{\sigma({\frac{ERA}{Barrel \ \%}}_j)}} ) - (\frac{{\frac{ERA}{Hard \ Hit \ \%}}_t - \frac{\sum_{i}^{n} \frac{ERA}{Hard \ Hit \ \%}_i}{n}}{\sigma({\frac{ERA}{Hard \ Hit \ \%}}_j)})}{2}
+$$
+
+where 
+
+$\sigma({\frac{ERA}{Barrel \ \%}}_j) = \sqrt{\frac{\sum_{j}^{n}({\frac{ERA}{Barrel \ \%}}_t - \frac{\sum_{i}^{n} \frac{ERA}{Barrel \ \%}_i}{n})^2_j}{n}} \ \ $ and    $\  \ \sigma({\frac{ERA}{Hard \ Hit \ \%}}_j) = \sqrt{\frac{\sum_{j}^{n}({\frac{ERA}{Hard \ Hit \ \%}}_t - \frac{\sum_{i}^{n} \frac{ERA}{Hard \ Hit \ \%}_i}{n})^2_j}{n}}$
+
+
+A more detailed discussion of the definition, concept, and implications of "luck" in pitching outcomes is included in our exploratory data analysis.
+    
+    
+    
+  
