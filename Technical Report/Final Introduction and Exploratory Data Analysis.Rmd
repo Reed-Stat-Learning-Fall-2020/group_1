@@ -330,11 +330,11 @@ cor(Mega_Summary_Filtered$HR,
 
 As anticipated, season totals in general have a strong, positive correlation with salary, and, following a trend that we will see again in this exploration, pitching volume can often be more predictive of future salary than pitch quality. 
 
-Total strikeouts and total batters faced have the strongest positive relationships with future salary. This is to be expected, as strikeouts are both the sign of a good pitcher and quite attractive to the average baseball fan. Similarly, a high number of batters faced suggests a well-regarded pitcher that is entrusted with such responsibilities. More unexpectedly, undesirable outcomes like hits and home runs display a medium positive relationship as well. This seemingly contradictory trend perhaps can be explained by the fact that only good pitchers are permitted (by their managers) to play enough games to surrender such a high volume hits and home runs, whereaas less-accomplished pitchers would be given limited playing time. If this hypothesis is true, then batting average against (BAA) should be negatively correlated, as BAA is a measurement of what percentage of hitters record a hit against a certain pitcher.
+Total strikeouts and total batters faced have the strongest positive relationships with future salary. This is to be expected, as strikeouts are both the sign of a good pitcher and quite attractive to the average baseball fan. Similarly, a high number of batters faced suggests a well-regarded pitcher that is entrusted with such responsibilities. More unexpectedly, undesirable outcomes like hits and home runs display a medium positive relationship as well. This seemingly contradictory trend perhaps can be explained by the fact that only good pitchers are permitted (by their managers) to play enough games to surrender such a high volume hits and home runs, whereaas less-accomplished pitchers would be given limited playing time. If this hypothesis is true, then batting average against (BA) should be negatively correlated, as BAA is a measurement of what percentage of hitters record a hit against a certain pitcher.
 
 Total number of batters walked on balls has a very weak (close to 0) positive relationship with future salary. This is understandable, as number of batters walked can be more contingent on an individual's style of pitching rather than their quality as a pitcher. Less batters walked simply suggests better control, and superior control in a vacuum does not necessarily suggest a better pitcher.
 
-Next we looked to see if the percent of strikeouts, balls, and hits (BAA) are correlated with future salary.
+Next we looked to see if the percent of strikeouts, balls, and hits (BA) are correlated with future salary.
 
 
 ```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
@@ -347,11 +347,11 @@ ggplot(Mega_Summary_Filtered,
   geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
               color = "midnightblue") +
-  labs(x = "Home Runs (HR)",
+  labs(x = "K %",
        y = "Salary (t+1)") +
   theme_classic()
 
-cor(Mega_Summary_Filtered$`K %`,
+cor(Mega_Summary_Filtered$K_percent,
     Mega_Summary_Filtered$salary_t1)
 
 #Percent of Batters walked
@@ -360,167 +360,195 @@ ggplot(Mega_Summary_Filtered,
          x = BB_percent,
          y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "BB %",
+       y = "Salary (t+1)") +
   theme_classic()
 
-cor(Mega_Summary_Filtered$`BB %`,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+cor(Mega_Summary_Filtered$BB_percent,
+    Mega_Summary_Filtered$salary_t1)
 
 #Batting average against (hit percent)
 ggplot(Mega_Summary_Filtered,
        aes(
          x = BA,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Batting Average (BA)",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$BA,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+    Mega_Summary_Filtered$salary_t1)
 
 
 ```
 
-Interestingly, even though strikeout percentage is still positively correlated with future salary, the strength of the relationship is not as strong as the raw number of strikeouts. Both percent of batters walked and hit percent have a moderate-weak negative relationship with future salary. This supports the previous hypothesis that only good, highly-valued pitchers are allowed to accumulate a large number of hits as simply giving up a lot of hits, for example having a high BA, is negatively correlated with future earning. Surprisingly, percent walked has a stronger negative relationship than BA despite total number of hits having a stronger correlation with future salary than total number of batters walked. The discrepancy between total batters walked (BB) and percentage of batters walked (BB%) is not easily explained.
 
-We next looked at some season percentages of more advanced statistics such as hard hit % and barrel %. Both of these statistics look at the speed and angle of the ball after being hit by the batter. Barrel % represents batted balls with exit velocities and launch angles that, historically, have led to a minimum .500 batting average or a 50% chance of resulting in a hit. Hard hit % is similar to barrel % but does not consider launch angle and simply describes batted balls with exit velocities exceeding 95 MPH. Naively, one would expect a negative relationship as a good pitcher should try to avoid giving up hard contact.
+Interestingly, even though strikeout percentage (K %) is still positively correlated with future salary, the strength of the relationship is not as strong as the raw number of strikeouts. Both the percentage of batters walked (BB %) and hit percent (BA) have a moderate to weak negative relationship with future salary. **This supports the previous hypothesis that only good, highly-valued pitchers are allowed to accumulate a large number of hits as simply giving up a lot of hits, for example having a high BA, is negatively correlated with future earning.** Surprisingly, BB % has a stronger negative relationship than BA, despite total number of hits having a stronger correlation with future salary than total number of batters walked. The discrepancy between total batters walked and percentage of batters walked is not easily explained.
 
-```{r}
+We next looked at some season percentages of more advanced statistics such as hard hit % and barrel %. Both of these statistics look at the speed and angle of the ball after being hit by the batter. Barrel % represents batted balls with exit velocities and launch angles that, historically, have led to a minimum .500 batting average (or a 50% chance of resulting in a hit). Hard hit % is similar to barrel %, but does not consider launch angle and simply describes batted balls with exit velocities exceeding 95 MPH. Naively, one would expect a negative relationship, as a good pitcher should try to avoid giving up hard contact.
+
+
+```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
 #Hard hit percent
 ggplot(Mega_Summary_Filtered,
        aes(
-         x = `Hard Hit %`,
-         y = `Salary (t+1)`)
+         x = hard_hit_percent,
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Hard Hit %",
+       y = "Salary (t+1)") +
   theme_classic()
 
-cor(Mega_Summary_Filtered$`Hard Hit %`,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+cor(Mega_Summary_Filtered$hard_hit_percent,
+    Mega_Summary_Filtered$salary_t1)
 
 #Barrel percent
 ggplot(Mega_Summary_Filtered,
        aes(
-         x = `Barrel %`,
-         y = `Salary (t+1)`)
+         x = barrel_percent,
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue") +
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Barrel %",
+       y = "Salary (t+1)") +
   theme_classic()
 
-cor(Mega_Summary_Filtered$`Barrel %`,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+cor(Mega_Summary_Filtered$barrel_percent,
+    Mega_Summary_Filtered$salary_t1)
 ```
 
-Surprisingly, neither of them seem to have a clear relationship with future salary, barrel %'s relationship is a bit stronger than hard hit % and is, shockingly, positive. However, this weak relationship could be just due to noise as it is unlikely that giving up hard hits will lead to a larger contract.
+Surprisingly, neither of these advanced variables seem to have a clear relationship with future salary. **Barrel %'s relationship with future is marginally stronger than hard hit %'s and is, shockingly, positive**. However, this weak relationship could be explained by noise, as it is unlikely that giving up more hard hits will lead to a larger contract.
 
-###Pitch Averages###
+
+
+
+### Pitch Averages
 
 Next, we examined if the averages of certain statistics were correlated with salary, specifically looking at average speed and spin rate.
 
-```{r}
+
+```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
 #Average Speed
 ggplot(Mega_Summary_Filtered,
        aes(
          x = Velocity,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue") +
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Average Velocity (MPH)",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$Velocity,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+    Mega_Summary_Filtered$salary_t1)
 
 #Average spin rate
 ggplot(Mega_Summary_Filtered,
-       aes(
-         x = `Spin Rate`,
-         y = `Salary (t+1)`)
+       aes(spin_rate,
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue") +
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "Average Spin Rate (RPM)",
+       y = "Salary (t+1)") +
   theme_classic()
 
-cor(Mega_Summary_Filtered$`Spin Rate`,
-    Mega_Summary_Filtered$`Salary (t+1)`)
+cor(Mega_Summary_Filtered$spin_rate,
+    Mega_Summary_Filtered$salary_t1)
 
 ```
 
-Naively, one might expect faster pitches to be harder to hit and thus expect pitchers with higher average velocities to be handsomely paid. However, the negative correlation, with a not-insignificant correlation, suggests that average pitch speed is actually inversely related to salary. There are a couple of reasons why this might be. The most obvious is that pitchers who lack speed often make up for it with stellar control or a wide variety of possible pitches. Another reason is that, just instinctively, average pitch speed might be correlated with certain negative predictors like more home runs as batters can often make hard contact against fast but poorly-placed pitches.
+Naively, one might expect faster pitches to be harder to hit and thus expect pitchers with higher average velocities to be handsomely paid. However, the negative **correlation, with a not-insignificant correlation, suggests** that average pitch speed is actually inversely related to salary. There are a couple of reasons why this might be. The most obvious is that pitchers who lack speed often make up for it with stellar control or a wide arsenal of offspeed pitches. Another reason is that, instinctively, average pitch speed might be correlated with certain negative predictors like home runs, as batters can often make hard contact against fast but poorly-placed pitches.
 
-Spin rate is a topic that has garnered increased attention in the baseball community and is something that pitchers place a lot of emphasis on. It seems that this interest is not misplaced as there is a moderate positive relationship between future salary and spin rate.
+Spin rate is a topic that has garnered increased attention in the baseball community, and is something that pitchers place a lot of emphasis on. It seems that this interest is not misplaced, as there is a moderate positive relationship between spin rate and future salary.
 
 
-###Advanced Statistics###
 
-We now get to our advanced statistics, namely weighted on base average against (wOBA), batting average on balls in play against (BABIP), expected weighted on base average against (xwOBA), and expected batting average against (xBA). The two expected statistics are notable as they try to remove some of the noise or luck from the statistic by calculating WOBA and BA based on the historical WOBA and BA's of batted balls with similar exit velocity and angles. 
 
-```{r}
+### Advanced Statistics
+
+**We now get to our advanced statistics,** namely weighted on base average (wOBA), batting average on balls in play(BABIP), expected weighted on base average (xwOBA), and expected batting average(xBA). The two expected statistics are notable as they try to remove some of the noise (or "luck"") from the statistic by calculating wOBA and BA based on the historical wOBA and BA of batted balls with similar exit velocities and launch angles. 
+
+
+```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
 #Weighted on base average (wOBA)
 ggplot(Mega_Summary_Filtered,
        aes(
          x = wOBA,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue") +
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "wOBA",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$wOBA,
-   Mega_Summary_Filtered$`Salary (t+1)`)
+   Mega_Summary_Filtered$salary_t1)
 
 #Batting average on balls in play against (BABIP)
 ggplot(Mega_Summary_Filtered,
        aes(
          x = BABIP,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue") +
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "BABIP",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$BABIP,
-   Mega_Summary_Filtered$`Salary (t+1)`)
+   Mega_Summary_Filtered$salary_t1)
 
 #Expected wOBA
 ggplot(Mega_Summary_Filtered,
        aes(
          x = xwOBA,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue") +
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "xwOBA",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$xwOBA,
-   Mega_Summary_Filtered$`Salary (t+1)`)
+   Mega_Summary_Filtered$salary_t1)
 
 #Expected batting average
 ggplot(Mega_Summary_Filtered,
        aes(
          x = xBA,
-         y = `Salary (t+1)`)
+         y = salary_t1)
        ) +
-  geom_point(alpha = 0.5)+
+  geom_point(alpha = 0.5, color = "midnightblue") +
   geom_smooth(method = lm,
-              color = "grey50") +
+              color = "midnightblue") +
+  labs(x = "xBA",
+       y = "Salary (t+1)") +
   theme_classic()
 
 cor(Mega_Summary_Filtered$xBA,
-   Mega_Summary_Filtered$`Salary (t+1)`)
+   Mega_Summary_Filtered$salary_t1)
 
 ```
 
