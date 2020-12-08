@@ -126,7 +126,6 @@ kable(full_model_table, digits = 3) %>%
 ```
 
 
-
 It appears that our full model struggles with the data compared to our other models. This is understandable for the reasons listed above, namely the presence of collinearity between predictors. Interestingly, even the full model has a 5-fold CV MSE for ERA above that of the null model of SIERA (see introduction for a full discussion of the null model), suggesting that even the weakest full model still outperformed existing ERA projection methodologies. It is also notable that the adjusted R-squared for ERA is far weaker than that of salary. This is understandable, as the irreducible error in the ERA data far exceeds that of the salary data. While there is some stochasticity in contract negotiations, there is far more noise when it comes to on-field performance.
 
 
@@ -286,6 +285,7 @@ PCR_table<-PCR_table %>%  rename(
 kable(PCR_table, digits = 3) %>%
   kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
+
 
 While principal component regression did lead to an improvement from the full model, it did not lead to as much of an improvement as we expected. While PCR performed at around the same level as ridge, LASSO out-performed both ridge and PCR. It is also notable that ridge, LASSO, and PCR resulted in large reductions in salary 5-fold CV MSE but not for ERA, suggesting that the salary data benefits more from the various attempts at reducing collinearity.
 
