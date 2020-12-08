@@ -64,15 +64,11 @@ pitchers_2019 <- pitchers_2019 %>%
 pitchers_2019$ERA_type <- ifelse(pitchers_2019$`Standardized Forecasted Adjusted ERA` < 0, "below", "above")
 
 pitchers_2019$salary_type <- ifelse(pitchers_2019$`Standardized Salary` < 0, "below", "above")
-```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
 pitchers_2019_tidy <- pitchers_2019 %>%
   pivot_longer(cols = c(custom_pred_2019, ERA_t1), 
                names_to = "type",
                values_to = "value")
-
-#pitchers_2019_tidy$difference <- ifelse(pitchers_2019_tidy$custom_pred_2019  > #pitchers_2019_tidy$ERA_t1 , "lower", "higher")
 ```
 
 

@@ -40,19 +40,9 @@ pitchers_2019 <- cbind(pitchers_2019, custom_pred_2019)
 
 pitchers0 <- cbind(pitchers0, custom_pred)
 
-normalize_salary <- function(x) {
-    (x - min(pitchers_2019$salary_t1)) / (max(pitchers_2019$salary_t1) - min(pitchers_2019$salary_t1))
-}
-
-normalize_ERA <- function(x) {
-    (x - min(pitchers_2019$custom_pred)) / (max(pitchers_2019$custom_pred) - min(pitchers_2019$custom_pred))
-  }
-
-
 pitchers_2019 <- pitchers_2019 %>%
   mutate(`Standardized Forecasted Adjusted ERA` = -scale(custom_pred_2019)) %>%
   mutate(`Standardized Salary` = scale(salary_t1)) %>%
-  mutate(`Normalized Forecasted Adjusted ERA` = normalize_ERA(custom_pred_2019)) %>%
   mutate(`Compensation` = ((salary_t1)/(10 -custom_pred_2019))/100000)
 
 pitchers_2019 <- pitchers_2019 %>%
@@ -71,11 +61,31 @@ pitchers_2019_tidy <- pitchers_2019 %>%
   pivot_longer(cols = c(custom_pred_2019, ERA_t1), 
                names_to = "type",
                values_to = "value")
+
+salary_2019 <- pitchers0 %>%
+  filter(Year == 2019) %>%
+  arrange(desc(salary_t1)) %>%
+  head(50)
+
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1) ~ Year + SO +
+                           Salary + W*luck_adj_ERA)
+
+salary_pred_2019 <- predict(custom_mod_salary, salary_2019, type = "response")
+
+salary_2019 <- cbind(salary_2019, salary_pred_2019)
+
+salary_2019_tidy <- salary_2019 %>%
+  mutate(salary_t1 = log(salary_t1)) %>%
+  pivot_longer(cols = c(salary_pred_2019, salary_t1), 
+               names_to = "type",
+               values_to = "value") 
 ```
 
 ## Data and Results
 
 After describing some of the trends we observed in the data, we then turn towards the variety of models that we have created, as well as their respective performances, measured in adjusted R-squared as well as 5-fold cross-validation mean-squared error (MSE).
+
 
 
 
@@ -94,7 +104,10 @@ full_mod <- lm(data = salary_data,
 ```
 
 
+
 Above, we see the code for the full model on both salary and ERA. We expected that the full model would do adequetely, as we had hand-selected every variable included in our dataset and thus we expected all of our variables to be at least somewhat significant. However, one of the issues we had foresaw was the presence of a great deal of collinearity, which could make our parameter estimates quite unstable, and the full model lacks the sufficient means to counter said collinearity.
+
+
 
 
 #### Full Model Results
@@ -113,7 +126,9 @@ kable(full_model_table, digits = 3) %>%
 ```
 
 
+
 It appears that our full model struggles with the data compared to our other models. This is understandable for the reasons listed above, namely the presence of collinearity between predictors. Interestingly, even the full model has a 5-fold CV MSE for ERA above that of the null model of SIERA (see introduction for a full discussion of the null model), suggesting that even the weakest full model still outperformed existing ERA projection methodologies. It is also notable that the adjusted R-squared for ERA is far weaker than that of salary. This is understandable, as the irreducible error in the ERA data far exceeds that of the salary data. While there is some stochasticity in contract negotiations, there is far more noise when it comes to on-field performance.
+
 
 
 
@@ -134,11 +149,13 @@ forward_mod_salary <- lm(data = salary_data,
 ```
 
 
+
 We then moved on to forward selection, which is an efficient alternative to best subset. We set the maximum complexity of the model (nvmax) to be considered at 12. We chose this because of the aforementioned problems with collinearity. Subset selection gives us a way to reduce collinearity by simply dropping some of the correlated predictors. We set the maximum to 12 because we wanted a relatively parsimonious model. Ultimately, the adjusted R-squared of the model with 9 predictors performed the best among all the 12 ERA models, while the 8-predictor model performed the best for salary.
 
 While a more detailed discussion will be left for the conclusion, in broad strokes, the predictors included in the two models are not as different as one would expect. The presence of expected batting averaged (xBA) and spin rate in the salary model suggests that these sabermetric statistics actually result in a larger contract, but, conversely, base counting statistics like total pitches and even year is also included.
 
 The forward model for ERA includes a number of advanced statistics such as wOBA, hard hit %, barrel %, and even ERA/barrel %. However, it also includes counting statistics like total strikeouts and total batters faced. Ultimately, the forward model for the two are more similar than one would have intuited. 
+
 
 
 #### Forward Selection Results
@@ -161,9 +178,11 @@ The forward selection method of subset selection led to improvements over the fu
 
 
 
+
 ### Ridge and LASSO Regression
 
 Both forms of penalized regression---ridge and LASSO---struck us as potentially valuable in that the full model performed fairly well on its own, thus a penalized regression might improve its accuracy by potentially reducing variance with only a small concomittant increase in bias. Due to the large number of predictors in the full model (30), we were quite concerned about variance and thus hoped that ridge and LASSO would help.
+
 
 ```{r eval=FALSE}
 # Ridge Model for ERA
@@ -197,7 +216,9 @@ lasso_mod_ERA <- glmnet(x_full_model_ERA,
 ```
 
 
+
 Above, we see the 4 models, one for salary and one for ERA for each of the penalized regressions. The best lambda value for cost-complexity tuning was determined through cross-validation using a range of values.
+
 
 
 #### Ridge and LASSO Results
@@ -224,11 +245,13 @@ Interestingly, LASSO performed better than ridge for both future salary and ERA.
 
 
 
+
 ### Principal Component Regression
 
 Best subset offers us one solution against collinearity by dropping some of the correlated predictors. Principal component regression offers us another method by combining various predictors into new ones that adequately explain much of the variation in the data. By doing so, we can perhaps remedy some of the correlations among our predictors.
 
 The number of principal components to use in each model was chosen based off crossed-validation. Interestingly, ERA only required 4 principal components, while salary required 13. This could suggest that, while 4 principal components are sufficient to capture the variability in future ERA, more principal components are necessary to capture the variance in future salary.
+
 
 
 ```{r eval=FALSE}
@@ -245,6 +268,8 @@ my_pcr_salary <- pcr(formula = log(salary_t1) ~ .,
                      data = salary_data)
 
 ```
+
+
 
 
 #### PCR Results
@@ -266,9 +291,11 @@ While principal component regression did lead to an improvement from the full mo
 
 
 
+
 ### Custom Model
 
 To construct a custom model, we relied on an amalgam of domain knowledge, variable interaction, and stepwise selection. We began with the aforementioned forward selection model, and then removed some of the predictors we did not believe to be important based on both underlyting domain knowledge and the reported significance of the variable coefficients in the model summary. The variables we chose to remove included games and batters faced. We then added spin rate as a predictor. While spin rate had very little effect on the change in response in the multiple linear regression (with a slope coeffcient estimate equal to approximately), it was nonetheless included in our model due to its sttatistcial significance and model-stabilizing effect. We then included two interaction terms, first between ERA and hard hit %, and the ERA and barrel %. These two interaction effects, while seemingly redudant with the already included luck-adjusted metrics, managed to dramatically improve overall model fit, and were therefore included in the final model.
+
 
 
 ```{r eval=FALSE}
@@ -279,6 +306,8 @@ custom_mod <- lm(data = pitchers,
                     ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
 
 ```
+
+
 
 
 #### Custom Model Results
@@ -299,6 +328,7 @@ kable(custom_table, digits = 3) %>%
 
 
 As seen above, our custom model actually produced the lowest 5-fold MSE among the sampled models. This is somewhat understandable, as we combined stepwise selection with domain knowledge to produce a model build around intuition. This model is also less complex than the forward model, perhaps contributing to its reduced MSE as it is less susceptible to variance.
+
 
 
 
@@ -343,7 +373,9 @@ kable(final_table, digits = 3) %>%
 ```
 
 
+
 We can see that in terms of R-squared, the forward model performed the best. Conversely, in terms of 5-fold MSE, the ensemble model performed the best. The 5-fold MSE difference might seem marginal, but we have to remember that the MSE is in `log(Salary)` units.
+
 
 
 ```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
@@ -398,7 +430,9 @@ ggplot(final_table %>%
 ```
 
 
+
 For salary, we can see that the ensemble model far outperforms the other models in terms of R-squared. Similarly, in terms of 5-fold MSE, we see that the ensemble model again outperforms all other models:
+
 
 
 ```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
@@ -460,6 +494,7 @@ We have split our conclusions into two parts, predictive and inferential. The re
 
 
 
+
 ### Inferential Conclusions
 
 ```{r}
@@ -503,11 +538,12 @@ Lastly, we can compare the predictors included in each model, as well as their a
 
 
 
+
 ### Predictive Conclusions
 
 In addition to using inference to assess the discrepancies in the patterns that determine future performance and future salary, we can also utilize the predictive powers of our models to make additional evaluations. In the interest of illustrating the predictive power of our custom ERA model, the first step we took was visualizing and measuring prediction accuracy of our model against the null (ERA-only) model:
 
-```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r echo=FALSE, fig.height=5, fig.width=7, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot(pitchers,
        aes(x = custom_pred, y = ERA_t1)) +
   geom_point(alpha = 0.5, color = "midnightblue") +
@@ -519,7 +555,7 @@ ggplot(pitchers,
   theme_classic()
 ```
 
-```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r echo=FALSE, fig.height=5, fig.width=7, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot(pitchers,
        aes(x = ERA, y = ERA_t1)) +
   geom_point(alpha = 0.5, color = "midnightblue") +
@@ -532,6 +568,163 @@ ggplot(pitchers,
 ```
 
 
+```{r echo=FALSE}
+cor_table <- tibble(
+    Model = c("Custom ERA Model", "Null ERA Model"),
+    `Correlation (R)` = c(0.413, 0.218))
+
+kable(cor_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+
+As we can see from the above visualizations, our custom model for forecasting ERA comfortably outperforms the null model. This is also evident in the two models' respective correlation coeffiecients, which measure the correlation between the actual values and predicted values for each model. In both cases, we can discern the difficulty in accurately forecasting ERA, as even our best performing model struggles to avoid some degree of prediction error. This is to be expected though, as predicting patterns of human performance (such as ERA) is a reasonably difficult task, especially when exposed to a large amount of stochastic error. That being said, our model is still accurate enough to make it useful in application. One such application is to compare the predicted ERA and actual ERA of pitchers in a given season, effectively measuring how well a pitcher performed relative to the modelling expectations determined by the previous year's performance.
+
+
+
+```{r echo=FALSE, fig.width=9,fig.height=6}
+ggplot(pitchers_2019_tidy, aes(x = Pitcher,
+                          y = value,
+                          label = value)) + 
+  geom_point(stat = 'identity',
+             aes(color = type), 
+             size = 2.5) +
+  scale_color_manual(name = "Value", 
+                    labels = c("Predicted ERA", "Actual ERA"), 
+                    values = c("custom_pred_2019" = "deepskyblue", 
+                               "ERA_t1" = "palevioletred2")) +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Predicted ERA vs. Actual ERA (2020)",
+       x = "Pitcher",
+       y = "ERA Value") + 
+  geom_line() +
+  theme_minimal()
+```
+
+
+
+From the above plot, which graphs predicted ERA (as determined by our ERA forecasting model) and actual ERA for the 50 highest-paid starting pitchers, we can ascertain which pitchers either overperformed or underperformed relative to modelling expectations. Specifically, we can look at the absolute difference between predicted ERA and actual ERA as a measure of expectation deviation. By this account, Anibal Sanchez, Jon Gray, Madison Bumgarner, Robbie Ray, and Tanner Roark stand out as pitchers who underperformed relative to their predicted performance. On the other hand, Dallas Keuchel, Shane Bieber, Trevor Bauer, and Zach Davies posted actual ERAs that exceeded the model's expectations. Implicitly, the model gives tends more conservative ERA prediction estimates, since the data used in linear model construction is necessarilly regressed. 
+
+Another extension of our ERA model is using salary data to determine which pitchers were overpaid or underpaid relative to both their contemporaries and their expected pitching outcomes. Intuitively, front offices should spend money on pitchers who they believe will improve the overall pitching poerformance of their team in coming seasons. Subsequently, general managers should be interested in compensating players based on their expected future performance, since that will determine the return the team gets on their investment. It is therefore appropriate to assess a player's salary relative to their forecasted performance in order to determine whether or not that player is appropriately compensated, which we attempted using our ERA model and salary data. To allow for ease of comparison, we first standardized each pitcher's salary and forecasted ERA. We then created the following visualizations, each of which offer some sort of display comparing the standardized forecasted ERA and standardized salaries for the 50 highest-paid starting pitchers in the year 2020:
+
+
+```{r, echo=FALSE, fig.width=7,fig.height=6}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted ERA`),
+                          y = `Standardized Forecasted Adjusted ERA`,
+                          label = `Standardized Forecasted Adjusted ERA`)) + 
+  geom_bar(stat = 'identity', aes(fill = ERA_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
+  labs(title = "Diverging Standardized Forecasted ERA (2020)",
+       x = "Pitcher",
+       y = "Standardized ERA Forecast (Adjusted)") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r, echo=FALSE, fig.width=7,fig.height=6}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
+                          y = `Standardized Salary`,
+                          label = `Standardized Salary`)) + 
+  geom_bar(stat = 'identity', aes(fill = salary_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
+  labs(title = "Diverging Standardized Salary (2020)",
+       x = "Pitcher",
+       y = "Standardized Salary") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot() +
+  scale_x_continuous(name = "Standardized Forecasted ERA (adjusted)",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  scale_y_continuous(name = "Standardized Salary",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  ggtitle("Standardized Forecasted ERA vs. Standardized Salary (2020)") +
+  geom_rect(aes(xmin = 0, ymin = 0, xmax = 3, ymax = 3), 
+            fill = "deepskyblue", alpha = 0.2) +
+  geom_rect(aes(xmin = -3, ymin = -3, xmax = 0, ymax = 0), 
+            fill = "palevioletred2", alpha = 0.2) +
+  geom_density_2d(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             color = "dodgerblue2", alpha = 0.3) +
+  geom_point(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             shape = 21,
+             colour = "dodgerblue", 
+             fill = "grey100", 
+             size = 5) +
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` > 1 | 
+                          `Standardized Salary` > 1),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.2) + 
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` < -2),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.33) + 
+  theme_minimal()
+```
+
+
+
+Already, we can identify several players who appear to be appropriately paid for their forecasted performance. Gerrit Cole, Max Scherzer, Jacob DeGrom, and Yu Darvish are four pronounced examples, as each pitcher possesses both one of the highest standardized salaries and highest standardized forecasted ERAs (for this analysis, forecasted ERA has been adjusted such that a positive value is now associated with stronger preformances). On the other hand, we also notice players who represent examples of inneffieint decision making by front offices. Zack Greinke, who has one of the highest salaries of any starting pitcher in 2020, actually had a forecasted ERA below the mean, implying that teams could have made better use of that salary capital. On the contrary, starting pitchers Blake Snell and Mike Clevinger were modelled to have  two of the best expected ERAs, but both had salaries lower than the mean value. Lastly, in order to provide one convenient measure of pitcher compensation, we plotted salary over forecasted ERA for each of the 50 highest-paid starting pitchers for the year 2020, with higher values representing pitchers who were more genereously compensated for their forecasted performances:
+
+
+```{r echo=FALSE, fig.width=9,fig.height=6}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
+                          y = Compensation,
+                          label = Compensation)) + 
+  geom_col(aes(fill = Compensation)) +
+  scale_fill_continuous(type = "viridis") +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Starting Pitcher Compensation (2020)",
+       x = "Pitcher",
+       y = "Relative Compensation (Salary/Adjusted Forecasted ERA)") + 
+  theme_minimal()
+```
+
+
+
+We can aslo use our salary model to measure which pitchers were underpaid relative to the existing standards and patterns of compensation identified by our model. 
+
+
+```{r echo=FALSE, fig.width=9,fig.height=6}
+ggplot(salary_2019_tidy, aes(x = Pitcher,
+                          y = value,
+                          label = value)) + 
+  geom_point(stat = 'identity',
+             aes(color = type), 
+             size = 2.5) +
+  scale_color_manual(name = "Value", 
+                    labels = c("Predicted Salary", "Actual Salary"), 
+                    values = c("salary_pred_2019" = "deepskyblue", 
+                               "salary_t1" = "palevioletred2")) +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Predicted Salary vs. Actual Salary (2020)",
+       x = "Pitcher",
+       y = "Log (Salary)") + 
+  geom_line() +
+  theme_minimal()
+```
 
 
 
