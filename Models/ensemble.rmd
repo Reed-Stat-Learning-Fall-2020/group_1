@@ -650,4 +650,7 @@ autoplot(base_stack_s, type = "weights")
 autoplot(base_stack_s)
 ```
 
+```{r}
+write_csv(data_test_s, "ensemblepreds.csv")
+```
 
