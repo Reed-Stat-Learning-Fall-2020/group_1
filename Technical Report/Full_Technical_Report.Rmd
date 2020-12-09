@@ -2,7 +2,7 @@
 title: "Modeling Pitcher Performance and Salary"
 author: "Josh Yamamoto, Riley Leonard, Andy Zhao"
 date: "Fall 2020"
-output: pdf_document
+output: html_document
 ---
 
 <style>
@@ -72,13 +72,17 @@ Conversely, in order to acquire data for the 2016 through 2020 seasons, we had t
 
 Worth noting is that we only pulled salary data for starting pitchers, both because it was a more feasible task in regards to controlling sample size and because pitching statistics and salary data vary greatly between the two principal types of pitchers (starting pitchers and relief pitchers). Including relief pitchers in our data would have resulted in less consistent and insightful modeling outcomes, motivating our decision to exclude relief pitchers from our data. That being said, because our pitching statistics dataset contained data for all pitchers, we were required to filter the data to only contain the starting pitchers present in our salary dataset, which were able to achieve by filtering on a combination of total games played and the number of batters faced per game (both of which varied substantially between the two pitcher classes). In order to minimize any joining mistakes, we used the function `make_clean_names()` from the `janitor` package to clean each pitcher's name before joining. Following the join, we included several filters (specifically to ensure a sufficient volume of batters faced) in order to drop outliers and make certain that our data was as robust as possible. Ultimately, the data wrangling process resulted in a handful of lost observations and an overall decrease in sample size, but we maintained a sizable enough dataset that we weren't too concerned about adverse variance.
 
-When all was said and done, we ended up with a dataset of 457 observations and 36 variables. Each observational unit in our dataset represents the season of an individual MLB pitcher between 2015 and 2019. Importantly, certain pitchers appear multiple times in the dataset, as many players sustain careers spanning the entire time series comprised in our data.
+When all was said and done, we ended up with a dataset of 457 observations and 36 variables, an excerpt of which is shared below. Each observational unit in our dataset represents the season of an individual MLB pitcher between 2015 and 2019. Importantly, certain pitchers appear multiple times in the dataset, as many players sustain careers spanning the entire time series comprised in our data. 
 
 ```{r echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
 data <- read_csv("Final Mega Summary.csv")
 
 nrow(data)
 ncol(data)
+```
+
+```{r echo=FALSE, fig.height=4, fig.width=6}
+include_graphics("Data Frame Pic.png")
 ```
 
 
@@ -121,7 +125,8 @@ A filter was applied to salary to remove salaries lower than 600,000 or pre-arbi
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 Mega_Summary <- read_csv("Final Mega Summary.csv")
-Original_Summary <- read_csv("Mega Summary.csv")
+Original_Summary <- read_csv("Mega Summary.csv") %>%
+  filter(`ERA (t+1)` < 7.00)
 
 #Filter out Pre-arbitration
 Mega_Summary_Filtered <- 
@@ -131,8 +136,7 @@ Mega_Summary_Filtered <-
 #Filter out Pre-arbitration
 Original_Summary_Filtered <- 
   Original_Summary %>% 
-  filter(`Salary (t+1)` > 600000) %>%
-  filter(`ERA (t+1)` < 7.00)
+  filter(`Salary (t+1)` > 600000)
 ```
 
 #### Looking at Salary
@@ -827,7 +831,6 @@ Having explored possible predictors of salary (comparing both simple and complex
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
-Mega_Summary <- read_csv("Mega Summary.csv")
 pitch_data <- read_csv("2020_summary.csv") %>%
   rename(`Pitch Category` = pitch_category) %>%
   rename(wOBA = wOBAA)
@@ -868,13 +871,13 @@ pitch_data  %>%
 
 
 
-The first thing we find in our exploration is that average pitch speed has little meaningful relationship with other measures of pitch performance (such as wOBA), even when the data is almost perfectly separated by categorical variable level. These results are consistent with different response choices (BA, SLG, etc.). This leads us to conclude that some pitch tracking data (specifically the data involving velocity and release extension) have no predictive power when it comes to modeling pitcher performance. This helps explain why Statcast uses batted ball variables (such as launch angle and exit velocity) rather than pitch tracking variables as the predictors in the calculation of their expected outcome statistics (such as xwOBA and xBA). Accordingly, we will most likely avoid using average pitch speed and average release extension in our model and focus on other predictors of future ERA instead.
+The first thing we find in our exploration is that average pitch speed does not exhibit meaningful statistical relationships with other measures of pitch performance (such as wOBA), even when the data is almost perfectly separated by categorical variable level. These results are consistent with different response choices (BA, SLG, etc.). This leads us to conclude that some pitch tracking data (specifically the data involving velocity and release extension) have no predictive power when it comes to modeling pitcher performance. This helps explain why Statcast uses batted ball variables (such as launch angle and exit velocity) rather than pitch tracking variables as the predictors in the calculation of their expected outcome statistics (such as xwOBA and xBA). Accordingly, we will most likely avoid using average pitch speed and average release extension in our model and focus on other predictors of future ERA instead.
 
 Ostensibly, the most obvious predictor of forecasted ERA is current ERA, as we can intuitively expect pitchers who performed well in a given season to also perform well in subsequent seasons.
 
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = ERA,
     y = `ERA (t+1)`)
@@ -886,7 +889,7 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$ERA, Mega_Summary$`ERA (t+1)`)
+cor(Original_Summary$ERA, Original_Summary$`ERA (t+1)`)
 ```
 
 
@@ -899,7 +902,7 @@ Despite the expected existence of a positive linear association between the two 
 #### Future ERA Distribution
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-ggplot(Mega_Summary, aes(x = `ERA (t+1)` ))+
+ggplot(Original_Summary, aes(x = `ERA (t+1)` ))+
   geom_histogram(
     color="grey100",
     fill = "midnightblue",
@@ -921,7 +924,7 @@ First, we look at some of the same counting statistics that were significant in 
 
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = W,
     y = `ERA (t+1)`)
@@ -933,16 +936,16 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$W, Mega_Summary$`ERA (t+1)`)
+cor(Original_Summary$W, Original_Summary$`ERA (t+1)`)
 ```
 
 
 
-The relationship between wins and forecasted ERA is somewhat weak but the negative (or inverse) relationship is what one would have expected, since winning pitchers often have lower ERAs. Thus, while the negative correlation coefficient does support the decision to reward wins with a lucrative contract, the weaker association suggests that the relationship might not be as important as one would have expected looking at salary alone.
+The relationship between wins and forecasted ERA isn't exceptionally strong but the negative (or inverse) relationship is what one would have expected, since winning pitchers often have lower ERAs. Thus, while the negative correlation coefficient does support the decision to reward wins with a lucrative contract, the weaker association suggests that the relationship might not be as important as one would have expected looking at salary alone.
 
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = Pitches,
     y = `ERA (t+1)`)
@@ -954,7 +957,7 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$Pitches, Mega_Summary$`ERA (t+1)`)
+cor(Original_Summary$Pitches, Original_Summary$`ERA (t+1)`)
 ```
 
 
@@ -963,7 +966,7 @@ Similar to wins, we again see a weak, negative relationship between number of pi
 
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = SO,
     y = `ERA (t+1)`)
@@ -975,7 +978,7 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$SO, Mega_Summary$`ERA (t+1)`)
+cor(Original_Summary$SO, Original_Summary$`ERA (t+1)`)
 ```
 
 
@@ -995,7 +998,7 @@ Despite the fact that the salary-associated predictors are already quite good at
 The advanced statistics we considered were strikeout percent (K %), weighted on base average (wOBA), expected weighted on base average (xwOBA), and batting average on balls in play (BABIP).
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = `K %`,
     y = `ERA (t+1)`)
@@ -1007,11 +1010,11 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$`K %`, Mega_Summary$`ERA (t+1)`)
+cor(Original_Summary$`K %`, Original_Summary$`ERA (t+1)`)
 ```
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = wOBA,
     y = `ERA (t+1)`)
@@ -1023,11 +1026,11 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$wOBA, Mega_Summary$`ERA (t+1)`)
+cor(Original_Summary$wOBA, Original_Summary$`ERA (t+1)`)
 ```
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = xwOBA,
     y = `ERA (t+1)`)
@@ -1039,11 +1042,11 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$xwOBA, Mega_Summary$`ERA (t+1)`)
+cor(Original_Summary$xwOBA, Original_Summary$`ERA (t+1)`)
 ```
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = BABIP,
     y = `ERA (t+1)`)
@@ -1055,7 +1058,7 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$BABIP, Mega_Summary$`ERA (t+1)`)
+cor(Original_Summary$BABIP, Original_Summary$`ERA (t+1)`)
 ```
 
 
@@ -1071,7 +1074,7 @@ A further extension of comparing the differences in outcome and expected outcome
 
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = `BABIP - Mean BABIP`,
     y = `ΔERA`)
@@ -1083,11 +1086,11 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$`BABIP - Mean BABIP`, Mega_Summary$`ΔERA`)
+cor(Original_Summary$`BABIP - Mean BABIP`, Original_Summary$`ΔERA`)
 ```
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = `xBA - BA`,
     y = `ΔERA`)
@@ -1099,11 +1102,11 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$`xBA - BA`, Mega_Summary$`ΔERA`)
+cor(Original_Summary$`xBA - BA`, Original_Summary$`ΔERA`)
 ```
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = `xwOBA - wOBA`,
     y = `ΔERA`)
@@ -1115,11 +1118,11 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$`xwOBA - wOBA`, Mega_Summary$`ΔERA`)
+cor(Original_Summary$`xwOBA - wOBA`, Original_Summary$`ΔERA`)
 ```
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   ggplot(aes(
     x = `ERA/Hard Hit %`,
     y = `ΔERA`)
@@ -1131,11 +1134,11 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-cor(Mega_Summary$`ERA/Hard Hit %`, Mega_Summary$`ΔERA`)
+cor(Original_Summary$`ERA/Hard Hit %`, Original_Summary$`ΔERA`)
 ```
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
-Mega_Summary %>%
+Original_Summary %>%
   filter(`ERA/Barrel %` < 1.5) %>%
   ggplot(aes(
     x = `ERA/Barrel %`,
@@ -1148,7 +1151,7 @@ Mega_Summary %>%
 ```
 
 ```{r echo=FALSE}
-Barrel_Filtered <- Mega_Summary %>%
+Barrel_Filtered <- Original_Summary %>%
   filter(`ERA/Barrel %` < 1.5) 
 cor(Barrel_Filtered$`ERA/Barrel %`, Barrel_Filtered$`ΔERA`)
 ```
@@ -1159,7 +1162,7 @@ As we see in the data, there is clear statistical evidence of what we could call
 
 
 ```{r echo=FALSE}
-cor(Mega_Summary$`ERA (t+1)`, Mega_Summary$`ΔERA`)
+cor(Original_Summary$`ERA (t+1)`, Original_Summary$`ΔERA`)
 ```
 
 
@@ -1182,8 +1185,8 @@ kable(salary_pred_cor, digits = 3, caption = "Strongest Salary Predictors") %>%
 ```
 
 ```{r echo=FALSE}
-future_ERA_pred<-Original_Summary_Filtered %>%select(wOBA, BA, xBA, xwOBA, `K %`)
-future_ERA_pred_cor<-cor(future_ERA_pred,Original_Summary_Filtered$`ERA (t+1)`)
+future_ERA_pred<-Original_Summary %>%select(wOBA, BA, xBA, xwOBA, `K %`)
+future_ERA_pred_cor<-cor(future_ERA_pred,Original_Summary$`ERA (t+1)`)
 kable(future_ERA_pred_cor, digits = 3, caption = "Strongest ERA Predictors") %>%
   kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
@@ -1282,7 +1285,7 @@ full_mod <- lm(data = pitchers,
 
 # Full Model for Salary
 
-full_mod <- lm(data = salary_data,
+full_mod_salary <- lm(data = salary_data,
                  salary_t1 ~.)
 ```
 
@@ -1413,7 +1416,7 @@ labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fo
 penalized_reg_table<-data.frame(labels,ridge_statistics,lasso_statistics) 
 penalized_reg_table<-penalized_reg_table %>%  rename(
     `Ridge Regression Statistics` = ridge_statistics,
-    `Lasso Regression Statistics` = lasso_statistics,
+    `LASSO Regression Statistics` = lasso_statistics,
     `Adjusted R-squared and 5-Fold CV MSE` = labels)
 
 kable(penalized_reg_table, digits = 3) %>%
@@ -1533,7 +1536,7 @@ all_statistics<-all_statistics %>%  rename(
     `Full Model` =full_statistics,
     `Forward Model` = forward_statistics,
     `Ridge Regression`=ridge_statistics,
-    `Lasso Regression`=lasso_statistics,
+    `LASSO Regression`=lasso_statistics,
     `Custom Model`= domain_knowledge_statistics,
     `Principal Regression` = PCR_statistics,
     `Ensemble Model` = ensemble_statistics,
@@ -1545,7 +1548,7 @@ kable(all_statistics, digits = 3) %>%
 
 ```{r echo=FALSE}
 final_table <- tibble(
-    Model = c("Ridge", "Lasso", "Forward","Custom","Full","PCR", "Ensemble"),
+    Model = c("Ridge", "LASSO", "Forward","Custom","Full","PCR", "Ensemble"),
     `Rsq for ERA` = c(0.092,0.107,0.164,0.157,0.139,0.138,0.149),
     `5-fold MSE for ERA` = c(0.990,0.973,0.999,0.972,1.043, 0.997,0.970),
     `Rsq for Salary` = c(0.625,0.629,0.616,0.6429,0.609,0.654,0.829),
