@@ -2,7 +2,7 @@
 title: "Modeling Pitcher Performance and Salary"
 author: "Josh Yamamoto, Riley Leonard, Andy Zhao"
 date: "Fall 2020"
-output: html_document
+output: pdf_document
 ---
 
 <style>
@@ -742,7 +742,7 @@ In the interest of saving some space, we will not be printing the entire correla
 ```{r echo=FALSE}
 volume_predictors<-Mega_Summary_Filtered %>%select(Pitches,W,L,BFP,H,HR,SO)
 volume_predictors_cor<-cor(volume_predictors)
-kable(volume_predictors_cor, digits = 3, caption = "Volume Predictors") %>%
+kable(volume_predictors_cor, digits = 3, caption = "Volume Predictor Correlations") %>%
   kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
@@ -858,8 +858,12 @@ pitch_data  %>%
   geom_point(
     size = 2, 
     alpha = 0.5) +
+    scale_color_manual(name = "Pitch Category", 
+                    labels = c("Fastball", "Off-speed"), 
+                    values = c("Off-speed" = "deepskyblue", 
+                               "Fastball" = "palevioletred2")) +
   geom_smooth(method = lm) +
-  theme_minimal()
+  theme_classic()
 ```
 
 
@@ -1728,7 +1732,7 @@ ggplot(pitchers,
   geom_point(alpha = 0.5, color = "midnightblue") +
   geom_smooth(method = lm, color = "midnightblue") +
   labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
-       subtitle = "Modelling Predictions",
+       subtitle = "Model Predictions",
        x = "Predicted ERA (t+1)",
        y = "ERA (t+1)") + 
   theme_classic()
