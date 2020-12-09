@@ -28,7 +28,9 @@ ensemble_results %>%
   ) +
   geom_point() + 
   coord_obs_pred() +
-  geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2) 
+  geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2) +
+  labs(x = "logged Salary (t+1)", y = "Prediction") +
+  theme_minimal()
 
 ```
 
@@ -51,5 +53,19 @@ It seems like we likely don't quite have enough data to say anything too conclus
 
 Overall we're a bit unsurprised by the fact that the ensemble model performed so well because it was essentially a combination of two of our other successful models. We were able explain a good amount of the variation in the next year's salary and out test MSE was impressively better than any other model.
 
+Here's another way to visualize how we did. We can see that the occasions when our model did the worst was when we overpredicted a salary. In other words we see that same struggle with predicting low salaries here.
+
+```{r}
+ensemble_results %>%
+  mutate(diff = salary_t1 - .pred) %>%
+  distinct(Pitcher, .keep_all = T) %>%
+  mutate(Pitcher =  fct_reorder(Pitcher, abs(diff))) %>%
+  ggplot(aes(x = Pitcher, y = abs(diff), color = diff < 0)) +
+  geom_point() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45)) +
+  labs(y = "Residuals")
+
+```
 
 
