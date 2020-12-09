@@ -543,7 +543,7 @@ Lastly, we can compare the predictors included in each model, as well as their a
 
 In addition to using inference to assess the discrepancies in the patterns that determine future performance and future salary, we can also utilize the predictive powers of our models to make additional evaluations. In the interest of illustrating the predictive power of our custom ERA model, the first step we took was visualizing and measuring prediction accuracy of our model against the null (ERA-only) model:
 
-```{r echo=FALSE, fig.height=5, fig.width=7, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot(pitchers,
        aes(x = custom_pred, y = ERA_t1)) +
   geom_point(alpha = 0.5, color = "midnightblue") +
@@ -555,7 +555,7 @@ ggplot(pitchers,
   theme_classic()
 ```
 
-```{r echo=FALSE, fig.height=5, fig.width=7, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot(pitchers,
        aes(x = ERA, y = ERA_t1)) +
   geom_point(alpha = 0.5, color = "midnightblue") +

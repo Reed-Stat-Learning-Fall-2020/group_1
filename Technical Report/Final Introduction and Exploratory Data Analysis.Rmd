@@ -5,14 +5,14 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 library(tidyverse)
 library(tidymodels)
 library(rvest)
 library(baseballr)
 library(readr)
 library(knitr)
-library(corrr)
+library(kableExtra)
 ```
 
 ## Introduction
@@ -68,7 +68,7 @@ We began by examining the structure of our first response variable: future salar
 
 
 
-```{r echo=FALSE, fig.height=4, fig.width=6}
+```{r echo=FALSE, fig.height=3, fig.width=5}
 ggplot(Mega_Summary_Filtered, 
        aes(x = salary_t1)) + 
   geom_histogram(
@@ -87,7 +87,7 @@ ggplot(Mega_Summary_Filtered,
 As we can see, future salary is quite right skewed. This is understandable, as certain superstar pitchers have salaries that are magnitudes greater than the average starting pitcher. We considered a log tranformation to try to ameliorate this skew.
 
 
-```{r echo=FALSE, fig.height=4, fig.width=6}
+```{r echo=FALSE, fig.height=3, fig.width=5}
 ggplot(Mega_Summary_Filtered, 
        aes(x = log(salary_t1))) + 
   geom_histogram(
@@ -112,7 +112,7 @@ It would appear as though the log transformation greatly reduced the degree of t
 
 Total wins and total losses constitute the most basic pitching statistics, indicating nothing more than the possible discrete outcomes resulting from a pitcher's contribution to a game. Total number of pitches also represents a fairly rudimentary measure of pitching performance and durability. Additionally, raw, unadjusted ERA (or the average number of runs a pitcher allows in a game) is another predictor that one would expect to be associated with salary. Lastly, the number of earned runs (the unprocessed counting statistic used to calculate ERA) stands out as anohter basic predictor in determining future salary.
 
-```{r echo=FALSE. fig.height=4, fig.width=6, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #Total Wins
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -170,7 +170,7 @@ Unsurprisingly, total wins illustrates a moderate, positive correlation with fut
 Meanwhile total number of pitches exhibits a moderate, positive correlation with salary. As we will see later on, pitching statistics having to do with productivity or volume of pitches are often highly correlated with salary.
 
 
-```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #Win percent
 Mega_Summary_Filtered <- 
   Mega_Summary_Filtered %>% 
@@ -199,7 +199,7 @@ cor(Mega_Summary_Filtered$Win_Percent,
 Strikingly, a pitcher's win percentage has a lower correlation with future salary than the total number of wins. While wins and losses are inherently flawed statistics, one would imagine that a higher win-loss ratio implies that a pitcher is contributing more directly to a team's sucess and thus deserves a higher salary. Rather, it seems like the total number of wins is the more important statistic in the eyes of GMs.
 
 
-```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #Games played
 ggplot(Mega_Summary_Filtered, 
        aes(
@@ -223,7 +223,7 @@ cor(Mega_Summary_Filtered$G,
 Total games played appears to possess a very weak positive relationship with future salary. This is understandable for two reasons, the first being that pitchers who make a lot of appearances are generally more skilled and therefore trusted to appear in more games by managers. Concurrently, highly skilled pitchers are paid well. Secondly, as we have seen throughout this exploration so far, an increase in volume-related statistics generally tends to result in a larger paycheck.
 
 
-```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #Current ERA
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -253,7 +253,7 @@ While ERA does exhibit a negative correlation with future salary, the weakness o
 While season totals might have a murkey relationship with future performance, it is undeniable that statistics such as strikeouts are quite flashy and can therefore lead to lucrative contracts. As a result, season totals might be strong predictors of next year's salary. We first examined total batters faced, total strikeouts, total number of batters walked on balls, total hits, and total home runs allowed.
 
 
-```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #Total batters faced
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -346,7 +346,7 @@ Total number of batters walked on balls has a very weak (close to 0) positive re
 Next we looked to see if the percent of strikeouts, balls, and hits (BA) are correlated with future salary.
 
 
-```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #Strikeout Percent
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -405,7 +405,7 @@ Interestingly, even though strikeout percentage (K %) is still positively correl
 We next looked at some season percentages of more advanced statistics such as hard hit % and barrel %. Both of these statistics look at the speed and angle of the ball after being hit by the batter. Barrel % represents batted balls with exit velocities and launch angles that, historically, have led to a minimum .500 batting average (or a 50% chance of resulting in a hit). Hard hit % is similar to barrel %, but does not consider launch angle and simply describes batted balls with exit velocities exceeding 95 MPH. Naively, one would expect a negative relationship, as a good pitcher should try to avoid giving up hard contact.
 
 
-```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #Hard hit percent
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -451,7 +451,7 @@ Surprisingly, neither of these advanced variables seem to have a clear relations
 Next, we examined if the averages of certain statistics were correlated with salary, specifically looking at average speed and spin rate.
 
 
-```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #Average Speed
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -499,7 +499,7 @@ Spin rate is a topic that has garnered increased attention in the baseball commu
 **We now get to our advanced statistics,** namely weighted on base average (wOBA), batting average on balls in play(BABIP), expected weighted on base average (xwOBA), and expected batting average(xBA). The two expected statistics are notable as they try to remove some of the noise (or "luck"") from the statistic by calculating wOBA and BA based on the historical wOBA and BA of batted balls with similar exit velocities and launch angles. 
 
 
-```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #Weighted on base average (wOBA)
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -577,7 +577,7 @@ Interestingly, all 4 advanced statistics had negative correlations, albeit weak 
 **These predictors will come in handy later, but the idea behind luck reversion is that if a pitcher's wOBA was significantly lower than their expected wOBA, then they would appear to be a better pitcher due to luck alone**. **Luck reversion for us takes 4 forms,** the first two (xwOBA-wOBA and xBA-BA) are simply the difference between expected and observed statistics. The second two (ERA/hard hit % and ERA/barrel %) operate under the assumption that hard contact (hard hit % and barrel %) will result in more earned runs and a higher ERA, and if a pitcher's ERA/barrel % is low, then that means that they were lucky in terms of having a lower ERA than their pitching truly warrants.
 
 
-```{r, echo=FALSE, fig.height=4, fig.width=6, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 #xwOBA-wOBA
 ggplot(Original_Summary_Filtered,
        aes(
@@ -700,7 +700,7 @@ kable(barrel_predictors_cor, digits = 3, caption = "Barrel % Correlations") %>%
 Average barrel percentage has a medium positive correlation with our advanced statistics wOBA as well as expected wOBA and expected BA. It is also positively correlated with ERA. This makes sense as harder contact means more runs allowed which means more offense, thus raising the values of the advanced statistics.
 
 
-```{r echo=FALSE}}
+```{r echo=FALSE}
 offense_statistics<-Original_Summary_Filtered %>%select(`K %`,BA,wOBA,xwOBA)
 strikes_and_hits<-Original_Summary_Filtered %>%select(`K %`,BA)
 strikes_hits_statistics_cor<-cor(offense_statistics,strikes_and_hits)
@@ -712,7 +712,7 @@ kable(strikes_hits_statistics_cor, digits = 3, caption = "Rate Metric Correlatio
 Strike and hit %'s were negatively correlated with each other which is reasonable as they are mutually exclusive. Strike % also had high, negative correlations with the wOBA and xWOBA statistics while hit % had a high positive correlation with those two statistics. This is understandable as those statistics try to quantify total offensive output, which consists of accumulating hits while avoiding strikes.
 
 
-```{r echo=FALSE}}
+```{r echo=FALSE}
 advanced_statistics<-Mega_Summary_Filtered %>%select(BABIP,xBA,wOBA,xwOBA)
 advanced_statistics_cor<-cor(advanced_statistics,Mega_Summary_Filtered$ERA)
 kable(advanced_statistics_cor, digits = 3, caption = "ERA Correlations") %>%
@@ -723,7 +723,7 @@ kable(advanced_statistics_cor, digits = 3, caption = "ERA Correlations") %>%
 Our advanced statistics, BABIP, wOBA, xwOBA, xBA are all quite positively correlated with ERA. Given that the statistics all try to quantify offense and that ERA represents total offensive runs allowed, this relationship is to be expected. 
 
 
-```{r echo=FALSE}}
+```{r echo=FALSE}
 wins_and_lossess<-Mega_Summary_Filtered %>%select(W,L)
 wins_and_lossess_cor<-cor(wins_and_lossess,Mega_Summary_Filtered$ERA)
 kable(wins_and_lossess_cor, digits = 3, caption = "ERA Correlations") %>%
@@ -733,13 +733,10 @@ kable(wins_and_lossess_cor, digits = 3, caption = "ERA Correlations") %>%
 
 An additional, interesting, observation is that ERA is positively correlated with number of losses with a medium degree of positive correlation , while the inverse relationship between ERA and number of wins is not as strong. This suggests that a poor pitcher with a high ERA can easily lose games while a skilled pitcher with a low ERA cannot win games for his team alone.
 
-Here we have a nice way to visualize some of the correlations that we discussed above. Unfortunately due to the large number of predictors we have, the plot is quite cluttered in some ares.
+Here we have a nice way to visualize some of the correlations that we discussed above. Unfortunately due to the large number of predictors we have, the plot is quite cluttered in some ares. **unable to load paclage `corr`**
 
 
-
-```{r echo=FALSE}
-library(corrr)
-
+```{r echo=FALSE, eval=FALSE}
 total_quant_pred %>%
   correlate() %>%
   rearrange() %>%
@@ -751,32 +748,35 @@ total_quant_pred %>%
 
 
 
-## Predicting Future ERA
+### ERA Data Exlporation
 
-Having explored possible predictors of salary (comparing both simple and complex variables), we move on to our prediction of future Earned Run Average (ERA). In this case, our selected response (ERA) can be thought of as a rough proxy for general pitching performance and outcome. Since the inception of the statistic in the early 1900s, ERA has been the most ubiquitous and cited measure of pitcher effectiveness, as it represents a straightforward calculation of the average amount of runs a pitcher allows over the duration of typical game (with run prevention thought of as the ultimate aim of pitching). Despite ERA being the most functional measure of pitching performance, it is nonetheless subject to a significant deal of random noise between individual pitchers' seasons. The development of advanced pitching analytics therefore may lend itself to more accurate forecasts of future ERA than simple counting statistics (such as wins, strikeouts, and innings pitched). With this in mind, we are motivated to find the statistical model that most accurately predicts ERA in a succesive season given a number of predictors generated from data in the current season. This should allow us to assess and predict player performance not based on actual (occasionally random) outcomes, but rather on an aggregation of predicted outcomes determined by a set of relevant statistical parameters. Ultimately, this model should lend itself to making informed salary decisions by MLB general managers.
+Having explored possible predictors of salary (comparing both simple and complex variables), we move on to our prediction of future Earned Run Average (ERA). In this case, our selected response (ERA) can be thought of as a rough proxy for general pitching performance and outcome. Since the inception of the statistic in the early 1900s, ERA has been the most ubiquitous and cited measure of pitcher effectiveness, as it represents a straightforward calculation of the average amount of runs a pitcher allows over the duration of typical game (with run prevention thought of as the ultimate aim of pitching). Despite ERA being the most functional measure of pitching performance, it is nonetheless subject to a significant deal of random noise between individual pitchers' seasons. The development of advanced pitching analytics therefore may lend itself to more accurate forecasts of future ERA than simple counting statistics (such as wins, strikeouts, and pitches). With this in mind, we are motivated to find the statistical model that most accurately predicts ERA in a succesive season given a number of predictors generated from data in the current season. This should allow us to assess and predict player performance not based on actual (occasionally random) outcomes, but rather on an aggregation of predicted outcomes determined by a set of relevant statistical parameters. Ultimately, this model should lend itself to making informed salary decisions by MLB general managers.
 
-```{r message=FALSE, warning=FALSE, paged.print=FALSE}
-Mega_Summary <- read_csv("Models/Mega Summary.csv")
-pitch_data <- read_csv("Exploratory Data Analysis/2020_summary.csv") %>%
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+Mega_Summary <- read_csv("Mega Summary.csv")
+pitch_data <- read_csv("2020_summary.csv") %>%
   rename(`Pitch Category` = pitch_category) %>%
   rename(wOBA = wOBAA)
 ```
 
-```{r}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 pitch_data  %>%
   ggplot(aes(
     x = `Average Pitch Speed`,
     y = wOBA)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+    geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
+cor(pitch_data$`Average Pitch Speed`, pitch_data$wOBA)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 pitch_data  %>%
   ggplot(aes(
     x = `Average Pitch Speed`,
@@ -790,305 +790,327 @@ pitch_data  %>%
 ```
 
 
-The first thing we find in our exploration is that average pitch speed has no meaningful relationship with other measures of pitch performance (such as wOBA), even when the data is almost perfectly seperated by categorical variable level. This is also true of average spin rate, and the results are consistent with different response choices (BA, SLG, etc.). This leads us to conclude that pitch tracking data has no predictive power when it comes to modelling pitcher performance. This helps explain why Statcast uses batted ball variables (such as launch angle and exit velocity) rather than pitch tracking variables as the predictors in the calculation of their expected outcome statistics (such as xwOBA and xBA). Accordingly, we will most likely avoid using average pitch speed and average spin rate in our model and focus on other predictors of future ERA instead.
 
+The first thing we fnd in our exploration is that average pitch speed has little meaningful relationship with other measures of pitch performance (such as wOBA), even when the data is almost perfectly seperated by categorical variable level. These results are consistent with different response choices (BA, SLG, etc.). This leads us to conclude that some pitch tracking data (specifically the data involving velocity and release extension) have no predictive power when it comes to modelling pitcher performance. This helps explain why Statcast uses batted ball variables (such as launch angle and exit velocity) rather than pitch tracking variables as the predictors in the calculation of their expected outcome statistics (such as xwOBA and xBA). Accordingly, we will most likely avoid using average pitch speed and average release extension in our model and focus on other predictors of future ERA instead.
 
 Ostensibly, the most obvious predictor of forcasted ERA is current ERA, as we can intuitively expect pitchers who performed well in a given season to also perform well in subsequent seasons.
 
 
-```{r}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = ERA,
     y = `ERA (t+1)`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$ERA, Mega_Summary$`ERA (t+1)`)
 ```
 
 
-Despite the expected existence of a postive linear association between the two variables, the correlation between ERA and ERA in the subsequent season is far from perfect. This can likely be explained by the aforementioned influence of randomness in pitching outcomes. This leads us to believe that other variables (or a combination therof) may have more predictive power in forecasting ERA than ERA by itself. 
 
-##Future ERA distribution##
+Despite the expected existence of a postive linear association between the two variables, the correlation between ERA and ERA in the subsequent season is far from perfect. This can likely be explained by the aforementioned influence of randomness in pitching outcomes. This leads us to believe that other variables (or a combination therof) may have stronger predictive power in forecasting ERA than ERA by itself. 
 
-```{r}
+
+
+
+#### Future ERA Distribution
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 ggplot(Mega_Summary, aes(x = `ERA (t+1)` ))+
   geom_histogram(
     color="grey100",
+    fill = "midnightblue",
     bins = 30, 
     alpha = .75 )+
   theme_classic()
 ```
-We can see that, unlike future salary, future ERA displays a decently normal distribution. While there is a tiny right tail, the low number of observations in that region make it so that it is unlikely to skew our model. This normal distribution is understandable as the MLB has pitchers with a range of talent, with the majority of them falling around the average. The few outliers in the right tail likely represent injury-ridden seasons or seasons where a pitcher experienced bad luck.
-
-##Correlations Between the Strongest Predictors of Salary and Future ERA##
-
-First, we look at some of the same counting stats that were significant in predicting salary, namely total wins, total pitches, and total strikeouts, which were the three predictors with the highest correlation (quantified through R value) with salary:
 
 
-```{r}
+
+We can see that, unlike future salary, future ERA displays an approximately normal distribution. While there is a small right tail, the low number of observations in that region make it so that it is unlikely to skew our model. This normal distribution is understandable, as the MLB has pitchers with a range of talent, with the majority of them falling around the average. The few outliers in the right tail likely represent injury-ridden seasons or seasons where a pitcher experienced anomalously bad luck.
+
+
+
+
+#### Correlations Between the Strongest Predictors of Salary and Future ERA
+
+First, we look at some of the same counting statistics that were significant in predicting salary, namely total wins, total pitches, and total strikeouts, which were the three predictors with the highest correlation with salary:
+
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = W,
     y = `ERA (t+1)`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$W, Mega_Summary$`ERA (t+1)`)
 ```
 
 
-The relationship between wins and forcasted ERA is somewhat weak but the negative or inverse relationship is what one would have expected as winning pitchers often have lower ERAs. Thus, while the negative correlation coefficient does support the decision to reward wins with a lucrative contract, the weaker association suggests that the relationship might not be as important as one would have expected looking at salary alone.
 
-```{r}
+The relationship between wins and forcasted ERA is somewhat weak but the negative (or inverse) relationship is what one would have expected, since winning pitchers often have lower ERAs. Thus, while the negative correlation coefficient does support the decision to reward wins with a lucrative contract, the weaker association suggests that the relationship might not be as important as one would have expected looking at salary alone.
+
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = Pitches,
     y = `ERA (t+1)`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$Pitches, Mega_Summary$`ERA (t+1)`)
 ```
 
 
-Similar to wins, we again see a weak, negative relationship between number of pitches and ERA in the following year. This negative relationship is perhaps a bit more confusing and needs more explanation than the relationship between wins and ERA. What this relationship suggests is that more productive pitchers will tend to have a better or lower ERA next season. This relationship perhaps offers some validation to the correlations between volume of pitches and salary as it suggests that better pitchers simply pitch more often. However, it is worth mentioning that this relationship is more likely due to the fact that only highly-skilled pitchers will be allowed to rack up a large number of total pitchers. That is to say that, while a high number of pitches suggests a more valuable pitcher, making a less-accomplished pitcher pitch more innings will not necessarily improve their value or reduce their ERA.
+
+Similar to wins, we again see a weak, negative relationship between number of pitches and ERA in the following year. This negative relationship is perhaps a bit more confusing and needs more explanation than the relationship between wins and ERA. What this relationship suggests is that more productive pitchers (in terms of raw volume) will tend to have a better or lower ERA next season. This relationship perhaps offers some validation to the correlations between volume of pitches and salary, as it suggests that better pitchers simply pitch more often. However, it is worth mentioning that this relationship is more likely due to the fact that only highly-skilled pitchers will be allowed to accumulate a large number of total pitches. That is to say that, while a high number of pitches suggests a more valuable pitcher, making a less-accomplished pitcher pitch more innings will not necessarily improve their value or reduce their ERA.
 
 
-```{r}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = SO,
     y = `ERA (t+1)`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$SO, Mega_Summary$`ERA (t+1)`)
 ```
 
 
-Lastly, we see strikeouts in the previous year shows a decently strong, negative relationship to ERA. Here, the relationship is negative, which is what one would expect as pitchers that record more strikeouts are likely to be at the top of their field and are expected to continue their superb performance in later seasons. The strength of this association is surprising as it is stronger than both games and total pitches.
 
-From this analysis, we see that there is a consistently negative relationship between the top three predictors of salary and the pitcher's ERA the next season. This trend provides some evidence that, perhaps, GMs are doing a better job of properly valuing the right attributes than baseball fans imagine as the three predictors that are the most correlated with salary have a positive relationship to future performance (quantified through a negative relationship with future ERA). This finding is quite surprising as, intuitively, these impressive basic counting statistics should provide little to no indication as to future performance. One potential explanation for this is that these basic statistics are correlated with but, crucially, do not cause better future performance. That is to say that only "good" pitchers will be allowed to face a large number of batters and thus will accumulate a large number of these counting statistics.
+Lastly, we see strikeouts in the previous year demonstrates a fairly strong linear relationship with ERA. Here, the relationship is negative, which is what one would expect as pitchers that record more strikeouts are likely to be at the top of their field, and are expected to continue their superb performance in later seasons. The strength of this association is striking, as it is stronger than both games and total pitches.
+
+From this analysis, we see that there is a consistently negative relationship between the top three predictors of salary and the pitcher's ERA the next season. This trend provides some evidence that, perhaps, GMs are doing a better job of properly valuing the right attributes than baseball fans imagine, as the three predictors that are the most correlated with salary have a positive relationship to future performance (quantified through a negative relationship with future ERA). This finding is quite unexpected as, intuitively, these impressive basic counting statistics should provide little to no indication of future performance. One potential explanation for this result is that these basic statistics are correlated with but, crucially, do not cause better future performance. That is to say that only "good" pitchers will be allowed to face a large number of batters and thus will accumulate a large number of these counting statistics.
 
 Despite the fact that the salary-associated predictors are already quite good at predicting future ERA, we hypothesize that advanced statistics such as xWOBA or xBA are going to be better predictors of future performance than the salary-correlated predictors.
 
-##Correlations between Advanced Statistics and Future ERA##
 
-The advanced statistics we considered were strikeout percent (K%), weighted on base average (wOBA), expected weighted on base average (xwOBA), and batting average on balls in play (BABIP).
 
-```{r}
+
+#### Correlations Between Advanced Statistics and Future ERA
+
+
+The advanced statistics we considered were strikeout percent (K %), weighted on base average (wOBA), expected weighted on base average (xwOBA), and batting average on balls in play (BABIP).
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = `K %`,
     y = `ERA (t+1)`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$`K %`, Mega_Summary$`ERA (t+1)`)
 ```
 
-
-```{r}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = wOBA,
     y = `ERA (t+1)`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$wOBA, Mega_Summary$`ERA (t+1)`)
 ```
 
-
-```{r}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = xwOBA,
     y = `ERA (t+1)`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$xwOBA, Mega_Summary$`ERA (t+1)`)
 ```
 
-```{r}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = BABIP,
     y = `ERA (t+1)`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$BABIP, Mega_Summary$`ERA (t+1)`)
 ```
 
-Already, we see that the more advanced analytics have, on average, stronger correlations with future ERA than the more rudimentary counting statistics. Additionally, we see that expected weighted on-base average (xwOBA) outperforms weighted on-base average (wOBA). Unlike wOBA, xwOBA attempts to mitigate some of the stochasticity in pitching outcomes by aggregating batted ball data to predict results. In some ways, we can think of xwOBA has a more true measure of pure pitching performance than wOBA, which helps explain why it has a stronger correlation with future ERA. This also allows us to explore the difference between outcome-based statistics (like wOBA) and estimates of expected outcome (like xwOBA) as a measure of a pitcher's "luck", that is how much better or worse batters performed against the pitcher than expected (based on the quality of aontact allowed). 
-
-##Luck Reversion##
-
-Considering that we previously had discussed how total strikeouts is a very potent predictor of future salary, it is unsurprising that strikeout % has the strongest correlation, even stronger than total strikeouts, as it offers a more nuanced approach than the unadjusted total.
-
-A further extension of comparing the differences in outcome and expected outcome is to determine if those differences tend to correct themselves over time. To do so, we analyze the change in a pitcher's ERA from one season to the next as explained by the difference between different predictive and raw measures: 
 
 
-```{r}
+Already, we see that the more advanced analytics have, on average, stronger correlations with future ERA than the more rudimentary counting statistics. Considering that we previously discussed how total strikeouts is a very potent predictor of future salary, it is unsurprising that strikeout percentage has the strongest correlation to future ERA, even stronger than total strikeouts, as it offers a more nuanced approach than the unadjusted total. Additionally, we see that expected weighted on-base average (xwOBA) outperforms weighted on-base average (wOBA). Unlike wOBA, xwOBA attempts to mitigate some of the stochasticity in pitching outcomes by aggregaas a more true measure of pure pitching performance than wOBA, which helps explain why it has a stronger correlation with future ERA. This also allows us to explore the difference between outcome-based statistics (like wOBA) and estimates of expected outcome (like xwOBA) as a measure of a pitcher's "luck", based on the quality of contact allowed.
+
+
+
+
+#### Luck Reversion
+
+A further extension of comparing the differences in outcome and expected outcome is to determine if those differences tend to correct themselves over time. To do so, we analyze the change in a pitcher's ERA from one season to the next as explained by the difference between different predictive and raw measures.
+
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = `BABIP - Mean BABIP`,
     y = `ΔERA`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$`BABIP - Mean BABIP`, Mega_Summary$`ΔERA`)
 ```
 
-
-```{r}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = `xBA - BA`,
     y = `ΔERA`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$`xBA - BA`, Mega_Summary$`ΔERA`)
 ```
 
-
-```{r}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = `xwOBA - wOBA`,
     y = `ΔERA`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm,
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$`xwOBA - wOBA`, Mega_Summary$`ΔERA`)
 ```
 
-
-```{r}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Mega_Summary %>%
   ggplot(aes(
     x = `ERA/Hard Hit %`,
     y = `ΔERA`)
     ) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(
-    method = lm, 
-    color = "grey50"
-    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
   theme_classic()
 ```
 
-```{r}
+```{r echo=FALSE}
 cor(Mega_Summary$`ERA/Hard Hit %`, Mega_Summary$`ΔERA`)
 ```
 
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+Mega_Summary %>%
+  filter(`ERA/Barrel %` < 1.5) %>%
+  ggplot(aes(
+    x = `ERA/Barrel %`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
 
-As we see in the data, there is clear statistical evidence of what we could call "mean-reversion of luck". Pitchers whose actual performances were worse than expected performances generally saw an increase in ERA the next season as their "luck" reverted closer to the mean. The opposite can be said for pitchers who performed better than exopcted. 
+```{r echo=FALSE}
+Barrel_Filtered <- Mega_Summary %>%
+  filter(`ERA/Barrel %` < 1.5) 
+cor(Barrel_Filtered$`ERA/Barrel %`, Barrel_Filtered$`ΔERA`)
+```
 
-```{r}
+
+
+As we see in the data, there is clear statistical evidence of what we could call "mean-reversion of luck". Pitchers whose actual performances were worse than expected performances generally saw an increase in ERA the next season as their "luck" reverted closer to the mean. The opposite can be said for pitchers who performed better than expected. 
+
+
+```{r echo=FALSE}
 cor(Mega_Summary$`ERA (t+1)`, Mega_Summary$`ΔERA`)
 ```
+
+
 
 Considering the very strong, positive relationship between change in ERA (ΔERA) and future ERA (ERA (t+1)), this conclusion suggests that including differences in outcome-based statistics and expected statistics (especially in accordance with base year ERA) should have significant predictive power in forecasting future ERA.
 
 
-#Conclusion#
 
-Ultimately, the top 5 highest correlations for future salary are Pitches, ABs, W, H and HR, while the 5 predictors most associated with future ERA are wOBA, BA, xBA, xwOBA,and K %.
 
-```{r}
+### Conclusion
+
+Ultimately, the five highest correlations for future salary are pitches, ABs, W, H and HR, while the five predictors most associated with future ERA are wOBA, BA, xBA, xwOBA, and K %.
+
+
+```{r echo=FALSE}
 salary_pred<-Mega_Summary_Filtered %>%select(Pitches, ABs, W, H, HR)
-salary_pred_cor<-cor(salary_pred,Mega_Summary_Filtered$`Salary (t+1)`)
-kable(salary_pred_cor)
+salary_pred_cor<-cor(salary_pred,Mega_Summary_Filtered$salary_t1)
+kable(salary_pred_cor, digits = 3, caption = "Strongest Salary Predictors") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
-```{r}
-future_ERA_pred<-Mega_Summary_Filtered %>%select(wOBA, BA, xBA, xwOBA, `K %`)
-future_ERA_pred_cor<-cor(future_ERA_pred,Mega_Summary_Filtered$`ERA (t+1)`)
-kable(future_ERA_pred_cor)
+```{r echo=FALSE}
+future_ERA_pred<-Original_Summary_Filtered %>%select(wOBA, BA, xBA, xwOBA, `K %`)
+future_ERA_pred_cor<-cor(future_ERA_pred,Original_Summary_Filtered$`ERA (t+1)`)
+kable(future_ERA_pred_cor, digits = 3, caption = "Strongest ERA Predictors") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
-From our preliminary data exploration, it appears that slight discrepancies exist between the predictors that are associated with salary and the predictors associated with future performance. Specifically, it seems like raw, unadjusted counting stats associated with volume of pitches rather than quality are highly correlated with salary and have moderate correlations with future ERA, suggesting that baseball GMs might be prudent in rewarding those statistics. However, advanced statistics, especially statistics that calculate expected values, are better predictors of future performance, despite not being highly correlated with salary. We also elucidated the phenomenon of a "mean-reversion of luck" which suggests that a pitcher's expected performance, derived from statistics such as xWOBA and xBA rather than just WOBA and BA, can help remove some of the noise associated with luck and stochastic fluctuations. Overall, it appears that the differences in strength of correlation between salary and future performance are significant, our next step will be to create and fine-tune models to predict both response variables to both futher delineate what predictors the models differ on as well as investigate both over- and under-paid or valued pitchers.
+
+From our preliminary data exploration, it already appears that slight discrepancies exist between the predictors that are associated with salary and the predictors associated with future performance. Specifically, it seems like raw, unadjusted counting stats associated with volume of pitches rather than quality are highly correlated with salary and have moderate correlations with future ERA, suggesting that baseball GMs might be prudent in rewarding those statistics. However, advanced statistics, especially statistics that calculate expected values, are better predictors of future performance, despite not being highly correlated with salary. We also elucidated the phenomenon of a "mean-reversion of luck" which suggests that a pitcher's expected performance, derived from statistics such as xWOBA and xBA rather than just WOBA and BA, can help remove some of the noise associated with luck and stochastic fluctuations. Overall, it appears that the differences in strength of correlation between salary and future performance are significant, our next step will be to create and fine-tune models to predict both response variables to both futher delineate what predictors the models differ on as well as investigate both over- and under-paid or valued pitchers.
 
