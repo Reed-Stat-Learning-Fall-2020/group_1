@@ -694,7 +694,7 @@ cor(Original_Summary_Filtered$`ERA/Hard Hit %`,
    Original_Summary_Filtered$`Salary (t+1)`)
 
 #ERA/Barrel
-ggplot(Original_Summary_Filtered,
+ggplot(Original_Summary_Filtered %>% filter(`ERA/Barrel %` < 1.5),
        aes(
          x = `ERA/Barrel %`,
          y = `Salary (t+1)`)
