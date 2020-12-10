@@ -1177,7 +1177,7 @@ Ultimately, the predictors with the five highest correlations for future salary 
 
 
 ```{r echo=FALSE}
-salary_pred<-Mega_Summary_Filtered %>%select(Pitches, ABs, W, H, HR)
+salary_pred<-Mega_Summary_Filtered %>%select(SO,W,ABs,Pitches,BFP)
 salary_pred_cor<-cor(salary_pred,Mega_Summary_Filtered$salary_t1)
 kable(salary_pred_cor, digits = 3, caption = "Strongest Salary Predictors") %>%
   kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
