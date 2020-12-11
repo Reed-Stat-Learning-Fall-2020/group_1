@@ -1,0 +1,95 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rvest)
+library(janitor)
+library(glue)
+```
+
+```{r}
+team_url <- "https://www.spotrac.com/mlb/payroll/"
+
+# getting the team names
+
+html_team <- team_url %>%
+  read_html() %>%
+  html_nodes(css = ".xs-hide") %>%
+  html_text() %>%
+  make_clean_names() %>%
+  as_tibble() %>%
+  mutate(value = str_replace_all(value, "_", "-")) %>%
+  pull(value)
+  
+
+```
+
+
+```{r}
+# function to pull salary and then player names and then join the two together
+
+pull_salary <- function(x){
+  page <- read_html(x)
+  salary <- 
+    page %>%
+      html_nodes(css = ".info") %>%
+      html_text() %>%
+      as_tibble() %>%
+      mutate(value = str_remove(value, "\\$"),
+         value = str_remove_all(value, ","),
+         value = as.double(as.character(value)),
+         id = row_number()) %>%
+      rename("salary" = value)
+  players <- 
+    page %>%
+      html_nodes(css = ".team-name") %>%
+      html_text() %>%
+      as_tibble() %>%
+      mutate(id = row_number()) %>%
+      rename("name" = value)
+  final <- 
+    players %>%
+      left_join(salary, by = "id") %>%
+      select(-id)
+  return(final)
+}
+```
+
+
+```{r}
+links <- glue("https://www.spotrac.com/mlb/rankings/2017/salary/{html_team}/starting-pitcher/") %>%
+  map(
+    pull_salary
+  )
+
+full_df <- links %>%
+  bind_rows() %>%
+  mutate(year = 2017)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
