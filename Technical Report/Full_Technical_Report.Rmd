@@ -720,7 +720,7 @@ While `xwOBA-wOBA` doesn't display any strong relationship, `xBA-BA` had a moder
 
 #### Correlations Between Predictors
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=5, fig.width=7, message=FALSE, warning=FALSE}
 total_quant_pred <- 
   select_if(
     Original_Summary_Filtered,
@@ -743,14 +743,16 @@ total_quant_pred %>%
   correlate() %>%
   rearrange() %>%
   shave() %>%
-  rplot(shape = 19, colours = c("darkorange", "white", "midnightblue")) +
+  rplot(shape = 19, colours = c("midnightblue", "white", "darkorange")) +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
   
 
 ```
 
-This correlation plot is a great way to quickly look at how some of your predictors are correlated. Right off the bat we can see that we do have a lot of collinearity and although we won't discuss each instance, some salient trends certainly stand out.
+
+
+This correlation plot is a great way to quickly investigate how some of the predictors are correlated. Immediately, we can distinguish a fairly pronounced degree collinearity, and although we won't discuss each instance, some salient trends certainly stand out.
 
 
 ```{r echo=FALSE}
@@ -819,18 +821,6 @@ kable(wins_and_lossess_cor, digits = 3, caption = "ERA Correlations") %>%
 
 
 An additional, interesting, observation is that ERA is positively correlated with number of losses with a medium degree of positive correlation , while the inverse relationship between ERA and number of wins is stronger. This suggests that while a poor pitcher with a high ERA can easily lose games,  a skilled pitcher with a low ERA can perhaps contribute more to a winning effort.
-
-Here we have a nice way to visualize some of the correlations that we discussed above. Unfortunately due to the large number of predictors we have, the plot is quite cluttered in some ares. **unable to load package `corr`**
-
-
-```{r echo=FALSE, eval=FALSE}
-total_quant_pred %>%
-  correlate() %>%
-  rearrange() %>%
-  shave() %>%
-  rplot(shape = 15, colours = c("darkorange", "white","midnightblue")) +
-  theme(axis.text.x = element_text(angle = 90))
-```
 
 
 
