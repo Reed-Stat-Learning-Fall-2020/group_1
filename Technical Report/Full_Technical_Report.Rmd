@@ -720,7 +720,7 @@ While `xwOBA-wOBA` doesn't display any strong relationship, `xBA-BA` had a moder
 
 #### Correlations Between Predictors
 
-```{r echo=FALSE, fig.height=5, fig.width=7, message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE}
 total_quant_pred <- 
   select_if(
     Original_Summary_Filtered,
@@ -1589,7 +1589,7 @@ ggplot(final_table %>%
         geom="line",
         color = "midnightblue",
         size = 2.5, 
-        alpha = 0.6
+        alpha = 0.7
         ) +
     geom_point(
         color = "white",
@@ -1613,7 +1613,7 @@ ggplot(final_table %>%
         geom="line",
         color = "midnightblue",
         size = 2.5, 
-        alpha = 0.6
+        alpha = 0.7
         ) +
     geom_point(
         color = "white",
@@ -1646,7 +1646,7 @@ ggplot(final_table %>%
         geom="line",
         color = "midnightblue",
         size = 2.5, 
-        alpha = 0.6
+        alpha = 0.7
         ) +
     geom_point(
         color = "white",
@@ -1670,7 +1670,7 @@ ggplot(final_table %>%
         geom="line",
         color = "midnightblue",
         size = 2.5, 
-        alpha = 0.6
+        alpha = 0.7
         ) +
     geom_point(
         color = "white",
