@@ -70,7 +70,7 @@ Conversely, in order to acquire data for the 2016 through 2020 seasons, we had t
 
 #### Combining Data Sets
 
-Worth noting is that we only pulled salary data for starting pitchers, both because it was a more feasible task in regards to controlling sample size and because pitching statistics and salary data vary greatly between the two principal types of pitchers (starting pitchers and relief pitchers). Including relief pitchers in our data would have resulted in less consistent and insightful modeling outcomes, motivating our decision to exclude relief pitchers from our data. That being said, because our pitching statistics dataset contained data for all pitchers, we were required to filter the data to only contain the starting pitchers present in our salary dataset, which were able to achieve by filtering on a combination of total games played and the number of batters faced per game (both of which varied substantially between the two pitcher classes). In order to minimize any joining mistakes, we used the function `make_clean_names()` from the `janitor` package to clean each pitcher's name before joining. Following the join, we included several filters (specifically to ensure a sufficient volume of batters faced) in order to drop outliers and make certain that our data was as robust as possible. Ultimately, the data wrangling process resulted in a handful of lost observations and an overall decrease in sample size, but we maintained a sizable enough dataset that we weren't too concerned about adverse variance.
+Worth noting is that we only pulled salary data for starting pitchers, both because it was a more feasible task in regards to controlling sample size and because pitching statistics and salary data vary greatly between the two principal types of pitchers (starting pitchers and relief pitchers). Including relief pitchers in our data would have resulted in less consistent and insightful modeling outcomes, motivating our decision to exclude relief pitchers from our data. That being said, because our pitching statistics dataset contained data for all pitchers, we were required to filter the data to only contain the starting pitchers present in our salary dataset, which were able to achieve by filtering on a combination of total games played and the number of batters faced per game (both of which varied substantially between the two pitcher classes). In order to minimize any joining mistakes, we used the function `make_clean_names()` from the `janitor` package to clean each pitcher's name before joining. Following the join, we included several filters (specifically to ensure a sufficient volume of batters faced) in order to drop outliers and make certain that our data was as robust as possible. Ultimately, the data wrangling process resulted in a handful of lost observations and an overall decrease in sample size, but we maintained a sizable enough dataset that we weren't too concerned about adverse variance, especially with the sizable anticipated improvement in bias.
 
 When all was said and done, we ended up with a dataset of 457 observations and 36 variables, an excerpt of which is shared below. Each observational unit in our dataset represents the season of an individual MLB pitcher between 2015 and 2019. Importantly, certain pitchers appear multiple times in the dataset, as many players sustain careers spanning the entire time series comprised in our data. 
 
@@ -851,7 +851,7 @@ pitch_data  %>%
 cor(pitch_data$`Average Pitch Speed`, pitch_data$wOBA)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=6, message=FALSE}
 pitch_data  %>%
   ggplot(aes(
     x = `Average Pitch Speed`,
@@ -913,6 +913,18 @@ ggplot(Original_Summary, aes(x = `ERA (t+1)` ))+
 
 
 We can see that, unlike future salary, future ERA displays an approximately normal distribution. While there is a small right tail, the low number of observations in that region make it so that it is unlikely to skew our model. This normal distribution is understandable, as the MLB has pitchers with a range of talent, with the majority of them falling around the average. The few outliers in the right tail likely represent injury-ridden seasons or seasons where a pitcher experienced anomalously bad luck.
+
+
+```{r echo=FALSE, fig.height=3, fig.width=6, message=FALSE}
+ggplot(Original_Summary, aes(x = `ERA (t+1)`, fill = factor(Year))) +
+  geom_density(alpha = 0.25) + 
+  labs(y = "Density",
+       fill = "Year") +
+  theme_classic()
+```
+
+
+We also see that, for the most part, this normal distribution is consistent between the different individual years included in the dataset. One somewhat prominent exception is 2019, where `ERA (t+1)` represents a pitcher's ERA in 2020. Due to the inconsistencies and irregularaties in team's preparation for the 2020 season (as a result of COVID-19), batters were abnormally disadvantaged at the beginning of the season. Subsequently, the mean ERA for 2020 is lower than in the four previous years. Unfortunately, this is a difficult effect to seperate from our data. However, as discussed in the methods section, we filterer the data as diligently as possbile (in terms of sample size within individual pitchers' seasons) to ensure as robust a dataset as possible.
 
 
 
@@ -1682,7 +1694,7 @@ We have split our conclusions into two parts, predictive and inferential. The re
 
 ### Inferential Conclusions
 
-Before moving to the custom models, we can begin by examining the coefficient weights for different predictors in our lasso model (which performed almost as well as our custom models), in order to see if the same predictors are important for predicting both future salary and ERA.
+Before moving to the custom models, we can begin by examining the coefficient weights for different predictors in our LASSO model (which performed almost as well as our custom models), in order to see if the same predictors are important for predicting both future salary and ERA.
 
 ```{r include=FALSE}
 lasso_coef_names<-c("Pitches","BA","BABIP","wOBA","xwOBA","xBA","Hits","ABs","spin_rate","Velocity","W","L","G","BFP","ERA","H","HR","BB","SO","K_percent","BB_percent","hard_hit_percent","barrel_percent","Salary","BFP_per_G","BABIP_minus_meanBABIP", "xwOBA_minus_wOBA","`ERA/Barrel %`","`ERA/Hard Hit %`","luck_adj_ERA") 
@@ -1701,22 +1713,25 @@ lasso_coef<-data.frame(lasso_coef_names,lasso_coef_ERA,lasso_coef_salary)
 lasso_coef<-lasso_coef %>% rename(
   `Predictor` =lasso_coef_names,
   `Coefficients for ERA` = lasso_coef_ERA,
-  `Coefficients for salary`= lasso_coef_salary)
+  `Coefficients for Salary`= lasso_coef_salary)
 
 kable(lasso_coef, digits = 3) %>%
   kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 ```
 
-Surprisingly, xwOBA had the highest, positive coefficient for salary, followed by wOBA and BABIP. The highest negative correlation came with BA. 
 
-Considering that BA and xwOBA are quite highly correlated with each other, the situation in which a pitcher's BA is low but xwOBA is high (which would result in a high value for predicted salary based of LASSO) is quite a unique one. The most important difference in the two is that BA only considers hit or no hit in a binary manner, so a home run or a single would both be registered as a hit, while wOBA considers the hit outcome such that a home run is weighted more heavily than a single. Additionally, xwOBA is an expected statistic and is thus calculated based off the launch angle and speed of the ball rather than the actual outcome in an attempt to remove some of the noise. Thus, a pitcher with a low BA against but a high xwOBA likely achieves a high number of strikeouts but gives up hard contact when he gives up contact at all. A hypothetical pitcher that strikes out most batters but gives up the occasional home run represents the extreme of this trend; his BA would be incredibly low but the discrepancy between his BA and xwOBA would be significant due to the nature of the hits he does give up. Our model would predict a very high salary for this hypothetical pitcher, but the reasoning behind it and what it says about baseball front offices is somewhat confusing.
+Surprisingly, `xwOBA` had the highest, positive coefficient for salary, followed by `wOBA` and `BABIP`. The highest negative correlation came with `BA`. 
 
-The fact that xwOBA, xOBA, and BABIP have positive correlations is in and of itself confusing, even before considering their magnitude. These statistics represent an attempt at quantifying the amount of offense given up by a certain pitcher, and thus, rationally, one would have expected a negative relationship with salary—worse pitchers give up more runs and earn less. Overall, our lasso-penalized regression model is quite odd and perhaps does not offer much in terms of inference. The aforementioned coefficient weights that benefit a BA-wOBA discrepancy and the fact that the advanced metrics are all positively correlated with salary (except for BA and xBA) are both quite inexplainable. Still, the odd combination of coefficient weights we see with advanced metrics suggest that salary is not commensurately tied to advanced analytics.
-The lasso model for ERA came up with a similarly odd combination of predictors. Lasso, unlike ridge, is capable of variable selection by setting coefficient weights to 0. While lasso did not drop any coefficients in the salary prediction, when it came to predicting ERA, the lasso model dropped all but 3 of the predictors: strikeout rate, total strikeouts, and xwOBA. Strikeout rates had by far the highest coefficient, which is to be expected as the exploratory data analysis revealed that it was the single most correlated predictor to future ERA. The negative relationship is also understandable as increasing strikeout rate logically will lead to a lower ERA. The second highest coefficient came with xwOBA and its positive relationship also makes sense as a higher xwOBA suggests a pitcher that is giving up more offense, which correlates to a higher ERA. Fascinatingly, even though total strikeout’s coefficient was non-zero, its small scale means that most of the prediction relies on the 2 predictors of strikeout rate and xwOBA. The negative relationship with total strikeout makes sense for the same reasons as strikeout rates, increasing strikeouts means less runs so a lower ERA.
+Considering that `BA` and `xwOBA` are quite highly correlated with each other, the situation in which a pitcher's `BA` is low but `xwOBA` is high (which would result in a high value for predicted salary based of LASSO) is quite a unique one. The most important difference in the two is that `BA` only considers hit or no hit in a binary manner, so a home run or a single would both be registered as a hit, while `wOBA` considers the hit outcome such that a home run or extra-base is weighted more heavily than a single. Additionally, `xwOBA` is an expected statistic and is thus calculated based off the launch angle and speed of the ball rather than the actual outcome. Thus, a pitcher with a low `BA` against but a high `xwOBA` likely achieves a high number of strikeouts but gives up hard contact when he gives up contact at all. A hypothetical pitcher that strikes out most batters but gives up the occasional home run represents the extreme of this trend; his `BA` would be incredibly low but the discrepancy between his `BA` and `xwOBA` would be significant due to the nature of the hits he does give up. Our model would predict a very high salary for this hypothetical pitcher, but the *reasoning behind it and what it says about baseball front offices is somewhat confusing*.
 
-It is fascinating that the lasso model for ERA essential consists of two predictors-xwOBA and strikeout rate. The relationship is pretty simple- to get a lower ERA, strikeout batters at a higher percentage and give up less offense to achieve a lower xwOBA. It is notable that xwOBA rather than unadjusted wOBA is chosen as it suggests that the “expected” statistics could have greater predictive power than the raw stats themselves.
+The fact that `xwOBA`, `wOBA`, and `BABIP` have positive correlations is in and of itself confusing, even before considering their magnitude. These statistics represent an attempt at quantifying the amount of offense given up by a certain pitcher, and thus, rationally, one would have expected a negative relationship with salary. where worse pitchers give up more runs and earn less. Overall, our LASSO-penalized regression model is quite odd and perhaps does not offer much in terms of inference. The aforementioned coefficient weights that benefit a `BA`-`wOBA` discrepancy and the fact that the advanced metrics are all positively correlated with salary (except for `BA` and `xBA`) are both quite inexplicable. Still, the odd combination of coefficient weights we see with advanced metrics suggest that salary is not commensurately tied to advanced analytics.
 
-While the lasso models resulted in some pretty unexplainable relationships for both future salary and ERA, the custom models should offer clearer interpretability.
+The LASSO model for ERA came up with a similarly odd combination of predictors. LASSO, unlike ridge, is capable of variable selection by setting coefficient weights to 0. While LASSO did not drop any coefficients in the salary prediction, when it came to predicting ERA, the LASSO model dropped all but 3 of the predictors: strikeout rate, total strikeouts, and `xwOBA`. Strikeout rates had by far the highest coefficient, which is to be expected, as the exploratory data analysis revealed that it was the single most correlated predictor to future ERA. The negative relationship is also understandable, as increasing strikeout rate logically will lead to a lower ERA. The second highest coefficient came with `xwOBA`, and its positive relationship also makes sense, as a higher `xwOBA` suggests a pitcher that is giving up more offense, which correlates to a higher ERA. Fascinatingly, even though the coefficient for total strikeouts was non-zero, its small scale means that most of the prediction relies on the two predictors of strikeout rate and `xwOBA`. The negative relationship with total strikeouts makes sense for the same reasons as strikeout rates, increasing strikeouts means less runs so a lower ERA.
+
+It is fascinating that the LASSO model for ERA essentially consists of two predictors---`xwOBA` and strikeout rate. The relationship is pretty simple---to get a lower ERA, strikeout batters at a higher percentage and give up less offense to achieve a lower `xwOBA`. It is notable that `xwOBA`, rather than unadjusted `wOBA`, is chosen, as it suggests that the “expected” statistics could have greater predictive power than the raw statistics themselves.
+
+While the LASSO models resulted in some pretty unexplainable relationships for both future salary and ERA, the custom models should offer clearer interpretability.
+
 
 ```{r}
 # Comparing Custom Models
