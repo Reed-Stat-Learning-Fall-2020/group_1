@@ -1,5 +1,3 @@
-Revise this readme file to give an overview of the files in your repo.
-
 # Overview
 
 The main goal for this project is to predict both future performance and salary for MLB pitchers from 2015-2019. This endeavor allows us to not only understand the metrics that underlie the two response variables, but also to investigate if a discrepancy exists between the predictors responsible for prospective pitching success and those responsible for a lucrative contract. 
