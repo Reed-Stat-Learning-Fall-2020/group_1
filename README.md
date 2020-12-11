@@ -26,7 +26,7 @@ Living in this folder are a large number of markdown files where each one corres
 
 #### Code Appendix
 
-This folder is a bit of a dump for all of the code that we used for this project as well as all of the packages that we utilized, but everything that we used is truly here.
+This folder is a bit of a dump for all of the code that we used for this project as well as all of the packages that we utilized, but everything that we used is truly there.
 
 
 
