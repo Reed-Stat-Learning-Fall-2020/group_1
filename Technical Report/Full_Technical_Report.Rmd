@@ -1684,7 +1684,28 @@ We have split our conclusions into two parts, predictive and inferential. The re
 
 Before moving to the custom models, we can begin by examining the coefficient weights for different predictors in our lasso model (which performed almost as well as our custom models), in order to see if the same predictors are important for predicting both future salary and ERA.
 
+```{r include=FALSE}
+lasso_coef_names<-c("Pitches","BA","BABIP","wOBA","xwOBA","xBA","Hits","ABs","spin_rate","Velocity","W","L","G","BFP","ERA","H","HR","BB","SO","K_percent","BB_percent","hard_hit_percent","barrel_percent","Salary","BFP_per_G","BABIP_minus_meanBABIP", "xwOBA_minus_wOBA","`ERA/Barrel %`","`ERA/Hard Hit %`","luck_adj_ERA") 
 
+lasso_coef_salary<-c(3.679551e-05,-3.938318e+00,1.476968e+00,2.483049e+00,2.743261e+00,-2.577875e+00,1.762172e-03, 3.263765e-04 ,1.665866e-04,-4.088986e-03,-2.656325e-04,-1.440660e-02 ,1.058231e-02,-8.902579e-05,-1.823438e-02,-8.672353e-04,-4.961412e-03,-1.201000e-03,-6.262600e-04,-3.609648e-01,4.310003e-01,-5.630545e-03,-1.923594e-02,7.730858e-08,3.653187e-02,1.146286e+00,-2.687309e-01,-6.353398e-02,8.098175e-01,-4.987056e-02)
+
+lasso_coef_ERA<-c(0,0,0,0,1.424176214,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.002102052,-4.452771489,0,0,0,0,0,0,0,0,0,0)
+                     
+lasso_coef<-data.frame(lasso_coef_names,lasso_coef_ERA,lasso_coef_salary)
+```
+
+```{r echo=FALSE}
+#Comparing Lasso Coefficients
+lasso_coef<-data.frame(lasso_coef_names,lasso_coef_ERA,lasso_coef_salary)
+
+lasso_coef<-lasso_coef %>% rename(
+  `Predictor` =lasso_coef_names,
+  `Coefficients for ERA` = lasso_coef_ERA,
+  `Coefficients for salary`= lasso_coef_salary)
+
+kable(lasso_coef, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
 
 Surprisingly, xwOBA had the highest, positive coefficient for salary, followed by wOBA and BABIP. The highest negative correlation came with BA. 
 
