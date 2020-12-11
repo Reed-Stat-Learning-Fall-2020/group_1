@@ -19,6 +19,7 @@ library(baseballr)
 library(readr)
 library(knitr)
 library(kableExtra)
+library(corrr)
 ```
 
 ## Introduction
@@ -737,9 +738,19 @@ total_quant_pred <-
 predictor_correlations <- 
   cor(total_quant_pred)
 
+total_quant_pred %>%
+  select(-`ERA/Hard Hit %`, -`xBA - BA`, -`xwOBA - wOBA`, -`ERA/Barrel %`, -`BABIP - Mean BABIP`) %>%
+  correlate() %>%
+  rearrange() %>%
+  shave() %>%
+  rplot(shape = 19, colours = c("darkorange", "white", "midnightblue")) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+
 ```
 
-In the interest of saving some space, we will not be printing the entire correlation matrix. However, some salient trends stand out in terms of collinearity.
+This correlation plot is a great way to quickly look at how some of your predictors are correlated. Right off the bat we can see that we do have a lot of collinearity and although we won't discuss each instance, some salient trends certainly stand out.
 
 
 ```{r echo=FALSE}
