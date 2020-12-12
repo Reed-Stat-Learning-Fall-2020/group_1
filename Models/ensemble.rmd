@@ -230,7 +230,10 @@ data_test %>%
     y = .pred
   ) +
   geom_point() + 
-  coord_obs_pred()
+  coord_obs_pred() +
+  labs(y = "prediction", x = "ERA (t+1)") +
+  geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2) +
+  theme_minimal()
 ```
 
 ```{r}
@@ -293,19 +296,31 @@ ctrl_res <- control_stack_resamples()
 ```
 
 ```{r}
-lm_mod <- 
-  linear_reg() %>%
-  set_engine("lm")
 
-lm_wf <- 
-  baseball_wf_s %>% 
-  add_model(lm_mod)
+lambda_grid_s <-
+  grid_regular(penalty(),
+               levels = 50)
 
-lm_res <-
-  lm_wf %>%
-  fit_resamples(
+ridge_spec_s <- 
+  linear_reg(penalty = tune(),
+             mixture = 0) %>%
+  set_engine("glmnet")
+
+  
+# add it to a workflow
+ridge_wf_s <- 
+  baseball_wf_s %>%
+  add_model(ridge_spec_s)
+
+# tune deg_free and fit to the 5-fold cv
+set.seed(123)
+ridge_res_s <- 
+  tune_grid(
+    ridge_wf_s,
     resamples = folds_s,
-    control = ctrl_res
+    metrics = metric,
+    control = ctrl_grid,
+    grid = lambda_grid_s
   )
 ```
 
@@ -386,7 +401,7 @@ baseball_d_stack_s <-
   stacks() %>%
     add_candidates(lasso_res_s) %>%
     add_candidates(randf_res_s) %>%
-    add_candidates(lm_res)
+    add_candidates(ridge_res_s)
 
 ```
 
@@ -497,19 +512,31 @@ ctrl_res <- control_stack_resamples()
 ```
 
 ```{r}
-lm_mod <- 
-  linear_reg() %>%
-  set_engine("lm")
 
-lm_wf <- 
-  baseball_wf_s %>% 
-  add_model(lm_mod)
+lambda_grid_s <-
+  grid_regular(penalty(),
+               levels = 50)
 
-lm_res <-
-  lm_wf %>%
-  fit_resamples(
+ridge_spec_s <- 
+  linear_reg(penalty = tune(),
+             mixture = 0) %>%
+  set_engine("glmnet")
+
+  
+# add it to a workflow
+ridge_wf_s <- 
+  baseball_wf_s %>%
+  add_model(ridge_spec_s)
+
+# tune deg_free and fit to the 5-fold cv
+set.seed(123)
+ridge_res_s <- 
+  tune_grid(
+    ridge_wf_s,
     resamples = folds_s,
-    control = ctrl_res
+    metrics = metric_s,
+    control = ctrl_grid,
+    grid = lambda_grid_s
   )
 ```
 
@@ -590,7 +617,7 @@ baseball_d_stack_s <-
   stacks() %>%
     add_candidates(lasso_res_s) %>%
     add_candidates(randf_res_s) %>%
-    add_candidates(lm_res)
+    add_candidates(ridge_res_s)
 
 ```
 
@@ -629,9 +656,11 @@ data_test_s %>%
     x = salary_t1, 
     y = .pred
   ) +
-  geom_point() + 
+  geom_point(alpha = 0.7) + 
   coord_obs_pred() +
-  geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2)
+  geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2) +
+  labs(x = "Salary (t+1)", y = "prediction") +
+  theme_minimal()
 
 ```
 
