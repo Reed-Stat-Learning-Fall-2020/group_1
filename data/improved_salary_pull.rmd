@@ -12,6 +12,7 @@ library(glue)
 ```
 
 ```{r}
+
 team_url <- "https://www.spotrac.com/mlb/payroll/"
 
 # getting the team names
@@ -61,14 +62,16 @@ pull_salary <- function(x){
 
 
 ```{r}
-links <- glue("https://www.spotrac.com/mlb/rankings/2017/salary/{html_team}/starting-pitcher/") %>%
+
+links <- 
+  glue("https://www.spotrac.com/mlb/rankings/2017/salary/{html_team}/starting-pitcher/") %>%
   map(
     pull_salary
   )
 
-full_df <- links %>%
-  bind_rows() %>%
-  mutate(year = 2017)
+salary17 <- links %>%
+  bind_rows() 
+
 ```
 
 
