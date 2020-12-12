@@ -1825,6 +1825,21 @@ ggplot(pitchers_2019_tidy, aes(x = Pitcher,
 
 From the above plot, which graphs predicted ERA (as determined by our ERA forecasting model) and actual ERA for the 50 highest-paid starting pitchers, we can ascertain which pitchers either overperformed or underperformed relative to modeling expectations. Specifically, we can look at the absolute difference between predicted ERA and actual ERA as a measure of expectation deviation. By this account, Anibal Sanchez, Jon Gray, Madison Bumgarner, Robbie Ray, and Tanner Roark stand out as pitchers who underperformed relative to their predicted performance. On the other hand, Dallas Keuchel, Shane Bieber, Trevor Bauer, and Zach Davies posted actual ERAs that exceeded the model's expectations. Implicitly, the model gives tends more conservative ERA prediction estimates, since the data used in linear model construction is necessarily regressed. 
 
+The following plot is just another way to look at ordered absolute residuals to more easily see the underperformers and overperformers relative to our modeling expectations. The points colored red have a positive residual whereas the points in blue had a negative residual.
+
+```{r}
+pitchers_2019_tidy %>%
+  pivot_wider(names_from = type, values_from = value) %>%
+  mutate(residual = ERA_t1 - custom_pred_2019) %>%
+  mutate(Pitcher = fct_reorder(Pitcher, abs(residual))) %>%
+  ggplot(aes(x = Pitcher, y = abs(residual), color = residual < 0)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(y = "Absolute Residual") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) 
+```
+
+
 Another extension of our ERA model is using salary data to determine which pitchers were overpaid or underpaid relative to both their contemporaries and their expected pitching outcomes. Intuitively, front offices should spend money on pitchers who they believe will improve the overall pitching performance of their team in coming seasons. Subsequently, general managers should be interested in compensating players based on their expected future performance, since that will determine the return the team gets on their investment. It is therefore appropriate to assess a player's salary relative to their forecasted performance in order to determine whether or not that player is appropriately compensated, which we attempted using our ERA model and salary data. To allow for ease of comparison, we first standardized each pitcher's salary and forecasted ERA. We then created the following visualizations, each of which offer some sort of display comparing the standardized forecasted ERA and standardized salaries for the 50 highest-paid starting pitchers in the year 2020:
 
 
