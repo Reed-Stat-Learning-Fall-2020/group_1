@@ -1825,7 +1825,7 @@ ggplot(pitchers_2019_tidy, aes(x = Pitcher,
 
 From the above plot, which graphs predicted ERA (as determined by our ERA forecasting model) and actual ERA for the 50 highest-paid starting pitchers, we can ascertain which pitchers either overperformed or underperformed relative to modeling expectations. Specifically, we can look at the absolute difference between predicted ERA and actual ERA as a measure of expectation deviation. By this account, Anibal Sanchez, Jon Gray, Madison Bumgarner, Robbie Ray, and Tanner Roark stand out as pitchers who underperformed relative to their predicted performance. On the other hand, Dallas Keuchel, Shane Bieber, Trevor Bauer, and Zach Davies posted actual ERAs that exceeded the model's expectations. Implicitly, the model gives tends more conservative ERA prediction estimates, since the data used in linear model construction is necessarily regressed. 
 
-The following plot is just another way to look at ordered absolute residuals to more easily see the underperformers and overperformers relative to our modeling expectations. The points colored red have a positive residual whereas the points in blue had a negative residual.
+The following plot represents another way to visualize the same predictions. In this instance, the  absolute residuals are ordered to easily discern the extent that individual pitchers either underperformed or overperformed relative to our modeling expectations. The points colored red have a positive residual (representing pitchers who underperformed), whereas the points in blue had a negative residual (representing pitchers who overperformed).
 
 ```{r echo=FALSE, fig.width=9,fig.height=6}
 pitchers_2019_tidy %>%
@@ -1834,8 +1834,9 @@ pitchers_2019_tidy %>%
   mutate(Pitcher = fct_reorder(Pitcher, abs(residual))) %>%
   ggplot(aes(x = Pitcher, y = abs(residual), color = residual < 0)) +
   geom_point(size = 3, alpha = 0.7) +
-  scale_color_manual(values = c("midnightblue","gray60")) +
-  labs(y = "Absolute Residual") +
+  scale_color_manual(values = c("palevioletred2","deepskyblue")) +
+  labs(y = "Absolute Residual",
+       color = "Residual < 0") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 50, hjust = 1)) 
 ```
