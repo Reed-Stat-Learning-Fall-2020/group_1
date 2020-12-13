@@ -1834,9 +1834,10 @@ pitchers_2019_tidy %>%
   mutate(Pitcher = fct_reorder(Pitcher, abs(residual))) %>%
   ggplot(aes(x = Pitcher, y = abs(residual), color = residual < 0)) +
   geom_point(size = 3, alpha = 0.7) +
+  scale_color_manual(values = c("midnightblue","gray60")) +
   labs(y = "Absolute Residual") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) 
+  theme(axis.text.x = element_text(angle = 50, hjust = 1)) 
 ```
 
 
