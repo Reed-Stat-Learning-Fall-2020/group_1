@@ -1827,7 +1827,7 @@ From the above plot, which graphs predicted ERA (as determined by our ERA foreca
 
 The following plot is just another way to look at ordered absolute residuals to more easily see the underperformers and overperformers relative to our modeling expectations. The points colored red have a positive residual whereas the points in blue had a negative residual.
 
-```{r}
+```{r echo=FALSE, fig.width=9,fig.height=6}
 pitchers_2019_tidy %>%
   pivot_wider(names_from = type, values_from = value) %>%
   mutate(residual = ERA_t1 - custom_pred_2019) %>%
