@@ -24,7 +24,8 @@ library(corrr)
 
 ## Abstract
 
-Write abstract here.
+
+The main goal for this project is to predict both future performance and salary for MLB pitchers from 2015-2019. This endeavor allows us to not only understand the metrics that underlie the two response variables, but also to investigate if a discrepancy exists between the predictors responsible for prospective pitching success and those responsible for a lucrative contract. Our salary data for 2017-2019 was scraped from spotrac.com and our salary data for 2015-2016 came from seanlahman.com. Additionally, all of our pitching statistics data came from the `statcast` tool from baseballsavant.com. After some preprocessing to clean up our data we ended up with a robust data set made up of 457 observations and 36 variables Our analysis and model building was all was done in RStudio and while we used quite a few advanced modeling techniques we also made use of our extensive domain knowledge to inform some of our decisions. 
 
 <br />
 <br />
