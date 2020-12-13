@@ -1973,6 +1973,7 @@ According to our salary model (which had noticeably lower prediction error than 
 ## Closing Thoughts
 
 Write broad conclusions/synthesis here.
+Nontrivial disparities between predictors informing future salary and predictors informing ERA forecasts. ERA forecasting model with relatively substantial predictive capabilities, extensive benefits in application.
 
 
 
