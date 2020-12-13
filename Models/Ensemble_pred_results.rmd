@@ -6,6 +6,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(tidymodels)
+library(stacks)
 ```
 
 ## Predictive Conclusions for the Ensemble model
@@ -46,7 +48,9 @@ ensemble_results %>%
   geom_point() + 
   coord_obs_pred() +
   geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2) +
-  facet_wrap(~Year)
+  facet_wrap(~Year) +
+  theme_minimal() +
+  labs(x = "Salary (t+1)", y = "predictions")
 ```
 
 It seems like we likely don't quite have enough data to say anything too conclusive about this, but it does seem like most of the problems occured in 2019 and there were just a couple of big misses in 2015 and 2018.
