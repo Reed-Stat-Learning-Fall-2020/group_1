@@ -10,8 +10,17 @@ body {
 text-align: justify}
 </style>
 
+<style>
+p.caption {
+  font-size: 0.8em;
+}
+</style>
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.cap.style = "Image Caption",
+                      fig.cap.pre = "Figure ",
+                      fig.cap.sep = ": ")
 library(tidyverse)
 library(tidymodels)
 library(rvest)
@@ -40,7 +49,8 @@ To investigate this question, we decided to build a variety of models in order t
 
 The second half of our project involves fitting a variety of models to try to predict a pitcher’s earned run average (ERA) in the coming season using statistics from the current season. The motivation for this exploration is that we wished to determine if the advanced Sabermetric statistics are truly more useful in predicting future performance than basic statistics such as total strikeouts. ERA describes the average number of runs given up by a pitcher over nine innings, and was the chosen metric to act as a proxy for pitching outcome, as it exemplifies a wholistic representation of a pitcher’s performance. While by no means a novel insight, it is also worth noting that a team's ERA is highly correlated with a team's total wins, prompting general managers to construct pitching rotations that minimize ERA in order to win more games (further validating ERA as an appropriate proxy for overall pitcher performance).
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE, fig.cap="**Figure 1.** Total team wins plotted against team ERA; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 teams <- read_csv("teams.csv") %>%
   filter(yearID > 2006)
 
@@ -56,7 +66,12 @@ ggplot(teams,
 cor(teams$ERA,
    teams$W)
 ```
-Figure 1: Total team wins plotted against team ERA; trend line represents linear line of best fit. Correlation between the two values shown underneath.
+
+```{r}
+
+```
+
+
 
 The aims and methods of this exploration differ from previous investigations in that the application of statistical learning models allow for more complexity compared to the single-metric methods that have been used traditionally (such as predicting ERA in subsequent seasons solely as a function of current season's ERA). While front offices certainly have proprietary models predicting a suite of different outcomes, online, the two methods used for predicting future salary and ERA both rely on basic statistics. For ERA, a post on the baseball statistics website FanGraphs attempted to predict 2011 ERA using 2010 statistics and identified skilled-interactive earned run average (SIERA) as the best predictor of future ERA (1). While the formula behind SIERA is quite complex, its calculation does not utilize Sabermetrics analytics (which were introduced in the 2014 season) in its calculation and its variables are restricted to basic statistics such as total strikeouts and plate appearances. In terms of predicting salary, a commonly used method is to calculate contract value over wins above replacement (WAR) to get the “cost of a win in free agency” (2). The formula for a pitcher’s WAR is quite complex but still does not fully integrate Sabermetrics statistics. Additionally, this method presupposes a linear relationship, which is to say that a four-win player costs the same as two two-win players, an assumption that we can circumvent with certain models.
 
