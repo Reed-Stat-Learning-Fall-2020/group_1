@@ -45,7 +45,7 @@ Since the sport’s inception in the nineteenth century, baseball has remained a
 
 A common refrain one hears from baseball fans is that general managers, those responsible for making personnel decisions such as trading a player or signing a free agent to a contract, are slow in adapting to the current trends in analytics. While some front offices, such as the Houston Astros (who boast a nine-man Sabermetric staff), have bought into an analytics-oriented approach, other teams have made their aversion to analytics clear. This disinclination is perhaps best encapsulated by the former Philadelphia Phillies GM Ruben Amaro claiming, back in 2014, that their team was "not a statistics-driven organization by any means". While such a sentiment seems outmoded now, the question remains over how earnestly baseball decision-makers have realistically accepted the growing Sabermetrics movement. 
 
-To investigate this question, we decided to build a variety of models in order to attempt to predict a pitcher’s future contract using their statistics from the past season. The rationale behind this was that, while baseball GMs might profess a certain belief in analytics publicly, the contracts they hand out represent a more verifiable illustration of what they actually value. Fitting a model to predict future salary will help answer this question, as it will allow us to perform inference on the various coefficients or weights placed on different metrics---including both basic counting statistics and more advanced statistics. If baseball front offices have genuinely accepted Sabermetrics to the degree that they claim, then we would expect to see that advanced statistics such as expected weighted on base average (xwOBA) or spin rate to be the strongest predictors of future salary. If, on the other hand, we find that basic counting statistics such as total pitches or total wins are the strongest predictors, it would suggest that baseball GMs are more enamored with counting statistics than they would like to admit.
+To investigate this question, we decided to build a variety of models in order to attempt to predict a pitcher’s future contract using their statistics from the past season. The rationale behind this was that, while baseball GMs might profess a certain belief in analytics publicly, the contracts they hand out represent a more verifiable illustration of what they actually value. Fitting a model to predict future salary will help answer this question, as it will allow us to perform inference on the various coefficients or weights placed on different metrics---including both basic counting statistics and more advanced statistics. If baseball front offices have genuinely accepted Sabermetrics to the degree that they claim, then we would expect to see that advanced statistics such as expected weighted on-base average (xwOBA) or spin rate to be the strongest predictors of future salary. If, on the other hand, we find that basic counting statistics such as total pitches or total wins are the strongest predictors, it would suggest that baseball GMs are more enamored with counting statistics than they would like to admit.
 
 The second half of our project involves fitting a variety of models to try to predict a pitcher’s earned run average (ERA) in the coming season using statistics from the current season. The motivation for this exploration is that we wished to determine if the advanced Sabermetric statistics are truly more useful in predicting future performance than basic statistics such as total strikeouts. ERA describes the average number of runs given up by a pitcher over nine innings, and was the chosen metric to act as a proxy for pitching outcome, as it exemplifies a wholistic representation of a pitcher’s performance. While by no means a novel insight, it is also worth noting that a team's ERA is highly correlated with a team's total wins, prompting general managers to construct pitching rotations that minimize ERA in order to win more games (further validating ERA as an appropriate proxy for overall pitcher performance).
 
@@ -65,10 +65,6 @@ ggplot(teams,
 
 cor(teams$ERA,
    teams$W)
-```
-
-```{r}
-
 ```
 
 
@@ -180,7 +176,7 @@ Original_Summary_Filtered <-
 We began by examining the structure of our first response variable: future salary (`Salary (t+1)`).
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5}
+```{r echo=FALSE, fig.height=3, fig.width=5, fig.cap="**Figure 2.1.** Histogram of distribution of MLB starting pitcher salary; the evident right skew necessitated a log transformation."}
 ggplot(Mega_Summary_Filtered, 
        aes(x = salary_t1)) + 
   geom_histogram(
@@ -193,13 +189,12 @@ ggplot(Mega_Summary_Filtered,
        y = "Count") +
   theme_classic()
 ```
-Figure 2: Histogram of MLB starting pitcher salary, the evident right skew necessitated a log transformation.
 
 
 As we can see, future salary is quite right skewed. This is understandable, as certain superstar pitchers have salaries that are magnitudes greater than the average starting pitcher. We considered a log transformation to try to ameliorate this skew.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5}
+```{r echo=FALSE, fig.height=3, fig.width=5, fig.cap="**Figure 2.2.** Histogram of distribution of log-transformed MLB starting pitcher salary; the previously mentioned right skew is no longer as extreme."}
 ggplot(Mega_Summary_Filtered, 
        aes(x = log(salary_t1))) + 
   geom_histogram(
@@ -212,7 +207,6 @@ ggplot(Mega_Summary_Filtered,
        y = "Count") +
   theme_classic()
 ```
-Figure 3: Histogram of log-transformed MLB starting pitcher salary, the previously mentioned right skew is no longer as extreme.
 
 
 It would appear as though the log transformation greatly reduced the degree of the previously observed right skew. While a slight left skew may now exist, we will consider log-transforming salary in our models in order to circumvent this extreme right skew.
@@ -223,7 +217,7 @@ It would appear as though the log transformation greatly reduced the degree of t
 
 Total wins (`W`) and total losses (`L`) constitute the most basic pitching statistics, indicating nothing more than the possible discrete outcomes resulting from a pitcher's contribution to a game. Total number of pitches (`Pitches`) also represents a fairly rudimentary measure of pitching performance and durability. Additionally, raw, unadjusted ERA (or the average number of runs a pitcher allows in a game) is another predictor that one would expect to be associated with salary. Lastly, the number of earned runs (the unprocessed counting statistic used to calculate ERA) stands out as another basic predictor in determining future salary.
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.1.** Pitcher wins plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total Wins
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -239,7 +233,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$W,
    Mega_Summary_Filtered$salary_t1)
+```
 
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.2.** Pitcher losses plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total Losses
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -255,7 +251,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$L,
    Mega_Summary_Filtered$salary_t1)
+```
 
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.3.** Total pitches plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total Pitches
 ggplot(Mega_Summary_Filtered, 
        aes(
@@ -281,7 +279,7 @@ Unsurprisingly, total wins illustrates a moderate, positive correlation with fut
 Meanwhile total number of pitches exhibits a moderate, positive correlation with salary. As we will see later on, pitching statistics having to do with productivity or volume of pitches are often highly correlated with salary.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.4.** Pitcher winning percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Win percent
 Mega_Summary_Filtered <- 
   Mega_Summary_Filtered %>% 
@@ -310,7 +308,7 @@ cor(Mega_Summary_Filtered$Win_Percent,
 Strikingly, a pitcher's win percentage has a lower correlation with future salary than the total number of wins. While wins and losses are inherently flawed statistics, one would imagine that a higher win-loss ratio implies that a pitcher is contributing more directly to a team's success and thus deserves a higher salary. Rather, it seems like the total number of wins is the more important statistic in the eyes of GMs.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.5.** Total games played plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Games played
 ggplot(Mega_Summary_Filtered, 
        aes(
@@ -334,7 +332,7 @@ cor(Mega_Summary_Filtered$G,
 Total games played (`G`) appears to possess a very weak positive relationship with future salary. This is understandable for two reasons, the first being that pitchers who make a lot of appearances are generally more skilled and therefore trusted to appear in more games by managers. Concurrently, highly skilled pitchers are paid well. Secondly, as we have seen throughout this exploration so far, an increase in volume-related statistics generally tends to result in a larger paycheck.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.6.** ERA plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Current ERA
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -363,7 +361,7 @@ While ERA does exhibit a negative correlation with future salary, the weakness o
 While season totals might have a murky relationship with future performance, it is undeniable that statistics such as strikeouts are quite flashy and can therefore lead to lucrative contracts. As a result, season totals might be strong predictors of next year's salary. We first examined total batters faced (`ABs`), total strikeouts (`SO`), total number of batters walked on balls (`BB`), total hits (`H`), and total home runs allowed (`HR`).
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.1.** Total batters faced plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total batters faced
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -379,7 +377,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$ABs,
     Mega_Summary_Filtered$salary_t1)
+```
 
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.2.** Total strikeouts plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total strikeouts
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -395,7 +395,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$SO,
     Mega_Summary_Filtered$salary_t1)
+```
 
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.3.** Total batters walked on balls plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total batters walked
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -411,7 +413,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$BB,
     Mega_Summary_Filtered$salary_t1)
+```
 
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.4.** Total hits plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total hits
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -427,7 +431,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$H,
     Mega_Summary_Filtered$salary_t1)
+```
 
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.5.** Total home runs plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total Home Runs
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -456,7 +462,7 @@ Total number of batters walked on balls has a very weak (close to nonexistent) p
 Next we looked to see if the percent of strikeouts (`K %`), walks (`BB %`), and hits (`BA`) are correlated with future salary.
 
 
-```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.6.** Strikeout percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Strikeout Percent
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -472,7 +478,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$K_percent,
     Mega_Summary_Filtered$salary_t1)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.7.** Walk percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Percent of Batters walked
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -488,7 +496,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$BB_percent,
     Mega_Summary_Filtered$salary_t1)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.8.** Batting average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Batting average against (hit percent)
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -515,7 +525,7 @@ Interestingly, even though strikeout percentage is still positively correlated w
 We next looked at some season percentages of more advanced statistics such as hard hit percentage (`Hard Hit %`) and barrel percentage (`Barrel %`). Both of these statistics look at the speed and angle of the ball after being hit by the batter. `Barrel %` represents batted balls with exit velocities and launch angles that, historically, have led to a minimum .500 batting average (or a 50% chance of resulting in a hit). `Hard Hit %` is similar to `Barrel %`, but does not consider launch angle and simply describes batted balls with exit velocities exceeding 95 MPH. Naively, one would expect a negative relationship, as a good pitcher should try to avoid giving up hard contact.
 
 
-```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.9.** Hard hit percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Hard hit percent
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -531,7 +541,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$hard_hit_percent,
     Mega_Summary_Filtered$salary_t1)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.10.** Barrel percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Barrel percent
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -560,7 +572,7 @@ Considering how similar the two statistics are, the disparity between their stre
 Next, we examined if the averages of certain statistics were correlated with salary, specifically looking at average pitch speed (`Velocity`) and average spin rate (`Spin Rate`), measured in MPH and RPM respectively.
 
 
-```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 5.1.** Average pitch speed plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Average Speed
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -576,7 +588,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$Velocity,
     Mega_Summary_Filtered$salary_t1)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 5.2.** Average spin rate plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Average spin rate
 ggplot(Mega_Summary_Filtered,
        aes(spin_rate,
@@ -598,16 +612,16 @@ cor(Mega_Summary_Filtered$spin_rate,
 
 Naively, one might expect faster pitches to be harder to hit and thus expect pitchers with higher average velocities to be handsomely paid. However, the negative correlation, albeit with a very weak association, suggests that average pitch speed is actually inversely related to salary. There are a couple of reasons why this might be. The most obvious is that pitchers who lack speed often make up for it with stellar control or a wide arsenal of off-speed pitches. Another reason is that, instinctively, average pitch speed might be correlated with certain negative predictors like home runs, as batters can often make hard contact against fast but poorly-placed pitches.
 
-Spin rate is a topic that has garnered increased attention in the baseball community, and is something that pitchers place a lot of emphasis on. It seems that this interest is not misplaced, as there is a moderate positive relationship between spin rate and future salary.
+Spin rate is a topic that has garnered increased attention in the baseball community, and is something that pitchers place a lot of emphasis on, with many devoting substantial time and energy to improving the movement on breaking pitches. It seems that this interest is not misplaced, as there is a moderate positive relationship between spin rate and future salary.
 
 <br />
 
 #### Advanced Statistics
 
-The correlations between future salary and advanced statistics was a point of focus for us as it offers the first indications as to whether front offices are successfully integrating analytics. The metrics we considered were weighted on base average (`wOBA`), batting average on balls in play (`BABIP`), expected weighted on base average (`xwOBA`), and expected batting average (`xBA`). The two expected statistics are notable, as they try to remove some of the noise (or "luck") from the statistic by calculating `wOBA` and `BA` based on the historical `wOBA` and `BA` of batted balls with similar exit velocities and launch angles. 
+The correlations between future salary and advanced statistics was a point of focus for us as it offers the first indications as to whether front offices are successfully integrating analytics. The metrics we considered were weighted on-base average (`wOBA`), batting average on balls in play (`BABIP`), expected weighted on-base average (`xwOBA`), and expected batting average (`xBA`). The two expected statistics are notable, as they try to remove some of the noise (or "luck") from the statistic by calculating `wOBA` and `BA` based on the historical `wOBA` and `BA` of batted balls with similar exit velocities and launch angles. 
 
 
-```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 6.1.** Weighted on-base average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Weighted on base average (wOBA)
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -623,7 +637,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$wOBA,
    Mega_Summary_Filtered$salary_t1)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 6.2.** Batting average on balls in play plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Batting average on balls in play against (BABIP)
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -639,7 +655,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$BABIP,
    Mega_Summary_Filtered$salary_t1)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 6.3.** Expected batting average on balls in play plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Expected wOBA
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -655,7 +673,9 @@ ggplot(Mega_Summary_Filtered,
 
 cor(Mega_Summary_Filtered$xwOBA,
    Mega_Summary_Filtered$salary_t1)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 6.4.** Expected batting average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Expected batting average
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -682,10 +702,10 @@ Interestingly, all four advanced statistics had negative correlations, albeit on
 
 #### Luck Reversion
 
-**These predictors will come in handy later, but the idea behind luck reversion is that if a pitcher's wOBA was significantly lower than their expected wOBA, then they would appear to be a better pitcher due to luck alone**. **Luck reversion for us takes 4 forms,** the first two (`xwOBA-wOBA` and `xBA-BA`) are simply the difference between expected and observed statistics. The second two (`ERA/Hard Hit %` and `ERA/Barrel %`) operate under the assumption that hard contact (high values of `Hard Hit %` and `Barrel %`) will result in more earned runs and a higher earned run average, and if a pitcher's `ERA/Barrel %` is low, then that means that they were lucky in terms of having a lower earned run average than their pitching truly warrants.
+The concept of luck reversion will be discussed in more detail later in the exploration, as it generally pertains more to ERA than salary. That being said, the idea behind luck reversion is that, over the course of a single-season, pitchers may outperform expected outcome due to randomness alone. As discussed in our methods section, we attempted to quantify pitcher luck by transforming a handful of variables. The first two (`xwOBA-wOBA` and `xBA-BA`) are simply the difference between expected and observed statistics. The second two (`ERA/Hard Hit %` and `ERA/Barrel %`) operate under the assumption that hard contact (high values of `Hard Hit %` and `Barrel %`) will result in more earned runs and a higher earned run average, and if a pitcher's `ERA/Barrel %` is low, then that means that they were lucky in terms of having a lower earned run average than their pitching truly warrants.
 
 
-```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.1.** Expected weighted on-base average minus weighted on-base average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #xwOBA-wOBA
 ggplot(Original_Summary_Filtered,
        aes(
@@ -699,7 +719,9 @@ ggplot(Original_Summary_Filtered,
 
 cor(Original_Summary_Filtered$`xwOBA - wOBA`,
    Original_Summary_Filtered$`Salary (t+1)`)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.2.** Expected batting average minus batting average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #xBA-BA
 ggplot(Original_Summary_Filtered,
        aes(
@@ -713,7 +735,9 @@ ggplot(Original_Summary_Filtered,
 
 cor(Original_Summary_Filtered$`xBA - BA`,
    Original_Summary_Filtered$`Salary (t+1)`)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.3.** ERA over hard hit percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #ERA/Hard Hit
 ggplot(Original_Summary_Filtered,
        aes(
@@ -727,7 +751,9 @@ ggplot(Original_Summary_Filtered,
 
 cor(Original_Summary_Filtered$`ERA/Hard Hit %`,
    Original_Summary_Filtered$`Salary (t+1)`)
+```
 
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.4.** ERA over barrel percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #ERA/Barrel
 ggplot(Original_Summary_Filtered %>% filter(`ERA/Barrel %` < 1.5),
        aes(
@@ -745,7 +771,7 @@ cor(Original_Summary_Filtered$`ERA/Barrel %`,
 ```
 
 
-While `xwOBA-wOBA` doesn't display any strong relationship, `xBA-BA` had a moderately strong positive relationship, which suggests that lucky players with a lower `BA` than expected are getting paid more. This further suggests that GMs really have trouble separating out luck. This trend is further exemplified with `ERA/Hard Hit %` or `ERA/Barrel %`, as those with smaller values (luckier pitchers) tend to have higher salaries, as suggested by the positive relationship. This relationship is especially pertinent with `ERA/Barrel %`, which has a sizable correlation coefficient. Overall, it seems like while GMs are attuned to advanced statistics, they have not yet fully bought into luck adjusted statistics.
+While `xwOBA-wOBA` doesn't display any strong relationship with future salary, `xBA-BA` had a moderately strong positive relationship, which suggests that lucky players with a lower `BA` than expected are getting paid more in succesive seaons. This further suggests that GMs really have trouble separating out luck. This trend is further exemplified with `ERA/Hard Hit %` or `ERA/Barrel %`, as those with smaller values (luckier pitchers) tend to have higher salaries, as suggested by the positive relationship. This relationship is especially pertinent with `ERA/Barrel %`, which has a sizable correlation coefficient. Overall, it seems like while GMs are attuned to advanced statistics, they have not yet fully bought into luck adjusted statistics.
 
 <br />
 
@@ -1035,7 +1061,7 @@ Despite the fact that the salary-associated predictors are already quite good at
 #### Correlations Between Advanced Statistics and Future ERA
 
 
-The advanced statistics we considered were strikeout percent (`K %`), weighted on base average (`wOBA`), expected weighted on base average (`xwOBA`), and batting average on balls in play (`BABIP`).
+The advanced statistics we considered were strikeout percent (`K %`), weighted on-base average (`wOBA`), expected weighted on-base average (`xwOBA`), and batting average on balls in play (`BABIP`).
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
 Original_Summary %>%
