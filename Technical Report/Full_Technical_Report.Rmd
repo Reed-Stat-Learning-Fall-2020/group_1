@@ -25,7 +25,7 @@ library(corrr)
 ## Abstract
 
 
-The main goal for this project is to predict both future performance and salary for MLB pitchers from 2015-2019. This endeavor allows us to not only understand the metrics that underlie the two response variables, but also to investigate if a discrepancy exists between the predictors responsible for prospective pitching success and those responsible for a lucrative contract. Our salary data for 2017-2019 was scraped from spotrac.com and our salary data for 2015-2016 came from seanlahman.com. Additionally, all of our pitching statistics data came from the `statcast` tool from baseballsavant.com. After some preprocessing to clean up our data we ended up with a robust data set made up of 457 observations and 36 variables Our analysis and model building was all was done in RStudio and while we used quite a few advanced modeling techniques we also made use of our extensive domain knowledge to inform some of our decisions. 
+The main goal for this project is to predict both future performance and salary for MLB pitchers from 2015-2019. This endeavor allows us to not only understand the metrics that underlie the two response variables, but also to investigate if a discrepancy exists between the predictors responsible for prospective pitching success and those responsible for a lucrative contract. Our salary data for 2017-2019 was scraped from spotrac.com and our salary data for 2015-2016 came from seanlahman.com. Additionally, all of our pitching statistics data came from the `statcast` tool from baseballsavant.com. After some preprocessing to clean up our data we ended up with a robust data set made up of 457 observations and 36 variables Our analysis and model building was all was done in RStudio and while we used quite a few advanced modeling techniques we also made use of our extensive domain knowledge to inform some of our decisions. Ultimately, comparison between a variety of model types revealed that an ensemble model performed the best in forecasting future ERA and salary, outperforming the existing null models. Additionally, inferential conclusions drawn from the more interpretable multiple linear regression models suggest that a discrepancy does exist between the contracts handed out by baseball front offices and future performance. While it seems like front offices are doing an adequate job of considering advanced statsitics, new, statcast measures that try to account for luck-adjustment have not yet been fully integrated into their decision making.
 
 <br />
 <br />
@@ -1540,6 +1540,16 @@ As seen above, our custom model actually produced the one of lowest 5-fold MSE a
 
 The custom model for salary also performed decently well, which similarly chose predictors according to what domain knowledge would suggest. In the case of salary, this consisted of a preponderance of counting statistics
 
+
+<br />
+
+### Ensemble Model
+
+The ensemble model relied upon combining lasso regression, ridge regression, and random forests into an overall model in the interest of improving model accuracy. Each of the constituent models then is assigned a coefficient to determine the amount they contribute to the final prediction.
+
+For the ERA prediction, the ensemble model's most heavily weighted sub-model was lasso regression with a coefficient of 1.56. This is understandable considering how well the lasso model performed. The ensemble model also included 4 random forests, with weights ranging from 0.28-0.000009.
+
+For the salary prediction, it relied upon only 2 sub-models, a random forest and a lasso regression. The random forest had the higher coefficient, with a weight of 0.98 compared to the lasso regression's 0.29.
 #### Ensemble Model Results
 ```{r echo=FALSE}
 ensemble_statistics<-c(0.776,0.2209,0.149,0.970225)
@@ -1557,17 +1567,6 @@ kable(ensemble_table, digits = 3) %>%
 From the above table, we can see that the ensemble model outperformed all other models in forecasting future ERA and salary. This is understandable as combining multiple models allows the ensemble model to "look" at the data in more ways than one which makes it more efficient in terms of utilizing more of the data. 
 
 The improvement that the ensemble model achieved is especially notable with salary-the difference between its 5-fold CV MSE and the second best performing model is quite large. Even though the ensemble model had the lowest 5-fold CV MSE for predicting ERA as well, its MSE was similar to that of the lasso and custom models.
-
-<br />
-
-### Ensemble Model
-
-The ensemble model relied upon combining lasso regression, ridge regression, and random forests into an overall model in the interest of improving model accuracy. Each of the constituent models then is assigned a coefficient to determine the amount they contribute to the final prediction.
-
-For the ERA prediction, the ensemble model's most heavily weighted sub-model was lasso regression with a coefficient of 1.56. This is understandable considering how well the lasso model performed. The ensemble model also included 4 random forests, with weights ranging from 0.28-0.000009.
-
-For the salary prediction, it relied upon only 2 sub-models, a random forest and a lasso regression. The random forest had the higher coefficient, with a weight of 0.98 compared to the lasso regression's 0.29.
-
 
 <br />
 
@@ -2033,8 +2032,9 @@ According to our salary model (which had noticeably lower prediction error than 
 
 ## Closing Thoughts
 
-Write broad conclusions/synthesis here.
-Nontrivial disparities between predictors informing future salary and predictors informing ERA forecasts. ERA forecasting model with relatively substantial predictive capabilities, extensive benefits in application.
+From both the custom multiple linear regression models as well as the, slightly more confusing, lasso regression, we can see that a disparity does exist between predictors that inform future performance and those correlated with future salary. The custom salary model did not include a single advanced statistic and still performed relatively well. The correlations examined in the exploratory data analysis further reinforce such a trend and suggest that, even though front offices are warming up to advanced statistics such as wOBA, they are still failing to fully account for luck-adjustment. This is evident through the fact that, even though xwOBA and xBA were both better predictors of future ERA than wOBA and BA, they were not as highly correlated with future salary. Thus, it seems that a more-holistic adoption of statcast data could benefit decision making in MLB front offices.
+
+ERA forecasting model with relatively substantial predictive capabilities, extensive benefits in application.
 Discuss some limitations.
 
 
