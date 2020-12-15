@@ -56,7 +56,7 @@ ggplot(teams,
 cor(teams$ERA,
    teams$W)
 ```
-
+Figure 1: Total team wins plotted against team ERA; trend line represents linear line of best fit. Correlation between the two values shown underneath.
 
 The aims and methods of this exploration differ from previous investigations in that the application of statistical learning models allow for more complexity compared to the single-metric methods that have been used traditionally (such as predicting ERA in subsequent seasons solely as a function of current season's ERA). While front offices certainly have proprietary models predicting a suite of different outcomes, online, the two methods used for predicting future salary and ERA both rely on basic statistics. For ERA, a post on the baseball statistics website FanGraphs attempted to predict 2011 ERA using 2010 statistics and identified skilled-interactive earned run average (SIERA) as the best predictor of future ERA (1). While the formula behind SIERA is quite complex, its calculation does not utilize Sabermetrics analytics (which were introduced in the 2014 season) in its calculation and its variables are restricted to basic statistics such as total strikeouts and plate appearances. In terms of predicting salary, a commonly used method is to calculate contract value over wins above replacement (WAR) to get the “cost of a win in free agency” (2). The formula for a pitcher’s WAR is quite complex but still does not fully integrate Sabermetrics statistics. Additionally, this method presupposes a linear relationship, which is to say that a four-win player costs the same as two two-win players, an assumption that we can circumvent with certain models.
 
@@ -178,7 +178,7 @@ ggplot(Mega_Summary_Filtered,
        y = "Count") +
   theme_classic()
 ```
-
+Figure 2: Histogram of MLB starting pitcher salary, the evident right skew necessitated a log transformation.
 
 
 As we can see, future salary is quite right skewed. This is understandable, as certain superstar pitchers have salaries that are magnitudes greater than the average starting pitcher. We considered a log transformation to try to ameliorate this skew.
@@ -197,7 +197,7 @@ ggplot(Mega_Summary_Filtered,
        y = "Count") +
   theme_classic()
 ```
-
+Figure 3: Histogram of log-transformed MLB starting pitcher salary, the previously mentioned right skew is no longer as extreme.
 
 
 It would appear as though the log transformation greatly reduced the degree of the previously observed right skew. While a slight left skew may now exist, we will consider log-transforming salary in our models in order to circumvent this extreme right skew.
@@ -495,7 +495,7 @@ cor(Mega_Summary_Filtered$BA,
 
 
 
-Interestingly, even though strikeout percentage is still positively correlated with future salary, the strength of the relationship is not as strong as the raw number of strikeouts. Both the percentage of batters walked and batting average have a moderate to weak negative relationship with future salary. **This supports the previous hypothesis that only good, highly-valued pitchers are allowed to accumulate a large number of hits as simply giving up a lot of hits, for example having a high BA, is negatively correlated with future earning.** Surprisingly, `BB %` has a stronger negative relationship than `BA`, despite total number of hits having a stronger correlation with future salary than total number of batters walked. The discrepancy between total batters walked and percentage of batters walked is not easily explained.
+Interestingly, even though strikeout percentage is still positively correlated with future salary, the strength of the relationship is not as strong as the raw number of strikeouts. Both the percentage of batters walked and batting average have a moderate to weak negative relationship with future salary. The negative correlation between future salary and BA is notable as, in conjunction with the previously-mentioned positive correlation between total hits and salary, it  supports the previous hypothesis that only good, highly-valued pitchers are allowed to accumulate a large number of hits. As simply giving up a lot of hits, resulting in a high total number of hits but also a high BA, is negatively correlated with future earning. Surprisingly, `BB %` has a stronger negative relationship than `BA`, despite total number of hits having a stronger correlation with future salary than total number of batters walked. The discrepancy between total batters walked and percentage of batters walked is not easily explained.
 
 We next looked at some season percentages of more advanced statistics such as hard hit percentage (`Hard Hit %`) and barrel percentage (`Barrel %`). Both of these statistics look at the speed and angle of the ball after being hit by the batter. `Barrel %` represents batted balls with exit velocities and launch angles that, historically, have led to a minimum .500 batting average (or a 50% chance of resulting in a hit). `Hard Hit %` is similar to `Barrel %`, but does not consider launch angle and simply describes batted balls with exit velocities exceeding 95 MPH. Naively, one would expect a negative relationship, as a good pitcher should try to avoid giving up hard contact.
 
@@ -536,7 +536,7 @@ cor(Mega_Summary_Filtered$barrel_percent,
 
 
 
-Surprisingly, neither of these advanced variables seem to have a clear relationship with future salary. **`Barrel %`'s relationship with future salary is marginally stronger than `Hard Hit %`'s and is, shockingly, positive**. However, this weak relationship could be explained by noise, as it is unlikely that giving up more hard hits will lead to a larger contract.
+Considering how similar the two statistics are, the disparity between their strength of correlation is quite striking. Hard hit % is moderately negatively correlated with future salary while barrel % has essentially no correlation. This is surprising as the two are quite similar as well as correlated with each other.
 
 <br />
 
@@ -581,7 +581,7 @@ cor(Mega_Summary_Filtered$spin_rate,
 
 
 
-Naively, one might expect faster pitches to be harder to hit and thus expect pitchers with higher average velocities to be handsomely paid. However, the negative **correlation, with a not-insignificant correlation, suggests** that average pitch speed is actually inversely related to salary. There are a couple of reasons why this might be. The most obvious is that pitchers who lack speed often make up for it with stellar control or a wide arsenal of off-speed pitches. Another reason is that, instinctively, average pitch speed might be correlated with certain negative predictors like home runs, as batters can often make hard contact against fast but poorly-placed pitches.
+Naively, one might expect faster pitches to be harder to hit and thus expect pitchers with higher average velocities to be handsomely paid. However, the negative correlation, albeit with a very weak association, suggests that average pitch speed is actually inversely related to salary. There are a couple of reasons why this might be. The most obvious is that pitchers who lack speed often make up for it with stellar control or a wide arsenal of off-speed pitches. Another reason is that, instinctively, average pitch speed might be correlated with certain negative predictors like home runs, as batters can often make hard contact against fast but poorly-placed pitches.
 
 Spin rate is a topic that has garnered increased attention in the baseball community, and is something that pitchers place a lot of emphasis on. It seems that this interest is not misplaced, as there is a moderate positive relationship between spin rate and future salary.
 
@@ -589,7 +589,7 @@ Spin rate is a topic that has garnered increased attention in the baseball commu
 
 #### Advanced Statistics
 
-**We now get to our advanced statistics,** namely weighted on base average (`wOBA`), batting average on balls in play (`BABIP`), expected weighted on base average (`xwOBA`), and expected batting average (`xBA`). The two expected statistics are notable, as they try to remove some of the noise (or "luck") from the statistic by calculating `wOBA` and `BA` based on the historical `wOBA` and `BA` of batted balls with similar exit velocities and launch angles. 
+The correlations between future salary and advanced statistics was a point of focus for us as it offers the first indications as to whether front offices are successfully integrating analytics. The metrics we considered were weighted on base average (`wOBA`), batting average on balls in play (`BABIP`), expected weighted on base average (`xwOBA`), and expected batting average (`xBA`). The two expected statistics are notable, as they try to remove some of the noise (or "luck") from the statistic by calculating `wOBA` and `BA` based on the historical `wOBA` and `BA` of batted balls with similar exit velocities and launch angles. 
 
 
 ```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
@@ -661,7 +661,7 @@ cor(Mega_Summary_Filtered$xBA,
 
 
 
-Interestingly, all four advanced statistics had negative correlations, albeit weak ones. This suggests that GMs perhaps are not as averse to advanced statistics as one would expect. The negative relationship is understandable, as these statistics measure the offensive production against the pitcher, thus, smaller values are desirable. Both `wOBA` and `BABIP` have stronger relationships with future salary than expected `wOBA` and `xBA`, which suggests that GMs are still not adequately separating out noise or luck. 
+Interestingly, all four advanced statistics had negative correlations, albeit only moderate ones ones. This suggests that GMs perhaps are not as averse to advanced statistics as one would expect. The negative relationship is understandable, as these statistics measure the offensive production against the pitcher, thus, smaller values are desirable. Both `wOBA` and `BABIP` have stronger relationships with future salary than expected `wOBA` and `xBA`, which suggests that GMs are still not adequately separating out noise or luck. 
 
 <br />
 
@@ -863,6 +863,7 @@ pitch_data  %>%
               color = "midnightblue") +
   theme_classic()
 ```
+Figure 5: Average pitch speed plotted against wOBA. Trend line represents linear line of best fit. Correlation between the two values are shown below.
 
 ```{r echo=FALSE}
 cor(pitch_data$`Average Pitch Speed`, pitch_data$wOBA)
@@ -884,7 +885,7 @@ pitch_data  %>%
   geom_smooth(method = lm) +
   theme_classic()
 ```
-
+Figure 6: Average pitch speed plotted against wOBA after separating the data into “fast ball” and “off speed”. Trend line represents linear line of best fit. 
 
 
 The first thing we find in our exploration is that average pitch speed does not exhibit meaningful statistical relationships with other measures of pitch performance (such as `wOBA`), even when the data is almost perfectly separated by categorical variable level. These results are consistent with different response choices (`BA`, `HR`, etc.). This leads us to conclude that some pitch tracking data (specifically the data involving velocity and release extension) have no predictive power when it comes to modeling pitcher performance. This helps explain why Statcast uses batted ball variables (such as launch angle and exit velocity) rather than pitch tracking variables as the predictors in the calculation of their expected outcome statistics (such as `xwOBA` and `xBA`). Accordingly, we will most likely avoid using average pitch speed and average release extension in our model and focus on other predictors of future ERA instead.
@@ -907,8 +908,7 @@ Original_Summary %>%
 ```{r echo=FALSE}
 cor(Original_Summary$ERA, Original_Summary$`ERA (t+1)`)
 ```
-
-
+Figure 7: Current ERA plotted against future ERA. Trend line represents linear line of best fit. Correlation between the two values are shown below.
 
 Despite the expected existence of a positive linear association between the two variables, the correlation between ERA and ERA in the subsequent season is far from perfect. This can likely be explained by the aforementioned influence of randomness in pitching outcomes. This leads us to believe that other variables (or a combination thereof) may have stronger predictive power in forecasting ERA than ERA by itself. 
 
@@ -925,7 +925,7 @@ ggplot(Original_Summary, aes(x = `ERA (t+1)` ))+
     alpha = .75 )+
   theme_classic()
 ```
-
+Figure 8: Histogram of the distribution of ERA among MLB starting pitchers.
 
 
 We can see that, unlike future salary, future ERA displays an approximately normal distribution. While there is a small right tail, the low number of observations in that region make it so that it is unlikely to skew our model. This normal distribution is understandable, as the MLB has pitchers with a range of talent, with the majority of them falling around the average. The few outliers in the right tail likely represent injury-ridden seasons or seasons where a pitcher experienced anomalously bad luck.
@@ -938,7 +938,7 @@ ggplot(Original_Summary, aes(x = `ERA (t+1)`, fill = factor(Year))) +
        fill = "Year") +
   theme_classic()
 ```
-
+Figure 9: Density plot of pitcher ERA separated by year.
 
 We also see that, for the most part, this normal distribution is consistent between the different individual years included in the dataset. One somewhat prominent exception is 2019, where `ERA (t+1)` represents a pitcher's ERA in 2020. Due to the inconsistencies and irregularaties in team's preparation for the 2020 season (as a result of COVID-19), batters were abnormally disadvantaged at the beginning of the season. Subsequently, the mean ERA for 2020 is lower than in the four previous years. Unfortunately, this is a difficult effect to mitigate in our data. However, as discussed in the methods section, we filtered the data as diligently as possbile (in terms of sample size within individual pitchers' seasons) to ensure as robust a dataset as possible.
 
@@ -1509,6 +1509,12 @@ custom_mod <- lm(data = pitchers,
                   ERA_t1 ~ spin_rate + G + SO + K_percent + 
                     ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
 
+# Custom Model for Salary
+
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1)~Year+SO+
+                           Salary+W*luck_adj_ERA)
+
 ```
 
 
@@ -1530,9 +1536,41 @@ kable(custom_table, digits = 3) %>%
 ```
 
 
-As seen above, our custom model actually produced the lowest 5-fold MSE among the sampled models. This is somewhat understandable, as we combined stepwise selection with domain knowledge to produce a model build around intuition. This model is also less complex than the forward model, perhaps contributing to its reduced MSE as it is less susceptible to variance.
+As seen above, our custom model actually produced the one of lowest 5-fold MSE among the sampled models. This is somewhat understandable, as we combined stepwise selection with domain knowledge to produce a model build around intuition. This model is also less complex than the forward model, perhaps contributing to its reduced MSE as it is less susceptible to variance.
+
+The custom model for salary also performed decently well, which similarly chose predictors according to what domain knowledge would suggest. In the case of salary, this consisted of a preponderance of counting statistics
+
+#### Ensemble Model Results
+```{r echo=FALSE}
+ensemble_statistics<-c(0.776,0.2209,0.149,0.970225)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+ensemble_table<-data.frame(labels,ensemble_statistics) 
+ensemble_table<-ensemble_table %>%  rename(
+    `Ensemble Model Statistics` = ensemble_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(ensemble_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+
+```
+From the above table, we can see that the ensemble model outperformed all other models in forecasting future ERA and salary. This is understandable as combining multiple models allows the ensemble model to "look" at the data in more ways than one which makes it more efficient in terms of utilizing more of the data. 
+
+The improvement that the ensemble model achieved is especially notable with salary-the difference between its 5-fold CV MSE and the second best performing model is quite large. Even though the ensemble model had the lowest 5-fold CV MSE for predicting ERA as well, its MSE was similar to that of the lasso and custom models.
 
 <br />
+
+### Ensemble Model
+
+The ensemble model relied upon combining lasso regression, ridge regression, and random forests into an overall model in the interest of improving model accuracy. Each of the constituent models then is assigned a coefficient to determine the amount they contribute to the final prediction.
+
+For the ERA prediction, the ensemble model's most heavily weighted sub-model was lasso regression with a coefficient of 1.56. This is understandable considering how well the lasso model performed. The ensemble model also included 4 random forests, with weights ranging from 0.28-0.000009.
+
+For the salary prediction, it relied upon only 2 sub-models, a random forest and a lasso regression. The random forest had the higher coefficient, with a weight of 0.98 compared to the lasso regression's 0.29.
+
+
+<br />
+
 
 ### Overall Results
 
@@ -1540,7 +1578,7 @@ As seen above, our custom model actually produced the lowest 5-fold MSE among th
 ridge_statistics<-c(0.62543602, 0.33715364, 0.09284193, 0.99001384)
 lasso_statistics<-c(0.6299247, 0.3284793, 0.1072762, 0.9734646)
 forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
-domain_knowledge_statistics<-c("NA","NA",0.157,0.972)
+domain_knowledge_statistics<-c(0.6429,0.3293462,0.157,0.972)
 full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
 PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
 ensemble_statistics <-c(0.776,0.2209,0.149,0.970225)
@@ -1631,7 +1669,7 @@ ggplot(final_table %>%
 
 ```
 
-
+Figure 10: Line graph of the adjusted R-squared value as well as 5-fold CV MSE for each model when predicting future ERA.
 
 *For salary, we can see that the ensemble model far outperforms the other models in terms of R-squared. Similarly, in terms of 5-fold MSE, we see that the ensemble model again outperforms all other models:*
 
@@ -1686,6 +1724,7 @@ ggplot(final_table %>%
     expand_limits(x = 0, y = 0)
 
 ```
+Figure 11: Line graph of the adjusted R-squared value as well as 5-fold CV MSE for each model when predicting future salary
 
 <br />
 <br />
@@ -1793,7 +1832,7 @@ ggplot(pitchers,
        y = "ERA (t+1)") + 
   theme_classic()
 ```
-
+Figure 12: Predicted future ERA from the custom linear model plotted against observed future ERA. Trendline represents linear line of best fit.
 ```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot(pitchers,
        aes(x = ERA, y = ERA_t1)) +
@@ -1805,7 +1844,7 @@ ggplot(pitchers,
        y = "ERA (t+1)") + 
   theme_classic()
 ```
-
+Figure 13: Current ERA, which serves as the null model, plotted against observed future ERA. Trendline represents linear line of best fit.
 
 ```{r echo=FALSE}
 cor_table <- tibble(
@@ -1839,7 +1878,7 @@ ggplot(pitchers_2019_tidy, aes(x = Pitcher,
   geom_line() +
   theme_minimal()
 ```
-
+Figure 14: Dot graph showing residuals between predicted and actual 2020 ERA among the top 50 highest-paid pitchers.
 
 
 From the above plot, which graphs predicted ERA (as determined by our ERA forecasting model) and actual ERA for the 50 highest-paid starting pitchers, we can ascertain which pitchers either overperformed or underperformed relative to modeling expectations. Specifically, we can look at the absolute difference between predicted ERA and actual ERA as a measure of expectation deviation. By this account, Anibal Sanchez, Jon Gray, Madison Bumgarner, Robbie Ray, and Tanner Roark stand out as pitchers who underperformed relative to their predicted performance. On the other hand, Dallas Keuchel, Shane Bieber, Trevor Bauer, and Zach Davies posted actual ERAs that exceeded the model's expectations. Implicitly, the model gives tends more conservative ERA prediction estimates, since the data used in linear model construction is necessarily regressed. Although these more conservative estimates preserve variance in our modeling outcomes (improving overall fit), it inevitably means that our model tends to produce large residuals on extreme outcomes. It is also worth mentioning that three of the four individual pitchers that produced the largest positive residuals (Jon Gray, Madison Bumgarner, and Robbie Ray) all play in unusual pitching environments. While the majority of MLB stadiums are fairly standard when it comes to influence on player performance, there are two distinct exceptions: Arizona and Colorado. In both locations, the abnormally high park altitudes tend to routinely effect pitch movement and batted ball distance, disproportionately inflating team offense and increasing ERA. Because Jon Gray, Madison Bumgarner, and Robbie Ray each play in either Arizona and Colorado, it is possible that our model fails to properly account for the confounding variable of pitcher environment. This is an important limitation to address, and partly explains the increasing popularity of park adjusted pitching metrics.
@@ -1861,7 +1900,7 @@ pitchers_2019_tidy %>%
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 50, hjust = 1)) 
 ```
-
+Figure 15: Dot graph showing absolute residuals between predicted and actual 2020 ERA among the top 50 highest-paid pitchers. Each point’s color represents whether the pitcher over or underperformed the predicted ERA.
 
 Another extension of our ERA model is using salary data to determine which pitchers were overpaid or underpaid relative to both their contemporaries and their expected pitching outcomes. Intuitively, front offices should spend money on pitchers who they believe will improve the overall pitching performance of their team in coming seasons. Subsequently, general managers should be interested in compensating players based on their expected future performance, since that will determine the return the team gets on their investment. It is therefore appropriate to assess a player's salary relative to their forecasted performance in order to determine whether or not that player is appropriately compensated, which we attempted using our ERA model and salary data. To allow for ease of comparison, we first standardized each pitcher's salary and forecasted ERA. We then created the following visualizations, each of which offer some sort of display comparing the standardized forecasted ERA and standardized salaries for the 50 highest-paid starting pitchers in the year 2020:
 
@@ -1880,7 +1919,7 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted
   coord_flip() +
   theme_minimal()
 ```
-
+Figure 16: Horizontal bar graph showing the standardized forecasted ERA value, arranged in descending order.
 ```{r, echo=FALSE, fig.width=7,fig.height=6}
 ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
                           y = `Standardized Salary`,
@@ -1895,7 +1934,7 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
   coord_flip() +
   theme_minimal()
 ```
-
+Figure 17: Horizontal bar graph showing the standardized salary of the top 50 highest paid pitchers, arranged in descending order.
 ```{r echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot() +
   scale_x_continuous(name = "Standardized Forecasted ERA (adjusted)",
@@ -1941,8 +1980,7 @@ ggplot() +
             vjust = -1.33) + 
   theme_minimal()
 ```
-
-
+Figure 18: Contour plot separating starting MLB pitchers along both salary and predicted ERA.
 
 Already, we can identify several players who appear to be appropriately paid for their forecasted performance. Gerrit Cole, Max Scherzer, Jacob DeGrom, and Yu Darvish are four pronounced examples, as each pitcher possesses both one of the highest standardized salaries and highest standardized forecasted ERAs (for this analysis, forecasted ERA has been adjusted such that a positive value is now associated with stronger performances). On the other hand, we also notice players who represent examples of inefficient decision making by front offices. Zack Greinke, who has one of the highest salaries of any starting pitcher in 2020, actually had a forecasted ERA below the mean, implying that teams could have made better use of that salary capital. On the contrary, starting pitchers Blake Snell and Mike Clevinger were modeled to have  two of the best expected ERAs, but both had salaries lower than the mean value. This can likely be explained by the fact that the two pitchers are both in the early stages of their careers and still under team control, preventing them from entering free agency and receiving a contract indicative of their proper market value. 
 
@@ -1961,7 +1999,7 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
        y = "log(Salary) / (1 -Adjusted Forecasted ERA)") + 
   theme_minimal()
 ```
-
+Figure 19: Bar graph showing player compensation per ERA. Pitchers on the right of the graph are over-compensated for production relative to average while those on the left are under-compensated.
 
 
 In addition to evaluating pitcher performance relative to our model ERA model forecast, we can also use our salary model to measure which pitchers were underpaid relative to the existing standards and patterns of compensation identified by our model. 
@@ -1985,7 +2023,7 @@ ggplot(salary_2019_tidy, aes(x = Pitcher,
   geom_line() +
   theme_minimal()
 ```
-
+Figure 20: Dot graph showing residuals between predicted and actual 2020 salary among the top 50 highest-paid pitchers.
 
 According to our salary model (which had noticeably lower prediction error than our ERA model), most pitchers appeared to be paid at or around their predicted salary, evident in the size of the residuals. That being said, there are still some clear anomolaies. Blake Snell, Max Scherzer, Shane Bieber, and Yu Darvish were four of the most underpaid pitchers according to our model. Worth noting is that these four pitchers also had four of the lowest forecasted ERAs. These conclusions illustrate that, when synthesizing the results of the two models, MLB teams may be able to readily identify players who are undevalued, allowing them to make advantageous free agency and contract extension decisions.
 
