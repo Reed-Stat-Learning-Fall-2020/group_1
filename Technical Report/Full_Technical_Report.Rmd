@@ -217,7 +217,7 @@ It would appear as though the log transformation greatly reduced the degree of t
 
 Total wins (`W`) and total losses (`L`) constitute the most basic pitching statistics, indicating nothing more than the possible discrete outcomes resulting from a pitcher's contribution to a game. Total number of pitches (`Pitches`) also represents a fairly rudimentary measure of pitching performance and durability. Additionally, raw, unadjusted ERA (or the average number of runs a pitcher allows in a game) is another predictor that one would expect to be associated with salary. Lastly, the number of earned runs (the unprocessed counting statistic used to calculate ERA) stands out as another basic predictor in determining future salary.
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.1.** Pitcher wins plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.1.** Total pitcher wins plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total Wins
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -227,7 +227,7 @@ ggplot(Mega_Summary_Filtered,
   geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
               color = "midnightblue") +
-  labs(x = "Wins",
+  labs(x = "W",
        y = "Salary (t+1)") +
   theme_classic()
 
@@ -235,7 +235,7 @@ cor(Mega_Summary_Filtered$W,
    Mega_Summary_Filtered$salary_t1)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.2.** Pitcher losses plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.2.** Total pitcher losses plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Total Losses
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -245,7 +245,7 @@ ggplot(Mega_Summary_Filtered,
   geom_point(alpha = 0.5, color = "midnightblue")+
   geom_smooth(method = lm,
               color = "midnightblue") +
-  labs(x = "Losses",
+  labs(x = "L",
        y = "Salary (t+1)") +
   theme_classic()
 
@@ -332,7 +332,7 @@ cor(Mega_Summary_Filtered$G,
 Total games played (`G`) appears to possess a very weak positive relationship with future salary. This is understandable for two reasons, the first being that pitchers who make a lot of appearances are generally more skilled and therefore trusted to appear in more games by managers. Concurrently, highly skilled pitchers are paid well. Secondly, as we have seen throughout this exploration so far, an increase in volume-related statistics generally tends to result in a larger paycheck.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.6.** ERA plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.6.** Earned run average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #Current ERA
 ggplot(Mega_Summary_Filtered,
        aes(
@@ -737,7 +737,7 @@ cor(Original_Summary_Filtered$`xBA - BA`,
    Original_Summary_Filtered$`Salary (t+1)`)
 ```
 
-```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.3.** ERA over hard hit percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.3.** Earned run average over hard hit percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #ERA/Hard Hit
 ggplot(Original_Summary_Filtered,
        aes(
@@ -753,7 +753,7 @@ cor(Original_Summary_Filtered$`ERA/Hard Hit %`,
    Original_Summary_Filtered$`Salary (t+1)`)
 ```
 
-```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.4.** ERA over barrel percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.4.** Earned run average over barrel percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 #ERA/Barrel
 ggplot(Original_Summary_Filtered %>% filter(`ERA/Barrel %` < 1.5),
        aes(
@@ -777,7 +777,7 @@ While `xwOBA-wOBA` doesn't display any strong relationship with future salary, `
 
 #### Correlations Between Predictors
 
-```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE}
+```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE, fig.cap="**Figure 8.1.** Correlogram illustrating correlations between predictors."}
 total_quant_pred <- 
   select_if(
     Original_Summary_Filtered,
@@ -893,7 +893,7 @@ pitch_data <- read_csv("2020_summary.csv") %>%
   rename(wOBA = wOBAA)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 9.1.** Average pitch speed plotted against weighted on-base average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 pitch_data  %>%
   ggplot(aes(
     x = `Average Pitch Speed`,
@@ -902,15 +902,15 @@ pitch_data  %>%
     geom_point(alpha = 0.5, color = "midnightblue") +
   geom_smooth(method = lm,
               color = "midnightblue") +
+  labs(x = "Velocity") +
   theme_classic()
 ```
-Figure 5: Average pitch speed plotted against wOBA. Trend line represents linear line of best fit. Correlation between the two values are shown below.
 
 ```{r echo=FALSE}
 cor(pitch_data$`Average Pitch Speed`, pitch_data$wOBA)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=6, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=6, message=FALSE, fig.cap="**Figure 9.2.** Average pitch speed plotted against weighted on-base average, seperated by pitch category; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 pitch_data  %>%
   ggplot(aes(
     x = `Average Pitch Speed`,
@@ -923,10 +923,10 @@ pitch_data  %>%
                     labels = c("Fastball", "Off-speed"), 
                     values = c("Off-speed" = "deepskyblue", 
                                "Fastball" = "palevioletred2")) +
+  labs(x = "Velocity") +
   geom_smooth(method = lm) +
   theme_classic()
 ```
-Figure 6: Average pitch speed plotted against wOBA after separating the data into “fast ball” and “off speed”. Trend line represents linear line of best fit. 
 
 
 The first thing we find in our exploration is that average pitch speed does not exhibit meaningful statistical relationships with other measures of pitch performance (such as `wOBA`), even when the data is almost perfectly separated by categorical variable level. These results are consistent with different response choices (`BA`, `HR`, etc.). This leads us to conclude that some pitch tracking data (specifically the data involving velocity and release extension) have no predictive power when it comes to modeling pitcher performance. This helps explain why Statcast uses batted ball variables (such as launch angle and exit velocity) rather than pitch tracking variables as the predictors in the calculation of their expected outcome statistics (such as `xwOBA` and `xBA`). Accordingly, we will most likely avoid using average pitch speed and average release extension in our model and focus on other predictors of future ERA instead.
@@ -934,7 +934,7 @@ The first thing we find in our exploration is that average pitch speed does not 
 Ostensibly, the most obvious predictor of forecasted ERA is current ERA, as we can intuitively expect pitchers who performed well in a given season to also perform well in subsequent seasons.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 9.3.** Earned run average plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = ERA,
@@ -949,7 +949,6 @@ Original_Summary %>%
 ```{r echo=FALSE}
 cor(Original_Summary$ERA, Original_Summary$`ERA (t+1)`)
 ```
-Figure 7: Current ERA plotted against future ERA. Trend line represents linear line of best fit. Correlation between the two values are shown below.
 
 Despite the expected existence of a positive linear association between the two variables, the correlation between ERA and ERA in the subsequent season is far from perfect. This can likely be explained by the aforementioned influence of randomness in pitching outcomes. This leads us to believe that other variables (or a combination thereof) may have stronger predictive power in forecasting ERA than ERA by itself. 
 
@@ -957,29 +956,29 @@ Despite the expected existence of a positive linear association between the two 
 
 #### Future ERA Distribution
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 10.1.** Histogram of distribution of future earned run average."}
 ggplot(Original_Summary, aes(x = `ERA (t+1)` ))+
   geom_histogram(
     color="grey100",
     fill = "midnightblue",
     bins = 30, 
-    alpha = .75 )+
+    alpha = .75 ) +
+  labs(y = "Count") +
   theme_classic()
 ```
-Figure 8: Histogram of the distribution of ERA among MLB starting pitchers.
 
 
 We can see that, unlike future salary, future ERA displays an approximately normal distribution. While there is a small right tail, the low number of observations in that region make it so that it is unlikely to skew our model. This normal distribution is understandable, as the MLB has pitchers with a range of talent, with the majority of them falling around the average. The few outliers in the right tail likely represent injury-ridden seasons or seasons where a pitcher experienced anomalously bad luck.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=6, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=6, message=FALSE, fig.cap="**Figure 10.2.** Density plots of distribution of future earned run average, separated by year."}
 ggplot(Original_Summary, aes(x = `ERA (t+1)`, fill = factor(Year))) +
   geom_density(alpha = 0.25) + 
   labs(y = "Density",
        fill = "Year") +
   theme_classic()
 ```
-Figure 9: Density plot of pitcher ERA separated by year.
+
 
 We also see that, for the most part, this normal distribution is consistent between the different individual years included in the dataset. One somewhat prominent exception is 2019, where `ERA (t+1)` represents a pitcher's ERA in 2020. Due to the inconsistencies and irregularaties in team's preparation for the 2020 season (as a result of COVID-19), batters were abnormally disadvantaged at the beginning of the season. Subsequently, the mean ERA for 2020 is lower than in the four previous years. Unfortunately, this is a difficult effect to mitigate in our data. However, as discussed in the methods section, we filtered the data as diligently as possbile (in terms of sample size within individual pitchers' seasons) to ensure as robust a dataset as possible.
 
@@ -990,7 +989,7 @@ We also see that, for the most part, this normal distribution is consistent betw
 First, we look at some of the same counting statistics that were significant in predicting salary, namely total wins, total pitches, and total strikeouts, which were the three predictors with the highest correlation with salary:
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 11.1.** Total pitcher wins plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = W,
@@ -1011,7 +1010,7 @@ cor(Original_Summary$W, Original_Summary$`ERA (t+1)`)
 The relationship between wins and forecasted ERA isn't exceptionally strong but the negative (or inverse) relationship is what one would have expected, since winning pitchers often have lower ERAs. Thus, while the negative correlation coefficient does support the decision to reward wins with a lucrative contract, the weaker association suggests that the relationship might not be as important as one would have expected looking at salary alone.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 11.2.** Total pitches plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = Pitches,
@@ -1032,7 +1031,7 @@ cor(Original_Summary$Pitches, Original_Summary$`ERA (t+1)`)
 Similar to wins, we again see a weak, negative relationship between number of pitches and ERA in the following year. This negative relationship is perhaps a bit more confusing and needs more explanation than the relationship between wins and ERA. What this relationship suggests is that more productive pitchers (in terms of raw volume) will tend to have a better or lower ERA next season. This relationship perhaps offers some validation to the correlations between volume of pitches and salary, as it suggests that better pitchers simply pitch more often. However, it is worth mentioning that this relationship is more likely due to the fact that only highly-skilled pitchers will be allowed to accumulate a large number of total pitches. That is to say that, while a high number of pitches suggests a more valuable pitcher, making a less-accomplished pitcher pitch more innings will not necessarily improve their value or reduce their ERA.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 11.3.** Total strikeouts plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = SO,
@@ -1063,7 +1062,7 @@ Despite the fact that the salary-associated predictors are already quite good at
 
 The advanced statistics we considered were strikeout percent (`K %`), weighted on-base average (`wOBA`), expected weighted on-base average (`xwOBA`), and batting average on balls in play (`BABIP`).
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 12.1.** Strikeout percentage plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = `K %`,
@@ -1079,7 +1078,7 @@ Original_Summary %>%
 cor(Original_Summary$`K %`, Original_Summary$`ERA (t+1)`)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 12.2.** Weighted on-base average plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = wOBA,
@@ -1095,7 +1094,7 @@ Original_Summary %>%
 cor(Original_Summary$wOBA, Original_Summary$`ERA (t+1)`)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 12.3.** Expected weighted on-base average plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = xwOBA,
@@ -1111,7 +1110,7 @@ Original_Summary %>%
 cor(Original_Summary$xwOBA, Original_Summary$`ERA (t+1)`)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 12.4.** Batting average on balls in play plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = BABIP,
@@ -1138,7 +1137,7 @@ Already, we see that the more advanced analytics have, on average, stronger corr
 A further extension of comparing the differences in outcome and expected outcome is to determine if those differences tend to correct themselves over time. To do so, we analyze the change in a pitcher's ERA from one season to the next as explained by the difference between different predictive and raw measures.
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.1.** Batting average on balls in play minus mean batting average on balls in play plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = `BABIP - Mean BABIP`,
@@ -1154,7 +1153,7 @@ Original_Summary %>%
 cor(Original_Summary$`BABIP - Mean BABIP`, Original_Summary$`ΔERA`)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.2.** Expected batting average minus batting average plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = `xBA - BA`,
@@ -1170,7 +1169,7 @@ Original_Summary %>%
 cor(Original_Summary$`xBA - BA`, Original_Summary$`ΔERA`)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.3.** Expected weighted on-base average minus weighted on-base average plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = `xwOBA - wOBA`,
@@ -1186,7 +1185,7 @@ Original_Summary %>%
 cor(Original_Summary$`xwOBA - wOBA`, Original_Summary$`ΔERA`)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.4.** Earned run average over hard hit percentage plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   ggplot(aes(
     x = `ERA/Hard Hit %`,
@@ -1202,7 +1201,7 @@ Original_Summary %>%
 cor(Original_Summary$`ERA/Hard Hit %`, Original_Summary$`ΔERA`)
 ```
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.5.** Earned run average over barrel percentage plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 Original_Summary %>%
   filter(`ERA/Barrel %` < 1.5) %>%
   ggplot(aes(
@@ -1586,12 +1585,16 @@ The custom model for salary also performed decently well, which similarly chose 
 
 ### Ensemble Model
 
-The ensemble model relied upon combining lasso regression, ridge regression, and random forests into an overall model in the interest of improving model accuracy. Each of the constituent models then is assigned a coefficient to determine the amount they contribute to the final prediction.
+The ensemble models for both salary and ERA relied upon combining LASSO regression, ridge regression, and random forests into a single aggregation in the interest of improving overall model accuracy. Each of the constituent models were then assigned a coefficient to determine the weight of their contribution to the final prediction.
 
-For the ERA prediction, the ensemble model's most heavily weighted sub-model was lasso regression with a coefficient of 1.56. This is understandable considering how well the lasso model performed. The ensemble model also included 4 random forests, with weights ranging from 0.28-0.000009.
+For the ERA prediction, the ensemble model's most heavily weighted sub-model was LASSO regression, with a coefficient of 1.56. This is understandable, especially considering how well the LASSO model performed generally. The ensemble model also included four random forests, with weights ranging from 0.28 to 0.000009.
 
-For the salary prediction, it relied upon only 2 sub-models, a random forest and a lasso regression. The random forest had the higher coefficient, with a weight of 0.98 compared to the lasso regression's 0.29.
+For the salary prediction, the ensemble model relied upon only two sub-models, a random forest and a LASSO regression. The random forest had the higher coefficient, with a weight of 0.98 compared to the LASSO regression's weight 0.29.
+
+
+
 #### Ensemble Model Results
+
 ```{r echo=FALSE}
 ensemble_statistics<-c(0.776,0.2209,0.149,0.970225)
 labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
@@ -1605,9 +1608,10 @@ kable(ensemble_table, digits = 3) %>%
   kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
 
 ```
-From the above table, we can see that the ensemble model outperformed all other models in forecasting future ERA and salary. This is understandable as combining multiple models allows the ensemble model to "look" at the data in more ways than one which makes it more efficient in terms of utilizing more of the data. 
 
-The improvement that the ensemble model achieved is especially notable with salary-the difference between its 5-fold CV MSE and the second best performing model is quite large. Even though the ensemble model had the lowest 5-fold CV MSE for predicting ERA as well, its MSE was similar to that of the lasso and custom models.
+From the above table, we can see that the ensemble model outperformed all other models in forecasting ERA and salary. This is reasonable, as combining multiple models allows the ensemble algorithm to "look" at the data in more ways than one, making it more efficient in terms of utilizing a greater depth of the available data. 
+
+The improvement that the ensemble model achieved is especially notable with salary---the difference between its 5-fold CV MSE and the second best performing model is quite large. Even though the ensemble model had the lowest 5-fold CV MSE for predicting ERA as well, its MSE was similar to that of the LASSO and custom models.
 
 <br />
 
@@ -1654,7 +1658,7 @@ kable(final_table, digits = 3) %>%
 
 
 
-*We can see that in terms of R-squared, the forward model performed the best. Conversely, in terms of 5-fold MSE, the ensemble model performed the best. The 5-fold MSE difference might seem marginal, but we have to remember that the MSE is in `log(Salary)` units.*
+We can see that in terms of R-squared, the forward model performed the best. Conversely, in terms of 5-fold MSE, the ensemble model performed the best. The 5-fold MSE difference might seem marginal, but it must be remembered that the MSE is in `log(Salary)` units.
 
 
 
@@ -1682,7 +1686,9 @@ ggplot(final_table %>%
          x = "Model",
          y = "R-Squared for ERA") +
     expand_limits(x = 0, y = 0)
+```
 
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggplot(final_table %>%
            mutate(Model = fct_reorder(Model,`5-fold MSE for ERA`)),
        aes(
@@ -1711,7 +1717,7 @@ ggplot(final_table %>%
 
 Figure 10: Line graph of the adjusted R-squared value as well as 5-fold CV MSE for each model when predicting future ERA.
 
-*For salary, we can see that the ensemble model far outperforms the other models in terms of R-squared. Similarly, in terms of 5-fold MSE, we see that the ensemble model again outperforms all other models:*
+For salary, we can see that the ensemble model far outperforms the other models in terms of R-squared. Similarly, in terms of 5-fold MSE, we see that the ensemble model again outperforms all other models:
 
 
 
