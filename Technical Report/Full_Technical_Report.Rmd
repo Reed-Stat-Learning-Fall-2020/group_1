@@ -34,7 +34,7 @@ library(corrr)
 ## Abstract
 
 
-The main goal for this project is to predict both future performance and salary for MLB pitchers from 2015-2019. This endeavor allows us to not only understand the metrics that underlie the two response variables, but also to investigate if a discrepancy exists between the predictors responsible for prospective pitching success and those responsible for a lucrative contract. Our salary data for 2017-2019 was scraped from spotrac.com and our salary data for 2015-2016 came from seanlahman.com. Additionally, all of our pitching statistics data came from the `statcast` tool from baseballsavant.com. After some preprocessing to clean up our data we ended up with a robust data set made up of 457 observations and 36 variables Our analysis and model building was all was done in RStudio and while we used quite a few advanced modeling techniques we also made use of our extensive domain knowledge to inform some of our decisions. Ultimately, comparison between a variety of model types revealed that an ensemble model performed the best in forecasting future ERA and salary, outperforming the existing null models. Additionally, inferential conclusions drawn from the more interpretable multiple linear regression models suggest that a discrepancy does exist between the contracts handed out by baseball front offices and future performance. While it seems like front offices are doing an adequate job of considering advanced statsitics, new, statcast measures that try to account for luck-adjustment have not yet been fully integrated into their decision making.
+The main goal of this project was to predict both the future performance and salary of Major League Baseball (MLB) starting pitchers from 2015 to 2019. This endeavor allowed us to not only understand the metrics that underlie the two response variables, but also to investigate if a discrepancy exists between the predictors responsible for prospective pitching success and those responsible for rewarding players with lucrative contracts. A robust data set was constructed from a variety of packages and online sources, all of which are credited throughout the paper. Our analysis and model building were performed in RStudio and, while we applied a number advanced statistical learning concepts and modeling techniques, we also made use of our extensive domain knowledge to inform many of our decisions. Ultimately, comparison between a variety of model types revealed that an ensemble model performed the best in forecasting future ERA and salary, outperforming the existing null models. Additionally, inferential conclusions drawn from the more interpretable multiple linear regression models suggested that a non-trivial discrepancy does exist between the contracts handed out by MLB front offices and the predicted future performance of individual starting pitchers. While it seems like front offices are doing an adequate job of considering a variety of measures of pitcher performance, advanced statistics that attempt to account for luck-adjustment have not yet been fully integrated into their decision making.
 
 <br />
 <br />
@@ -43,14 +43,14 @@ The main goal for this project is to predict both future performance and salary 
 
 Since the sport’s inception in the nineteenth century, baseball has remained a fascination of statisticians and data scientists. More recently, the advent of Sabermetrics and ball tracking technology has propelled the mathematical study of baseball to new heights, with the ubiquity and accessibility of baseball metrics encouraging more and more professional baseball organizations to adopt an increasingly analytical approach.
 
-A common refrain one hears from baseball fans is that general managers, those responsible for making personnel decisions such as trading a player or signing a free agent to a contract, are slow in adapting to the current trends in analytics. While some front offices, such as the Houston Astros (who boast a nine-man Sabermetric staff), have bought into an analytics-oriented approach, other teams have made their aversion to analytics clear. This disinclination is perhaps best encapsulated by the former Philadelphia Phillies GM Ruben Amaro claiming, back in 2014, that their team was "not a statistics-driven organization by any means". While such a sentiment seems outmoded now, the question remains over how earnestly baseball decision-makers have realistically accepted the growing Sabermetrics movement. 
+A common refrain one hears from baseball fans is that general managers (GMs), those responsible for making personnel decisions such as trading a player or signing a free agent to a contract, are slow in adapting to the current trends in analytics. While some front offices, such as the Houston Astros (who boast a nine-man Sabermetric staff), have bought into an analytics-oriented approach, other teams have made their aversion to analytics clear. This disinclination is perhaps best encapsulated by the former Philadelphia Phillies GM Ruben Amaro claiming, back in 2014, that their team was "not a statistics-driven organization by any means". While such a sentiment seems outmoded now, the question remains over how earnestly baseball decision-makers have realistically accepted the growing Sabermetrics movement. 
 
 To investigate this question, we decided to build a variety of models in order to attempt to predict a pitcher’s future contract using their statistics from the past season. The rationale behind this was that, while baseball GMs might profess a certain belief in analytics publicly, the contracts they hand out represent a more verifiable illustration of what they actually value. Fitting a model to predict future salary will help answer this question, as it will allow us to perform inference on the various coefficients or weights placed on different metrics---including both basic counting statistics and more advanced statistics. If baseball front offices have genuinely accepted Sabermetrics to the degree that they claim, then we would expect to see that advanced statistics such as expected weighted on-base average (xwOBA) or spin rate to be the strongest predictors of future salary. If, on the other hand, we find that basic counting statistics such as total pitches or total wins are the strongest predictors, it would suggest that baseball GMs are more enamored with counting statistics than they would like to admit.
 
 The second half of our project involves fitting a variety of models to try to predict a pitcher’s earned run average (ERA) in the coming season using statistics from the current season. The motivation for this exploration is that we wished to determine if the advanced Sabermetric statistics are truly more useful in predicting future performance than basic statistics such as total strikeouts. ERA describes the average number of runs given up by a pitcher over nine innings, and was the chosen metric to act as a proxy for pitching outcome, as it exemplifies a wholistic representation of a pitcher’s performance. While by no means a novel insight, it is also worth noting that a team's ERA is highly correlated with a team's total wins, prompting general managers to construct pitching rotations that minimize ERA in order to win more games (further validating ERA as an appropriate proxy for overall pitcher performance).
 
 
-```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE, fig.cap="**Figure 1.** Total team wins plotted against team ERA; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE, fig.cap="**Figure 1.** Total team wins plotted against team ERA from 2006 onwards; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 teams <- read_csv("teams.csv") %>%
   filter(yearID > 2006)
 
@@ -89,7 +89,7 @@ There were a number of data wrangling and processing strategies that were implem
 
 #### Pitching Statistics and Advanced Pitching Statistics
 
-Much of our advanced pitching metric data came from Baseball Savant's Statcast, a searchable online database developed by Major League Baseball. Because of its recent initiation, most of the advanced pitching statistics have only been recorded by Statcast from 2015 onwards, so we were limited to the past five seasons when pulling this data. We made the decision to avoid pulling advanced data from the year 2020, both because of the unorthodox nature of a COVID-shortened season and the fact that one-year forward variables were frequently implemented as a response in our models (and 2021 data doesn't yet exist). Fortunately, the data from Statcast is easily accessible, as it is open source and readily downloadable.
+Much of our advanced pitching metric data came from Baseball Savant's Statcast, a searchable online database developed by the MLB. Because of its recent initiation, most of the advanced pitching statistics have only been recorded by Statcast from 2015 onwards, so we were limited to the past five seasons when pulling this data. We made the decision to avoid pulling advanced data from the year 2020, both because of the unorthodox nature of a COVID-shortened season and the fact that one-year forward variables were frequently implemented as a response in our models (and 2021 data doesn't yet exist). Fortunately, the data from Statcast is easily accessible, as it is open source and readily downloadable.
 
 <br />
     
@@ -1658,11 +1658,64 @@ kable(final_table, digits = 3) %>%
 
 
 
-We can see that in terms of R-squared, the forward model performed the best. Conversely, in terms of 5-fold MSE, the ensemble model performed the best. The 5-fold MSE difference might seem marginal, but it must be remembered that the MSE is in `log(Salary)` units.
+For our salary forecasting models, we can see that the ensemble model considerably outperformed the other models in terms of both adjusted R-squared and 5-fold MSE. The 5-fold MSE difference might seem negligible, but it must be remembered that the MSE is recorded in `log(Salary)` units. The ridge regression, LASSO regression, custom model, and principal component regression all performed similarly, while the forward model and full model performed the worst. This suggests that, in our analysis of the salary data, in-depth models tend to approximate the data worse than parsimonious models, as the more accurate models generally contained fewer predictors. For our ERA forecasting models, we can see that the forward and custom models produced the greatest adjusted R-squared values. Conversely, in terms of 5-fold MSE, the ensemble model performed the best. However, the 5-fold MSE of the custom model was only marginally worse than that of the ensemble model. When also considering the improvements in adjusted R-squared and coefficient interpretability, the custom model becomes the most favorable in forecasting future ERA---a testament to the strength of manual stepwise regression and the incorporation of domain knowledge.
 
 
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 14.1.** Line graph comparing the adjusted R-squared values of our models predicting future salary."}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`Rsq for Salary`)),
+       aes(
+           x = factor(Model),
+           y = `Rsq for Salary`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.7
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "Salary Model Comparisons",
+         x = "Model",
+         y = "R-Squared for Salary") +
+    expand_limits(x = 0, y = 0)
+```
 
-```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 14.2.** Line graph comparing the 5-fold MSE values of our models predicting future salary."}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`5-fold MSE for Salary`)),
+       aes(
+           x = factor(Model),
+           y = `5-fold MSE for Salary`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.7
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "Salary Model Comparisons",
+         x = "Model") +
+    expand_limits(x = 0, y = 0)
+
+```
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 14.3.** Line graph comparing the adjusted R-squared values of our models predicting future earned run average."}
 ggplot(final_table %>%
            mutate(Model = fct_reorder(Model,`Rsq for ERA`)),
        aes(
@@ -1688,7 +1741,7 @@ ggplot(final_table %>%
     expand_limits(x = 0, y = 0)
 ```
 
-```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 14.4.** Line graph comparing the 5-fold MSE values of our models predicting future earned run average."}
 ggplot(final_table %>%
            mutate(Model = fct_reorder(Model,`5-fold MSE for ERA`)),
        aes(
@@ -1715,62 +1768,6 @@ ggplot(final_table %>%
 
 ```
 
-Figure 10: Line graph of the adjusted R-squared value as well as 5-fold CV MSE for each model when predicting future ERA.
-
-For salary, we can see that the ensemble model far outperforms the other models in terms of R-squared. Similarly, in terms of 5-fold MSE, we see that the ensemble model again outperforms all other models:
-
-
-
-```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
-ggplot(final_table %>%
-           mutate(Model = fct_reorder(Model,`Rsq for Salary`)),
-       aes(
-           x = factor(Model),
-           y = `Rsq for Salary`,
-           group = 1)
-       ) +
-    stat_summary(
-        fun.y=sum,
-        geom="line",
-        color = "midnightblue",
-        size = 2.5, 
-        alpha = 0.7
-        ) +
-    geom_point(
-        color = "white",
-        size = 1.5
-        ) +
-    theme_minimal() +
-    labs(title = "Salary Model Comparisons",
-         x = "Model",
-         y = "R-Squared for Salary") +
-    expand_limits(x = 0, y = 0)
-
-ggplot(final_table %>%
-           mutate(Model = fct_reorder(Model,`5-fold MSE for Salary`)),
-       aes(
-           x = factor(Model),
-           y = `5-fold MSE for Salary`,
-           group = 1)
-       ) +
-    stat_summary(
-        fun.y=sum,
-        geom="line",
-        color = "midnightblue",
-        size = 2.5, 
-        alpha = 0.7
-        ) +
-    geom_point(
-        color = "white",
-        size = 1.5
-        ) +
-    theme_minimal() +
-    labs(title = "Salary Model Comparisons",
-         x = "Model") +
-    expand_limits(x = 0, y = 0)
-
-```
-Figure 11: Line graph of the adjusted R-squared value as well as 5-fold CV MSE for each model when predicting future salary
 
 <br />
 <br />
@@ -1811,7 +1808,7 @@ kable(lasso_coef, digits = 3) %>%
 
 Surprisingly, `xwOBA` had the highest, positive coefficient for salary, followed by `wOBA` and `BABIP`. The highest negative correlation came with `BA`. 
 
-Considering that `BA` and `xwOBA` are quite highly correlated with each other, the situation in which a pitcher's `BA` is low but `xwOBA` is high (which would result in a high value for predicted salary based of LASSO) is quite a unique one. The most important difference in the two is that `BA` only considers hit or no hit in a binary manner, so a home run or a single would both be registered as a hit, while `wOBA` considers the hit outcome such that a home run or extra-base is weighted more heavily than a single. Additionally, `xwOBA` is an expected statistic and is thus calculated based off the launch angle and speed of the ball rather than the actual outcome. Thus, a pitcher with a low `BA` against but a high `xwOBA` likely achieves a high number of strikeouts but gives up hard contact when he gives up contact at all. A hypothetical pitcher that strikes out most batters but gives up the occasional home run represents the extreme of this trend; his `BA` would be incredibly low but the discrepancy between his `BA` and `xwOBA` would be significant due to the nature of the hits he does give up. Our model would predict a very high salary for this hypothetical pitcher, but the *reasoning behind it and what it says about baseball front offices is somewhat confusing*.
+Considering that `BA` and `xwOBA` are quite highly correlated with each other, the situation in which a pitcher's `BA` is low but `xwOBA` is high (which would result in a high value for predicted salary based of LASSO) is quite a unique one. The most important difference in the two is that `BA` only considers hit or no hit in a binary manner, so a home run or a single would both be registered as a hit, while `wOBA` considers the hit outcome such that a home run or extra-base is weighted more heavily than a single. Additionally, `xwOBA` is an expected statistic and is thus calculated based off the launch angle and speed of the ball rather than the actual outcome. Thus, a pitcher with a low `BA` against but a high `xwOBA` likely achieves a high number of strikeouts but gives up hard contact when he gives up contact at all. A hypothetical pitcher that strikes out most batters but gives up the occasional home run represents the extreme of this trend; his `BA` would be incredibly low but the discrepancy between his `BA` and `xwOBA` would be significant due to the nature of the hits he does give up. Our model would predict a very high salary for this hypothetical pitcher, but the reasoning behind this result and what it says about baseball front offices is somewhat confounding.
 
 The fact that `xwOBA`, `wOBA`, and `BABIP` have positive correlations is in and of itself confusing, even before considering their magnitude. These statistics represent an attempt at quantifying the amount of offense given up by a certain pitcher, and thus, rationally, one would have expected a negative relationship with salary. where worse pitchers give up more runs and earn less. Overall, our LASSO-penalized regression model is quite odd and perhaps does not offer much in terms of inference. The aforementioned coefficient weights that benefit a `BA`-`wOBA` discrepancy and the fact that the advanced metrics are all positively correlated with salary (except for `BA` and `xBA`) are both quite inexplicable. Still, the odd combination of coefficient weights we see with advanced metrics suggest that salary is not commensurately tied to advanced analytics.
 
@@ -1867,7 +1864,7 @@ Lastly, we can compare the predictors included in each model, as well as their a
 
 In addition to using inference to assess the discrepancies in the patterns that determine future performance and future salary, we can also utilize the predictive powers of our models to make additional evaluations. In the interest of illustrating the predictive power of our custom ERA model, the first step we took was visualizing and measuring prediction accuracy of our model against the null (ERA-only) model:
 
-```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 15.1.** Custom model predictions plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 ggplot(pitchers,
        aes(x = custom_pred, y = ERA_t1)) +
   geom_point(alpha = 0.5, color = "midnightblue") +
@@ -1877,9 +1874,11 @@ ggplot(pitchers,
        x = "Predicted ERA (t+1)",
        y = "ERA (t+1)") + 
   theme_classic()
+
+cor(pitchers0$custom_pred, pitchers0$ERA_t1)
 ```
-Figure 12: Predicted future ERA from the custom linear model plotted against observed future ERA. Trendline represents linear line of best fit.
-```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 15.2.** Null model predictions plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 ggplot(pitchers,
        aes(x = ERA, y = ERA_t1)) +
   geom_point(alpha = 0.5, color = "midnightblue") +
@@ -1889,24 +1888,17 @@ ggplot(pitchers,
        x = "ERA",
        y = "ERA (t+1)") + 
   theme_classic()
-```
-Figure 13: Current ERA, which serves as the null model, plotted against observed future ERA. Trendline represents linear line of best fit.
 
-```{r echo=FALSE}
-cor_table <- tibble(
-    Model = c("Custom ERA Model", "Null ERA Model"),
-    `Correlation (R)` = c(0.413, 0.218))
-
-kable(cor_table, digits = 3) %>%
-  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+cor(pitchers0$ERA, pitchers0$ERA_t1)
 ```
 
 
-As we can see from the above visualizations, our custom model for forecasting ERA comfortably outperforms the null model. This is also evident in the two models' respective correlation coefficients, which measure the correlation between the actual values and predicted values for each model. In both cases, we can discern the difficulty in accurately forecasting ERA, as even our best performing model struggles to avoid some degree of prediction error. This is to be expected though, as predicting patterns of human performance (such as ERA) is a reasonably difficult task, especially when exposed to a large amount of stochastic error. That being said, our model is still accurate enough to make it useful in application. One such application is to compare the predicted ERA and actual ERA of pitchers in a given season, effectively measuring how well a pitcher performed relative to the modeling expectations determined by the previous year's performance.
+
+As we can see from the above visualizations, our custom model for forecasting ERA comfortably outperforms the null model. This is also evident in the two models' respective correlation coefficients, which measure the correlation between the observed values and predicted values for each model. In both cases, we can discern the difficulty in accurately forecasting ERA, as even our best performing model struggles to avoid some degree of prediction error. This is to be expected though, as predicting patterns of human performance (such as ERA) is a reasonably difficult task, especially when exposed to a large amount of stochastic error. That being said, our model is still accurate enough to make it useful in application. One such application is to compare the predicted ERA and actual ERA of pitchers in a given season, effectively measuring how well a pitcher performed relative to the modeling expectations determined by the previous year's performance.
 
 
 
-```{r echo=FALSE, fig.width=9,fig.height=6}
+```{r echo=FALSE, fig.width=9,fig.height=6, fig.cap="**Figure 15.3.** Dot plot illustrating the residuals of observed 2020 earned run average values among the 50 highest-paid starting pitchers."}
 ggplot(pitchers_2019_tidy, aes(x = Pitcher,
                           y = value,
                           label = value)) + 
@@ -1924,16 +1916,16 @@ ggplot(pitchers_2019_tidy, aes(x = Pitcher,
   geom_line() +
   theme_minimal()
 ```
-Figure 14: Dot graph showing residuals between predicted and actual 2020 ERA among the top 50 highest-paid pitchers.
 
 
-From the above plot, which graphs predicted ERA (as determined by our ERA forecasting model) and actual ERA for the 50 highest-paid starting pitchers, we can ascertain which pitchers either overperformed or underperformed relative to modeling expectations. Specifically, we can look at the absolute difference between predicted ERA and actual ERA as a measure of expectation deviation. By this account, Anibal Sanchez, Jon Gray, Madison Bumgarner, Robbie Ray, and Tanner Roark stand out as pitchers who underperformed relative to their predicted performance. On the other hand, Dallas Keuchel, Shane Bieber, Trevor Bauer, and Zach Davies posted actual ERAs that exceeded the model's expectations. Implicitly, the model gives tends more conservative ERA prediction estimates, since the data used in linear model construction is necessarily regressed. Although these more conservative estimates preserve variance in our modeling outcomes (improving overall fit), it inevitably means that our model tends to produce large residuals on extreme outcomes. It is also worth mentioning that three of the four individual pitchers that produced the largest positive residuals (Jon Gray, Madison Bumgarner, and Robbie Ray) all play in unusual pitching environments. While the majority of MLB stadiums are fairly standard when it comes to influence on player performance, there are two distinct exceptions: Arizona and Colorado. In both locations, the abnormally high park altitudes tend to routinely effect pitch movement and batted ball distance, disproportionately inflating team offense and increasing ERA. Because Jon Gray, Madison Bumgarner, and Robbie Ray each play in either Arizona and Colorado, it is possible that our model fails to properly account for the confounding variable of pitcher environment. This is an important limitation to address, and partly explains the increasing popularity of park adjusted pitching metrics.
+
+From the above plot, which graphs predicted ERA (as determined by our ERA forecasting model) and actual ERA for the 50 highest-paid starting pitchers, we can ascertain which pitchers either overperformed or underperformed relative to modeling expectations. Specifically, we can look at the absolute difference between predicted ERA and observed ERA as a measure of expectation deviation. By this account, Anibal Sanchez, Jon Gray, Madison Bumgarner, Robbie Ray, and Tanner Roark stand out as pitchers who underperformed relative to their predicted performance. On the other hand, Dallas Keuchel, Shane Bieber, Trevor Bauer, and Zach Davies posted actual ERAs that exceeded the model's expectations. Implicitly, the model gives tends more conservative ERA prediction estimates, since the data used in linear model construction is necessarily regressed. Although these more conservative estimates preserve variance in our modeling outcomes (improving overall fit), it inevitably means that our model tends to produce large residuals on extreme outcomes. It is also worth mentioning that three of the four individual pitchers that produced the largest positive residuals (Jon Gray, Madison Bumgarner, and Robbie Ray) all play in unusual pitching environments. While the majority of MLB stadiums are fairly standard when it comes to influence on player performance, there are two distinct exceptions: Arizona and Colorado. In both locations, the abnormally high park altitudes tend to routinely effect pitch movement and batted ball distance, disproportionately inflating team offense and increasing ERA. Because Jon Gray, Madison Bumgarner, and Robbie Ray each play in either Arizona and Colorado, it is possible that our model fails to properly account for the confounding variable of pitcher environment. This is an important limitation to address, and partly explains the increasing popularity of park adjusted pitching metrics.
 
 
 The following plot represents another way to visualize the same predictions. In this instance, the absolute residuals are ordered to easily discern the extent that individual pitchers either underperformed or overperformed relative to our modeling expectations. The points colored purple have a positive residual (representing pitchers who underperformed), whereas the points in gray have a negative residual (representing pitchers who overperformed).
 
 
-```{r echo=FALSE, fig.width=9,fig.height=6}
+```{r echo=FALSE, fig.width=9,fig.height=6, fig.cap="**Figure 15.4.** Dot plot illustrating the ordered size of absolute residuals of observed 2020 earned run average values among the 50 highest-paid starting pitchers."}
 pitchers_2019_tidy %>%
   pivot_wider(names_from = type, values_from = value) %>%
   mutate(residual = ERA_t1 - custom_pred_2019) %>%
@@ -1946,12 +1938,12 @@ pitchers_2019_tidy %>%
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 50, hjust = 1)) 
 ```
-Figure 15: Dot graph showing absolute residuals between predicted and actual 2020 ERA among the top 50 highest-paid pitchers. Each point’s color represents whether the pitcher over or underperformed the predicted ERA.
+
 
 Another extension of our ERA model is using salary data to determine which pitchers were overpaid or underpaid relative to both their contemporaries and their expected pitching outcomes. Intuitively, front offices should spend money on pitchers who they believe will improve the overall pitching performance of their team in coming seasons. Subsequently, general managers should be interested in compensating players based on their expected future performance, since that will determine the return the team gets on their investment. It is therefore appropriate to assess a player's salary relative to their forecasted performance in order to determine whether or not that player is appropriately compensated, which we attempted using our ERA model and salary data. To allow for ease of comparison, we first standardized each pitcher's salary and forecasted ERA. We then created the following visualizations, each of which offer some sort of display comparing the standardized forecasted ERA and standardized salaries for the 50 highest-paid starting pitchers in the year 2020:
 
 
-```{r, echo=FALSE, fig.width=7,fig.height=6}
+```{r, echo=FALSE, fig.width=7,fig.height=6, fig.cap="**Figure 15.5.** Horizontal bar graph illustrating the standardized 2020 earned run average predictions among the 50 highest-paid starting pitchers, arranged in descending order."}
 ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted ERA`),
                           y = `Standardized Forecasted Adjusted ERA`,
                           label = `Standardized Forecasted Adjusted ERA`)) + 
@@ -1965,8 +1957,8 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted
   coord_flip() +
   theme_minimal()
 ```
-Figure 16: Horizontal bar graph showing the standardized forecasted ERA value, arranged in descending order.
-```{r, echo=FALSE, fig.width=7,fig.height=6}
+
+```{r, echo=FALSE, fig.width=7,fig.height=6, fig.cap="**Figure 15.6.** Horizontal bar graph illustrating the observed standardized 2020 salary values among the 50 highest-paid starting pitchers, arranged in descending order."}
 ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
                           y = `Standardized Salary`,
                           label = `Standardized Salary`)) + 
@@ -1980,8 +1972,8 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
   coord_flip() +
   theme_minimal()
 ```
-Figure 17: Horizontal bar graph showing the standardized salary of the top 50 highest paid pitchers, arranged in descending order.
-```{r echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+```{r echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 15.7.** Contour plot separating the 50 highest-paid starting pitchers in 2020 along both standardized salary and standardized predicted earned run average."}
 ggplot() +
   scale_x_continuous(name = "Standardized Forecasted ERA (adjusted)",
                      breaks = seq(-3, 3, 1),
@@ -2026,14 +2018,13 @@ ggplot() +
             vjust = -1.33) + 
   theme_minimal()
 ```
-Figure 18: Contour plot separating starting MLB pitchers along both salary and predicted ERA.
 
 Already, we can identify several players who appear to be appropriately paid for their forecasted performance. Gerrit Cole, Max Scherzer, Jacob DeGrom, and Yu Darvish are four pronounced examples, as each pitcher possesses both one of the highest standardized salaries and highest standardized forecasted ERAs (for this analysis, forecasted ERA has been adjusted such that a positive value is now associated with stronger performances). On the other hand, we also notice players who represent examples of inefficient decision making by front offices. Zack Greinke, who has one of the highest salaries of any starting pitcher in 2020, actually had a forecasted ERA below the mean, implying that teams could have made better use of that salary capital. On the contrary, starting pitchers Blake Snell and Mike Clevinger were modeled to have  two of the best expected ERAs, but both had salaries lower than the mean value. This can likely be explained by the fact that the two pitchers are both in the early stages of their careers and still under team control, preventing them from entering free agency and receiving a contract indicative of their proper market value. 
 
-Lastly, in order to provide one convenient measure of pitcher compensation, we plotted salary over forecasted ERA for each of the 50 highest-paid starting pitchers for the year 2020, with higher values representing pitchers who were more generously compensated for their forecasted performances:
+Lastly, in order to provide one convenient measure of pitcher compensation, we plotted salary over forecasted ERA for each of the 50 highest-paid starting pitchers for the year 2020, with higher values representing pitchers who were more generously compensated for their forecasted performances.
 
 
-```{r echo=FALSE, fig.width=9,fig.height=6}
+```{r echo=FALSE, fig.width=9,fig.height=6, fig.cap="**Figure 15.8.** Bar graph showing player compensation per unit of adjusted earned run average. Pitchers on the right of the graph are over-compensated for production relative to average, while those on the left are under-compensated."}
 ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
                           y = Compensation,
                           label = Compensation)) + 
@@ -2045,13 +2036,12 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
        y = "log(Salary) / (1 -Adjusted Forecasted ERA)") + 
   theme_minimal()
 ```
-Figure 19: Bar graph showing player compensation per ERA. Pitchers on the right of the graph are over-compensated for production relative to average while those on the left are under-compensated.
 
 
 In addition to evaluating pitcher performance relative to our model ERA model forecast, we can also use our salary model to measure which pitchers were underpaid relative to the existing standards and patterns of compensation identified by our model. 
 
 
-```{r echo=FALSE, fig.width=9,fig.height=6}
+```{r echo=FALSE, fig.width=9,fig.height=6, fig.cap="**Figure 15.9.** Dot plot illustrating the residuals of observed 2020 salary values among the 50 highest-paid starting pitchers."}
 ggplot(salary_2019_tidy, aes(x = Pitcher,
                           y = value,
                           label = value)) + 
@@ -2069,7 +2059,6 @@ ggplot(salary_2019_tidy, aes(x = Pitcher,
   geom_line() +
   theme_minimal()
 ```
-Figure 20: Dot graph showing residuals between predicted and actual 2020 salary among the top 50 highest-paid pitchers.
 
 According to our salary model (which had noticeably lower prediction error than our ERA model), most pitchers appeared to be paid at or around their predicted salary, evident in the size of the residuals. That being said, there are still some clear anomolaies. Blake Snell, Max Scherzer, Shane Bieber, and Yu Darvish were four of the most underpaid pitchers according to our model. Worth noting is that these four pitchers also had four of the lowest forecasted ERAs. These conclusions illustrate that, when synthesizing the results of the two models, MLB teams may be able to readily identify players who are undevalued, allowing them to make advantageous free agency and contract extension decisions.
 
