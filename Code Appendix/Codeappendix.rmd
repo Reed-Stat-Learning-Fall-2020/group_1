@@ -1,10 +1,11 @@
 ---
-title: "Untitled"
+title: "Code Appendix"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = FALSE)
 ```
 
 ## All Packages Used
@@ -42,9 +43,7 @@ library(corrr)
 ## Data Collection and Wrangling
 
 ```{r}
-
-# rvest -----------------------------------------------------------------------------------------
-
+# rvest
 
 team_link_df <-
   tibble(team = c("arizona-diamondbacks",
@@ -280,7 +279,7 @@ salary20 <- bind_rows(list_of_data4, .id = "column_label") %>%
 write_csv(salary20, "2020salary.csv")
 ```
 
-# data prep
+# Data Preparation
 
 ```{r}
 pitchers_2015 <- read_csv("Pitchers 2015.csv")
@@ -1568,9 +1567,9 @@ future_ERA_pred_cor<-cor(future_ERA_pred,Mega_Summary_Filtered$`ERA (t+1)`)
 kable(future_ERA_pred_cor)
 ```
 
-# Models
+## Models
 
-## tuned randomForest
+### Tuned Random Forest
 
 ```{r}
 data_raw <- read_csv("data/Final Mega Summary.csv") 
@@ -1848,7 +1847,7 @@ rsq(final_df_era, truth = `ERA_t1...4`,estimate = .pred)
 # and rsq = 0.0171
 ```
 
-## PCR
+### PCR
 
 ```{r}
 mega <- read_csv("data/Final Mega Summary.csv")
@@ -1917,7 +1916,7 @@ PCR_salary_r2<-r_sq(log(salary_data$salary_t1),PCR_predict_salary,467,4)
 
 ```
 
-## LASSO and Ridge
+### LASSO and Ridge Regression
 
 ```{r}
 Mega_Summary <- read_csv("data/Final Mega Summary.csv")
@@ -2099,7 +2098,7 @@ all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_stat
 view(all_statistics)
 ```
 
-## ERA models
+### ERA Models
 
 ```{r}
 pitchers <- read_csv("data/Final Mega Summary.csv")
@@ -2381,7 +2380,7 @@ summary(backward_mod_salary)$adj.r.squared
 
 ```
 
-## Ensemble
+### Ensemble
 
 ```{r}
 # loading data
@@ -3584,7 +3583,7 @@ ggplot(salary_2019_tidy, aes(x = Pitcher,
   theme_minimal()
 ```
 
-# Extensions and Discussion
+# Code for Extensions and Discussion
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 pitchers <- read_csv("Final Mega Summary.csv")
@@ -3790,7 +3789,7 @@ ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
   theme_minimal()
 ```
 
-# Code for full technical report
+# Code for Technical Report
 
 ```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE, fig.cap="**Figure 1.** Total team wins plotted against team ERA from 2006 onwards; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
 teams <- read_csv("teams.csv") %>%
