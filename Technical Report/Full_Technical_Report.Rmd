@@ -2076,5 +2076,8 @@ Our most obvious limitation comes is our subpar predictive power for ERA, which 
 
 In summation, in this investigation we used statistical modeling to produce models that resulted in high predictive powers for future salary and more limited accuracy for predicting future ERA. Consideration of model inputs and weights further suggested the prevalence of a sizable discrepancy between front office decision making and forecasted pitcher performance, largely owing to the omission of relatively new but highly predictive Statcast statistics such as `xwOBA` and `xBA` in these decisions. 
 
+<br>
+<br>
+
 
 
