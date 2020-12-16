@@ -16,6 +16,7 @@ library(tidyverse)
 library(janitor)
 library(rvest)
 library(baseballr)
+library(Lahman)
 
 
 # Modeling
@@ -29,6 +30,12 @@ library(ISLR)
 library(boot)
 library(randomForest)
 library(ranger)
+
+# other
+
+library(kableExtra)
+library(knitr)
+library(corrr)
 
 ```
 
@@ -273,8 +280,5039 @@ salary20 <- bind_rows(list_of_data4, .id = "column_label") %>%
 write_csv(salary20, "2020salary.csv")
 ```
 
+# data prep
+
+```{r}
+pitchers_2015 <- read_csv("Pitchers 2015.csv")
+pitchers_2015 <- pitchers_2015 %>% 
+  select(pitches, player_name, year, ba, babip, woba, xwoba, xba, hits, abs, spin_rate, velocity)
 
 
+# 2016 Data
+
+pitchers_2016 <- read_csv("Pitchers 2016.csv")
+pitchers_2016 <- pitchers_2016 %>% 
+  select(pitches, player_name, year, ba, babip, woba, xwoba, xba, hits, abs, spin_rate, velocity)
+
+
+# 2017 Data
+
+pitchers_2017 <- read_csv("Pitchers 2017.csv")
+pitchers_2017 <- pitchers_2017 %>% 
+  select(pitches, player_name, year, ba, babip, woba, xwoba, xba, hits, abs, spin_rate, velocity)
+
+
+# 2018 Data
+
+pitchers_2018 <- read_csv("Pitchers 2018.csv")
+pitchers_2018 <- pitchers_2018 %>% 
+  select(pitches, player_name, year, ba, babip, woba, xwoba, xba, hits, abs, spin_rate, velocity)
+
+
+# 2019 Data
+
+pitchers_2019 <- read_csv("Pitchers 2019.csv")
+pitchers_2019 <- pitchers_2019 %>% 
+  select(pitches, player_name, year, ba, babip, woba, xwoba, xba, hits, abs, spin_rate, velocity)
+
+
+# Names
+
+names <- People %>%
+  select(playerID, nameFirst, nameLast) %>%
+  unite("full_name", 2:3, sep = " ") %>%
+  rename(player_name = full_name)
+
+
+# 2015 Lahman
+
+lahman_2015 <- Pitching %>%
+  filter(yearID == 2015) %>%
+  rename(year = yearID) %>%
+  select(playerID, W, L, G, BFP, ERA, H, HR, BB, SO) %>%
+  mutate(`K %` = SO/BFP,
+         `BB %` = BB/BFP) %>%
+  mutate(`K %` = format(round(`K %`, 3), nsmall = 3)) %>%
+  mutate(`BB %` = format(round(`BB %`, 3), nsmall = 3))
+
+lahman_2015 <- left_join(lahman_2015, names, by = "playerID") %>%
+  select(-playerID) %>%
+  distinct(player_name, .keep_all = TRUE)
+
+
+# 2016 Lahman
+
+lahman_2016 <- Pitching %>%
+  filter(yearID == 2016) %>%
+  rename(year = yearID) %>%
+  select(playerID, W, L, G, BFP, ERA, H, HR, BB, SO) %>%
+  mutate(`K %` = SO/BFP,
+         `BB %` = BB/BFP) %>%
+  mutate(`K %` = format(round(`K %`, 3), nsmall = 3)) %>%
+  mutate(`BB %` = format(round(`BB %`, 3), nsmall = 3))
+
+lahman_2016 <- left_join(lahman_2016, names, by = "playerID") %>%
+  select(-playerID) %>%
+  distinct(player_name, .keep_all = TRUE)
+
+
+# 2017 Lahman
+
+lahman_2017 <- Pitching %>%
+  filter(yearID == 2017) %>%
+  rename(year = yearID) %>%
+  select(playerID, W, L, G, BFP, ERA, H, HR, BB, SO) %>%
+  mutate(`K %` = SO/BFP,
+         `BB %` = BB/BFP) %>%
+  mutate(`K %` = format(round(`K %`, 3), nsmall = 3)) %>%
+  mutate(`BB %` = format(round(`BB %`, 3), nsmall = 3))
+
+lahman_2017 <- left_join(lahman_2017, names, by = "playerID") %>%
+  select(-playerID) %>%
+  distinct(player_name, .keep_all = TRUE)
+
+
+# 2018 Lahman
+
+lahman_2018 <- Pitching %>%
+  filter(yearID == 2018) %>%
+  rename(year = yearID) %>%
+  select(playerID, W, L, G, BFP, ERA, H, HR, BB, SO) %>%
+  mutate(`K %` = SO/BFP,
+         `BB %` = BB/BFP) %>%
+  mutate(`K %` = format(round(`K %`, 3), nsmall = 3)) %>%
+  mutate(`BB %` = format(round(`BB %`, 3), nsmall = 3))
+
+lahman_2018 <- left_join(lahman_2018, names, by = "playerID") %>%
+  select(-playerID) %>%
+  distinct(player_name, .keep_all = TRUE)
+
+
+# 2019 Lahman
+
+lahman_2019 <- Pitching %>%
+  filter(yearID == 2019) %>%
+  rename(year = yearID) %>%
+  select(playerID, W, L, G, BFP, ERA, H, HR, BB, SO) %>%
+  mutate(`K %` = SO/BFP,
+         `BB %` = BB/BFP) %>%
+  mutate(`K %` = format(round(`K %`, 3), nsmall = 3)) %>%
+  mutate(`BB %` = format(round(`BB %`, 3), nsmall = 3))
+
+lahman_2019 <- left_join(lahman_2019, names, by = "playerID") %>%
+  select(-playerID) %>%
+  distinct(player_name, .keep_all = TRUE)
+
+
+# 2016 ERA
+
+ERA_2016 <- lahman_2016 %>%
+  filter(BFP >= 150) %>% 
+  select(player_name, ERA) %>%
+  rename(`ERA (t+1)` = ERA)
+
+
+# 2017 ERA
+
+ERA_2017 <- lahman_2017 %>%
+  filter(BFP >= 150) %>% 
+  select(player_name, ERA) %>%
+  rename(`ERA (t+1)` = ERA)
+
+
+# 2018 ERA
+
+ERA_2018 <- lahman_2018 %>%
+  filter(BFP >= 150) %>% 
+  select(player_name, ERA) %>%
+  rename(`ERA (t+1)` = ERA)
+
+
+# 2019 ERA
+
+ERA_2019 <- lahman_2019 %>%
+  filter(BFP >= 150) %>% 
+  select(player_name, ERA) %>%
+  rename(`ERA (t+1)` = ERA)
+
+
+# 2020 ERA
+
+ERA_2020 <- read_csv("ERA 2020.csv")
+ERA_2020 <- ERA_2020 %>%
+  filter(pa >= 150) %>% 
+  select(last_name, first_name, era) %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  rename(`ERA (t+1)` = era)
+
+
+# 2015 Salary
+
+salary_2015 <- read_csv("2015salary.csv") %>%
+  rename(player_name = mlb_name) %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2015two <- read_csv("2016salary.csv") %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2015 <- salary_2015 %>%
+  select(player_name, salary) %>%
+  rename(Salary = salary)
+salary_2015two <- salary_2015two %>%
+  select(player_name, salary) %>%
+  rename(`Salary (t+1)` = salary)
+
+
+# 2016 Salary
+
+salary_2016 <- read_csv("2016salary.csv") %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2016two <- read_csv("2017salary.csv") %>%
+  rename(player_name = name) %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2016 <- salary_2016 %>%
+  select(player_name, salary) %>%
+  rename(Salary = salary)
+salary_2016two <- salary_2016two %>%
+  select(player_name, salary) %>%
+  rename(`Salary (t+1)` = salary)
+
+
+# 2017 Salary
+
+salary_2017 <- read_csv("2017salary.csv") %>%
+  rename(player_name = name) %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2017two <- read_csv("2018salary.csv") %>%
+  rename(player_name = name) %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2017 <- salary_2017 %>%
+  select(player_name, salary) %>%
+  rename(Salary = salary)
+salary_2017two <- salary_2017two %>%
+  select(player_name, salary) %>%
+  rename(`Salary (t+1)` = salary)
+
+
+# 2018 Salary
+
+salary_2018 <- read_csv("2018salary.csv") %>%
+  rename(player_name = name) %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2018two <- read_csv("2019salary.csv") %>%
+  rename(player_name = name) %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2018 <- salary_2018 %>%
+  select(player_name, salary) %>%
+  rename(Salary = salary)
+salary_2018two <- salary_2018two %>%
+  select(player_name, salary) %>%
+  rename(`Salary (t+1)` = salary)
+
+
+# 2019 Salary
+
+salary_2019 <- read_csv("2019salary.csv") %>%
+  rename(player_name = name) %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2019two <- read_csv("2020salary.csv") %>%
+  rename(player_name = name) %>%
+  distinct(player_name, .keep_all = TRUE)
+salary_2019 <- salary_2019 %>%
+  select(player_name, salary) %>%
+  rename(Salary = salary)
+salary_2019two <- salary_2019two %>%
+  select(player_name, salary) %>%
+  rename(`Salary (t+1)` = salary)
+
+
+# 2015 Statcast
+
+statcast_2015 <- read_csv("2015statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
+# 2016 Statcast
+
+statcast_2016 <- read_csv("2016statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
+# 2017 Statcast
+
+statcast_2017 <- read_csv("2017statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
+# 2018 Statcast
+
+statcast_2018 <- read_csv("2018statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
+# 2019 Statcast
+
+statcast_2019 <- read_csv("2019statcast.csv") %>%
+  unite("player_name", 2:1, sep = " ") %>%
+  select(player_name, ev95percent, brl_percent) %>%
+  rename(`Hard Hit %` = ev95percent,
+         `Barrel %` = brl_percent)
+
+
+# 2015 Summary
+
+summary_2015 <- left_join(pitchers_2015, lahman_2015, by = "player_name")
+summary_2015 <- left_join(summary_2015, statcast_2015, by = "player_name")
+summary_2015 <- left_join(summary_2015, ERA_2016, by = "player_name")
+summary_2015 <- left_join(summary_2015, salary_2015, by = "player_name")
+summary_2015 <- left_join(summary_2015, salary_2015two, by = "player_name")
+
+
+# 2016 Summary
+
+summary_2016 <- left_join(pitchers_2016, lahman_2016, by = "player_name")
+summary_2016 <- left_join(summary_2016, statcast_2016, by = "player_name")
+summary_2016 <- left_join(summary_2016, ERA_2017, by = "player_name")
+summary_2016 <- left_join(summary_2016, salary_2016, by = "player_name")
+summary_2016 <- left_join(summary_2016, salary_2016two, by = "player_name")
+
+
+# 2017 Summary
+
+summary_2017 <- left_join(pitchers_2017, lahman_2017, by = "player_name")
+summary_2017 <- left_join(summary_2017, statcast_2017, by = "player_name")
+summary_2017 <- left_join(summary_2017, ERA_2018, by = "player_name")
+summary_2017 <- left_join(summary_2017, salary_2017, by = "player_name")
+summary_2017 <- left_join(summary_2017, salary_2017two, by = "player_name")
+
+
+# 2018 Summary
+
+summary_2018 <- left_join(pitchers_2018, lahman_2018, by = "player_name")
+summary_2018 <- left_join(summary_2018, statcast_2018, by = "player_name")
+summary_2018 <- left_join(summary_2018, ERA_2019, by = "player_name")
+summary_2018 <- left_join(summary_2018, salary_2018, by = "player_name")
+summary_2018 <- left_join(summary_2018, salary_2018two, by = "player_name")
+
+
+# 2019 Summary
+
+summary_2019 <- left_join(pitchers_2019, lahman_2019, by = "player_name")
+summary_2019 <- left_join(summary_2019, statcast_2019, by = "player_name")
+summary_2019 <- left_join(summary_2019, ERA_2020, by = "player_name")
+summary_2019 <- left_join(summary_2019, salary_2019, by = "player_name")
+summary_2019 <- left_join(summary_2019, salary_2019two, by = "player_name")
+
+
+# Mega Summary
+
+mega_summary <- rbind(summary_2015,
+                      summary_2016,
+                      summary_2017,
+                      summary_2018,
+                      summary_2019)
+
+mega_summary_uncut <- rbind(summary_2015,
+                      summary_2016,
+                      summary_2017,
+                      summary_2018,
+                      summary_2019)
+
+
+# Filter
+
+mega_summary <- mega_summary %>%
+  filter(BFP >= 150) 
+
+mega_summary <- mega_summary %>%
+  drop_na()
+
+mega_summary <- mega_summary %>%
+  filter(G <= 35)
+
+mega_summary <- mega_summary %>%
+  mutate(`BFP/G` = BFP/G)
+
+mega_summary %>%
+  ggplot(aes(x = BFP/G)) +
+  geom_histogram(bins = 50) +
+  theme_minimal()
+
+mega_summary <- mega_summary %>%
+  filter(`BFP/G` > 16)
+
+
+# Variable Mutations
+
+mega_summary <- mega_summary %>%
+  mutate(ba = as.numeric(ba),
+         babip = as.numeric(babip),
+         woba = as.numeric(woba),
+         xwoba = as.numeric(xwoba),
+         xba = as.numeric(xba),
+         spin_rate = as.numeric(spin_rate),
+         velocity = as.numeric(velocity)) %>%
+  mutate(`BABIP - Mean BABIP` = babip - mean(babip, na.rm = TRUE),
+         `xBA - BA` = xba - ba,
+         `xwOBA - wOBA` = xwoba - woba,
+         `ERA/Barrel %` = ERA/`Barrel %`,
+         `ERA/Hard Hit %` = ERA/`Hard Hit %`,
+         `ΔERA` = `ERA (t+1)` - ERA,
+         `ΔSalary` = `Salary (t+1)` - Salary) %>%
+  mutate(`ERA/Barrel %` = format(round(`ERA/Barrel %`, 3), nsmall = 3)) %>%
+  mutate(`ERA/Hard Hit %` = format(round(`ERA/Hard Hit %`, 3), nsmall = 3)) %>%
+  mutate(`BABIP - Mean BABIP` = format(round(`BABIP - Mean BABIP`, 4), nsmall = 4)) %>%
+  rename(Pitches = pitches,
+         Pitcher = player_name,
+         Year = year,
+         BA = ba,
+         BABIP = babip,
+         wOBA = woba,
+         xwOBA = xwoba,
+         xBA = xba,
+         Hits = hits,
+         ABs = abs,
+         `Spin Rate` = spin_rate,
+         `Velocity` = velocity)
+  
+
+mega_summary_uncut <- mega_summary_uncut %>%
+  mutate(ba = as.numeric(ba),
+         babip = as.numeric(babip),
+         woba = as.numeric(woba),
+         xwoba = as.numeric(xwoba),
+         xba = as.numeric(xba),
+         spin_rate = as.numeric(spin_rate),
+         velocity = as.numeric(velocity)) %>%
+  mutate(`BABIP - Mean BABIP` = babip - mean(babip, na.rm = TRUE),
+         `xBA - BA` = xba - ba,
+         `xwOBA - wOBA` = xwoba - woba,
+         `ERA/Barrel %` = ERA/`Barrel %`,
+         `ERA/Hard Hit %` = ERA/`Hard Hit %`,
+         `ΔERA` = `ERA (t+1)` - ERA,
+         `ΔSalary` = `Salary (t+1)` - Salary) %>%
+  mutate(`ERA/Barrel %` = format(round(`ERA/Barrel %`, 3), nsmall = 3)) %>%
+  mutate(`ERA/Hard Hit %` = format(round(`ERA/Hard Hit %`, 3), nsmall = 3)) %>%
+  mutate(`BABIP - Mean BABIP` = format(round(`BABIP - Mean BABIP`, 4), nsmall = 4)) %>%
+  rename(Pitches = pitches,
+         Pitcher = player_name,
+         Year = year,
+         BA = ba,
+         BABIP = babip,
+         wOBA = woba,
+         xwOBA = xwoba,
+         xBA = xba,
+         Hits = hits,
+         ABs = abs,
+         `Spin Rate` = spin_rate,
+         `Velocity` = velocity) %>%
+  select(-Salary, -`Salary (t+1)`, -`ΔSalary`) %>%
+  mutate(`BFP/G` = BFP/G)
+
+
+# Write CSV
+
+write_csv(mega_summary, "Mega Summary.csv")
+
+write_csv(mega_summary_uncut, "Uncut Mega Summary.csv")
+
+write_csv(salary_2015, "2015 Salaries.csv")
+write_csv(salary_2016, "2016 Salaries.csv")
+write_csv(salary_2017, "2017 Salaries.csv")
+write_csv(salary_2018, "2018 Salaries.csv")
+write_csv(salary_2019, "2019 Salaries.csv")
+write_csv(salary_2019two, "2020 Salaries.csv")
+
+
+# Load MegaMegaSummary
+
+MegaMegaSummary <- read_csv("MegeMegaSummary.csv")
+
+MegaMegaSummary <- MegaMegaSummary %>%
+  filter(BFP > 150) %>%
+  mutate(`BFP/G` = BFP/G)  %>%
+  filter(`BFP/G` > 16) %>%
+  filter(G <= 35) %>%
+  rename(Pitcher = pitcher) %>%
+  select(-Salary) %<%
+ 
+
+# Write CSV
+
+write_csv(MegaMegaSummary, "MegaMegaERA.csv")
+
+
+# Final Mega Summary
+
+FinalMegaSummary <- read_csv("Mega Summary.csv")
+
+FinalMegaSummary <- FinalMegaSummary %>%
+  mutate(`Standardized Barrel Luck` = -scale(`ERA/Barrel %`)) %>%
+  mutate(`Standardized Hard Hit Luck` = -scale(`ERA/Hard Hit %`)) %>%
+  mutate(`Standardized Luck` = (`Standardized Barrel Luck` + `Standardized Hard Hit Luck`)/2) %>%
+  mutate(`Luck Adjusted ERA` = ERA + (1/3)*`Standardized Luck`) %>%
+  mutate(`Luck Adjusted ERA` = as.numeric(`Luck Adjusted ERA`)) 
+
+FinalMegaSummary <- FinalMegaSummary %>%
+  select(-`xBA - BA`, -`Standardized Barrel Luck`, 
+         -`Standardized Hard Hit Luck`, -`Standardized Luck`)
+
+FinalMegaSummary <- FinalMegaSummary %>%
+  mutate(`Luck Adjusted ERA` = format(round(`Luck Adjusted ERA`, 2), nsmall = 2)) %>%
+  filter(`ERA (t+1)` < 7.00) %>%
+  filter(`ERA` < 7.00) %>%
+  filter(`Luck Adjusted ERA` < 7.00)
+
+FinalMegaSummary <- FinalMegaSummary %>%
+  rename(spin_rate = `Spin Rate`,
+         K_percent = `K %`,
+         BB_percent = `BB %`,
+         hard_hit_percent = `Hard Hit %`,
+         barrel_percent = `Barrel %`,
+         salary_t1 = `Salary (t+1)`,
+         ERA_t1 = `ERA (t+1)`,
+         BFP_per_G = `BFP/G`,
+         xwOBA_minus_wOBA = `xwOBA - wOBA`,
+         luck_adj_ERA = `Luck Adjusted ERA`)
+
+FinalMegaSummary <- FinalMegaSummary %>%
+  rename(BABIP_minus_meanBABIP = `BABIP - Mean BABIP`)
+
+```
+
+# Exploratory Data Analysis
+
+```{r}
+Mega_Summary <- read_csv("Models/Mega Summary.csv")
+
+#Filter out Pre-arbitration
+Mega_Summary_Filtered <- 
+  Mega_Summary %>% 
+  filter(`Salary (t+1)` > 600000)
+```
+
+```{r}
+ggplot(Mega_Summary_Filtered, 
+       aes(x = `Salary (t+1)` )) + 
+  geom_histogram(
+    color="grey100",
+    bins = 30, 
+    alpha = .75 
+    ) + 
+  theme_classic()
+```
+
+```{r}
+ggplot(Mega_Summary_Filtered, 
+       aes(x = log(`Salary (t+1)` ))) + 
+  geom_histogram(
+    bins = 30,
+    alpha = .75 ) + 
+  theme_bw()
+```
+
+```{r}
+#Total Wins
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = W,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$W,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Total Losses
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = L,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$L,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Total Pitches
+ggplot(Mega_Summary_Filtered, 
+       aes(
+         x = Pitches,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$Pitches,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+```
+
+```{r}
+#Win percent
+Mega_Summary_Filtered <- 
+  Mega_Summary_Filtered %>% 
+  mutate(Win_Percent = W/(W+L)) %>% 
+  drop_na()
+
+ggplot(Mega_Summary_Filtered, 
+       aes(
+         x = Win_Percent,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm, 
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$Win_Percent,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+```
+
+```{r}
+#Games played
+ggplot(Mega_Summary_Filtered, 
+       aes(
+         x = G,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$G,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+```
+
+```{r}
+#Current ERA
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `ERA`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$ERA,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+```
+
+```{r}
+#Total batters faced
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = ABs,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha=0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$ABs,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Total strikeouts
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = SO,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha=0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$SO,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Total batters walked
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = BB,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$BB,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Total hits
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = H,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$H,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Total Home Runs
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = HR,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$HR,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+```
+
+```{r}
+#Strikeout Percent
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `K %`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$`K %`,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Percent of Batters walked
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `BB %`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$`BB %`,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Batting average against (hit percent)
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = BA,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$BA,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+
+```
+
+```{r}
+#Hard hit percent
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `Hard Hit %`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$`Hard Hit %`,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Barrel percent
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `Barrel %`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$`Barrel %`,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+```
+
+```{r}
+#Average Speed
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = Velocity,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$Velocity,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Average spin rate
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `Spin Rate`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$`Spin Rate`,
+    Mega_Summary_Filtered$`Salary (t+1)`)
+
+```
+
+```{r}
+#Weighted on base average (wOBA)
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = wOBA,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$wOBA,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Batting average on balls in play against (BABIP)
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = BABIP,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$BABIP,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Expected wOBA
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = xwOBA,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$xwOBA,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+#Expected batting average
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = xBA,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$xBA,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+```
+
+```{r}
+#xwOBA-wOBA
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `xwOBA - wOBA`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$`xwOBA - wOBA`,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+#xBA-BA
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `xBA - BA`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$`xBA - BA`,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+#ERA/Hard Hit
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `ERA/Hard Hit %`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$`ERA/Hard Hit %`,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+#ERA/Barrel
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `ERA/Barrel %`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5)+
+  geom_smooth(method = lm,
+              color = "grey50") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$`ERA/Barrel %`,
+   Mega_Summary_Filtered$`Salary (t+1)`)
+
+```
+
+```{r}
+total_quant_pred <- 
+  select_if(
+    Mega_Summary_Filtered,
+    is.numeric
+    )
+
+total_quant_pred <- 
+  total_quant_pred %>% 
+  select(
+    -Year,
+    -ΔERA,-ΔSalary,
+    -`Salary (t+1)`
+         )
+
+predictor_correlations <- 
+  cor(total_quant_pred)
+
+```
+
+```{r}
+volume_predictors<-Mega_Summary_Filtered %>%select(Pitches,W,L,BFP,H,HR,SO)
+volume_predictors_cor<-cor(volume_predictors)
+kable(volume_predictors_cor)
+```
+
+```{r}
+hit_predictors<-Mega_Summary_Filtered %>%select(BA,xBA,`K %`)
+hit_predictors_cor<-cor(hit_predictors,Mega_Summary_Filtered$`Spin Rate`)
+kable(hit_predictors_cor)
+```
+
+```{r}
+barrel_predictors<-Mega_Summary_Filtered %>%select(xBA,wOBA,xwOBA,ERA)
+barrel_predictors_cor<-cor(barrel_predictors,Mega_Summary_Filtered$`Barrel %`)
+kable(barrel_predictors_cor)
+```
+
+```{r}
+offense_statistics<-Mega_Summary_Filtered %>%select(`K %`,BA,wOBA,xwOBA)
+strikes_and_hits<-Mega_Summary_Filtered %>%select(`K %`,BA)
+strikes_hits_statistics_cor<-cor(offense_statistics,strikes_and_hits)
+kable(strikes_hits_statistics_cor)
+```
+
+```{r}
+advanced_statistics<-Mega_Summary_Filtered %>%select(BABIP,xBA,wOBA,xwOBA)
+advanced_statistics_cor<-cor(advanced_statistics,Mega_Summary_Filtered$ERA)
+kable(advanced_statistics_cor)
+```
+
+
+```{r}
+wins_and_lossess<-Mega_Summary_Filtered %>%select(W,L)
+wins_and_lossess_cor<-cor(wins_and_lossess,Mega_Summary_Filtered$ERA)
+kable(wins_and_lossess_cor)
+```
+
+```{r}
+library(corrr)
+
+total_quant_pred %>%
+  correlate() %>%
+  rearrange() %>%
+  shave() %>%
+  rplot(shape = 15, colours = c("darkorange", "white","midnightblue")) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+Mega_Summary <- read_csv("Models/Mega Summary.csv")
+pitch_data <- read_csv("Exploratory Data Analysis/2020_summary.csv") %>%
+  rename(`Pitch Category` = pitch_category) %>%
+  rename(wOBA = wOBAA)
+```
+
+```{r}
+pitch_data  %>%
+  ggplot(aes(
+    x = `Average Pitch Speed`,
+    y = wOBA)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+pitch_data  %>%
+  ggplot(aes(
+    x = `Average Pitch Speed`,
+    y = wOBA, color =`Pitch Category`)
+    ) +
+  geom_point(
+    size = 2, 
+    alpha = 0.5) +
+  geom_smooth(method = lm) +
+  theme_minimal()
+```
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = ERA,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$ERA, Mega_Summary$`ERA (t+1)`)
+```
+
+```{r}
+ggplot(Mega_Summary, aes(x = `ERA (t+1)` ))+
+  geom_histogram(
+    color="grey100",
+    bins = 30, 
+    alpha = .75 )+
+  theme_classic()
+```
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = W,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$W, Mega_Summary$`ERA (t+1)`)
+```
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = Pitches,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$Pitches, Mega_Summary$`ERA (t+1)`)
+```
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = SO,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$SO, Mega_Summary$`ERA (t+1)`)
+```
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = `K %`,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$`K %`, Mega_Summary$`ERA (t+1)`)
+```
+
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = wOBA,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$wOBA, Mega_Summary$`ERA (t+1)`)
+```
+
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = xwOBA,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$xwOBA, Mega_Summary$`ERA (t+1)`)
+```
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = BABIP,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$BABIP, Mega_Summary$`ERA (t+1)`)
+```
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = `BABIP - Mean BABIP`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$`BABIP - Mean BABIP`, Mega_Summary$`ΔERA`)
+```
+
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = `xBA - BA`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$`xBA - BA`, Mega_Summary$`ΔERA`)
+```
+
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = `xwOBA - wOBA`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm,
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$`xwOBA - wOBA`, Mega_Summary$`ΔERA`)
+```
+
+
+```{r}
+Mega_Summary %>%
+  ggplot(aes(
+    x = `ERA/Hard Hit %`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(
+    method = lm, 
+    color = "grey50"
+    ) +
+  theme_classic()
+```
+
+```{r}
+cor(Mega_Summary$`ERA/Hard Hit %`, Mega_Summary$`ΔERA`)
+```
+
+```{r}
+cor(Mega_Summary$`ERA (t+1)`, Mega_Summary$`ΔERA`)
+```
+
+```{r}
+salary_pred<-Mega_Summary_Filtered %>%select(Pitches, ABs, W, H, HR)
+salary_pred_cor<-cor(salary_pred,Mega_Summary_Filtered$`Salary (t+1)`)
+kable(salary_pred_cor)
+```
+
+```{r}
+future_ERA_pred<-Mega_Summary_Filtered %>%select(wOBA, BA, xBA, xwOBA, `K %`)
+future_ERA_pred_cor<-cor(future_ERA_pred,Mega_Summary_Filtered$`ERA (t+1)`)
+kable(future_ERA_pred_cor)
+```
+
+# Models
+
+## tuned randomForest
+
+```{r}
+data_raw <- read_csv("data/Final Mega Summary.csv") 
+
+data <- data_raw %>%
+  filter(salary_t1 > 600000) %>%
+  select(-`ΔERA`, -`ΔSalary`)
+```
+
+```{r}
+set.seed(134)
+baseball_split <- initial_split(data, prop = 0.8)
+
+baseball_train <- training(baseball_split)
+baseball_test <- testing(baseball_split)
+```
+
+```{r}
+pitcher_rec <- recipe(salary_t1 ~ ., data = baseball_train) %>%
+  update_role(Pitcher, new_role = "ID") %>%
+  step_log(salary_t1) %>%
+  step_zv(all_predictors())
+
+
+pitcher_prep <- prep(pitcher_rec)
+juiced <- juice(pitcher_prep)
+```
+
+
+```{r}
+tune_spec <- rand_forest(
+  mtry = tune(),
+  trees = 1000,
+  min_n = tune()
+  ) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+```
+
+```{r}
+tune_wf <- workflow() %>%
+  add_recipe(pitcher_rec) %>%
+  add_model(tune_spec)
+```
+
+
+```{r}
+set.seed(987)
+baseball_fold <- vfold_cv(baseball_train)
+```
+
+
+```{r}
+rf_grid <- grid_regular(
+  mtry(range = c(4,12)),
+  min_n(range = c(2,8)),
+  levels = 5
+  )
+```
+
+```{r}
+set.seed(453)
+
+tune_res <- tune_grid(
+  tune_wf,
+  resamples = baseball_fold,
+  grid = rf_grid
+)
+```
+
+```{r}
+tune_res %>%
+  collect_metrics() %>%
+  filter(.metric == "rmse") %>%
+  mutate(min_n = factor(min_n)) %>%
+  ggplot(aes(mtry, mean, color = min_n)) +
+  geom_line(alpha = 0.5, size = 1.5) +
+  geom_point()
+```
+
+```{r}
+best_rmse <- select_best(tune_res, "rmse")
+
+final_rf <- finalize_model(
+  tune_spec,
+  best_rmse
+)
+```
+
+```{r}
+# variable importance plot
+
+library(vip)
+final_rf %>%
+  set_engine("ranger", importance = "permutation") %>%
+  fit(salary_t1 ~.,
+      data = juice(pitcher_prep) %>% select(-Pitcher)) %>%
+  vip(geom = "point")
+```
+
+```{r}
+final_wf <- workflow() %>%
+  add_recipe(pitcher_rec) %>%
+  add_model(final_rf)
+
+final_res <- final_wf %>%
+  last_fit(baseball_split)
+
+final_res %>%
+  collect_metrics()
+
+# since the rmse on the test set is so similar to that which we found when tuning
+# it's fairly likely that we did not overfit
+```
+
+```{r}
+final_df <- final_res %>%
+  collect_predictions() %>%
+  bind_cols(baseball_test)
+```
+
+```{r}
+# visualizing how our model did
+
+final_df %>%
+  ggplot(aes(.pred, salary_t1...4)) +
+  geom_point() +
+  geom_abline(slope = 1, alpha = 0.5)
+```
+
+```{r}
+rmse(final_df, truth = `salary_t1...4`,estimate = .pred )
+rsq(final_df, truth = `salary_t1...4`,estimate = .pred)
+
+# rmse = 0.521
+# so mse = 0.2714
+# rsq = 0.770
+```
+
+```{r}
+data1 <- data_raw %>%
+  filter(ERA_t1 < 7.00) %>%
+  filter(luck_adj_ERA < 7.00) %>%
+  select(-`ΔERA`, -`ΔSalary`)
+```
+
+```{r}
+set.seed(132)
+baseball_split_era <- initial_split(data1, prop = 0.8)
+
+baseball_train_era <- training(baseball_split_era)
+baseball_test_era <- testing(baseball_split_era)
+```
+
+
+
+```{r}
+pitcher_rec_era <- recipe(ERA_t1 ~ ., data = baseball_train_era) %>%
+  update_role(Pitcher, new_role = "ID") %>%
+  step_log(Salary) %>%
+  step_zv(all_predictors())
+
+pitcher_prep_era <- prep(pitcher_rec_era)
+juiced_era <- juice(pitcher_prep_era)
+```
+
+
+```{r}
+rf_spec_era <- rand_forest(
+  mtry = tune(),
+  trees = 1000,
+  min_n = tune()
+  ) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+```
+
+```{r}
+tune_wf_era <- workflow() %>%
+  add_recipe(pitcher_rec_era) %>%
+  add_model(rf_spec_era)
+```
+
+
+```{r}
+set.seed(987)
+baseball_fold_era <- vfold_cv(baseball_train_era, v = 5)
+```
+
+
+```{r}
+rf_grid_era <- grid_regular(
+  mtry(range = c(4,12)),
+  min_n(range = c(2,8)),
+  levels = 5
+  )
+```
+
+```{r}
+set.seed(453)
+
+tune_res_era <- tune_grid(
+  tune_wf_era,
+  resamples = baseball_fold_era,
+  grid = rf_grid_era
+)
+```
+
+```{r}
+tune_res_era %>%
+  collect_metrics() %>%
+  filter(.metric == "rmse") %>%
+  mutate(min_n = factor(min_n)) %>%
+  ggplot(aes(mtry, mean, color = min_n)) +
+  geom_line(alpha = 0.5, size = 1.5) +
+  geom_point()
+```
+
+```{r}
+best_rmse_era <- select_best(tune_res_era, "rmse")
+
+final_rf_era <- finalize_model(
+  rf_spec_era,
+  best_rmse_era
+)
+```
+
+```{r}
+# variable importance plot
+
+library(vip)
+final_rf_era %>%
+  set_engine("ranger", importance = "permutation") %>%
+  fit(ERA_t1 ~.,
+      data = juice(pitcher_prep) %>% select(-Pitcher)) %>%
+  vip(geom = "point")
+```
+
+```{r}
+final_wf_era <- workflow() %>%
+  add_recipe(pitcher_rec_era) %>%
+  add_model(final_rf_era)
+
+final_res_era <- final_wf_era %>%
+  last_fit(baseball_split_era)
+
+final_res_era %>%
+  collect_metrics()
+
+# since the rmse on the test set is so similar to that which we found when tuning
+# it's fairly likely that we did not overfit
+```
+
+```{r}
+final_df_era <- final_res_era %>%
+  collect_predictions() %>%
+  bind_cols(baseball_test_era)
+```
+
+```{r}
+# visualizing how our model did
+
+final_df_era %>%
+  ggplot(aes(.pred, `ERA_t1...4`)) +
+  geom_point() +
+  geom_abline(slope = 1, alpha = 0.5)
+
+```
+
+```{r}
+rmse(final_df_era, truth = `ERA_t1...4`,estimate = .pred )
+rsq(final_df_era, truth = `ERA_t1...4`,estimate = .pred)
+
+# so mse = 1.1236
+# and rsq = 0.0171
+```
+
+## PCR
+
+```{r}
+mega <- read_csv("data/Final Mega Summary.csv")
+
+salary_data<-mega %>% dplyr::select(-Pitcher,-ΔERA,-ERA_t1,-ΔSalary) #I'm sorry about the dplyr::, I guess I must have libraried a weird package
+
+salary_data <- salary_data %>% filter(salary_t1>600000)
+
+pitchers <- mega %>%
+  dplyr::select(-Pitcher,-ΔERA,-salary_t1,-ΔSalary)
+
+pitchers <- pitchers %>%
+  filter(ERA_t1 < 7.00) %>%
+  filter(luck_adj_ERA < 7.00)
+```
+
+
+```{r}
+my_pcr_ERA <- pcr(formula = ERA_t1 ~ ., data = pitchers, scale = T, validation = "CV",     kfold = 5, folds = 5)
+
+#To get CV and adjusted CV
+
+summary(my_pcr_ERA)
+
+#To plot CV of MSE
+
+validationplot(my_pcr_ERA, val.type = "MSEP")
+```
+
+```{r}
+PCR_predict_ERA<-predict(my_pcr_ERA,pitchers,4)
+
+PCR_MSE_ERA<-(sum((PCR_predict_ERA-pitchers$ERA_t1)^2))/(length(pitchers$ERA_t1))
+
+r_sq<- function (true_y, fitted,n_obs,k_obs) {
+  rss = sum((fitted - true_y)^2)
+  tss=sum(((true_y-mean(true_y))^2))
+  return (1 - ((rss/(n_obs - k_obs - 1)) / (tss/(n_obs - 1))))
+}
+
+PCR_ERA_r2<-r_sq(pitchers$ERA_t1,PCR_predict_ERA,467,4)
+
+```
+
+
+```{r}
+crossval(my_pcr_salary, segments = 5)
+
+my_pcr_salary <- pcr(formula = log(salary_t1) ~ ., data = salary_data, scale = T, validation = "CV",     kfold = 5, folds = 5)
+
+#To get CV and adjusted CV
+
+summary(my_pcr_salary)
+
+#To plot CV of MSE
+
+validationplot(my_pcr_salary, val.type = "MSEP")
+```
+
+```{r}
+PCR_predict_salary<-predict(my_pcr_salary,salary_data,13)
+
+PCR_MSE_Salary<-sum((PCR_predict_salary-salary_data$salary_t1^2))/(length(salary_data$salary_t1))
+
+PCR_salary_r2<-r_sq(log(salary_data$salary_t1),PCR_predict_salary,467,4)
+
+```
+
+## LASSO and Ridge
+
+```{r}
+Mega_Summary <- read_csv("data/Final Mega Summary.csv")
+
+
+data_selected <- Mega_Summary %>%
+  select(Pitches, BA, Hits,`Spin Rate`, Velocity,
+         W, L, ERA, HR, BB, SO, xwOBA, `K %`,
+         `Barrel %`, Salary, `K %`:`Barrel %`, ERA_t1,
+         salary_t1, Pitcher, Year) %>% select(-Pitcher)
+
+Mega_Summary_ERA<-Mega_Summary%>% select(-Pitcher,-ΔSalary,-Year,-ΔERA,-salary_t1)
+Mega_Summary_Salary<-Mega_Summary%>% select(-Pitcher,-ΔSalary,-Year,-ΔERA,-ERA_t1)
+
+#Filtering out Pre-arb in salary
+Mega_Summary_Salary<-Mega_Summary_Salary %>% filter(salary_t1>600000)
+
+#Split into test and train with 80/20 splits
+set.seed(0)
+
+pitch_train_salary<-Mega_Summary_Salary %>% sample_frac(0.8)
+pitch_test_salary<-anti_join(Mega_Summary_Salary, pitch_train)
+
+pitch_train_ERA<-Mega_Summary_ERA %>% sample_frac(0.8)
+pitch_test_ERA<-anti_join(Mega_Summary_ERA, pitch_train)
+
+#Creating model matrices for salary
+x_full_model_salary<-model.matrix(log(salary_t1)~.,data=Mega_Summary_Salary)[,-1]
+y_full_model_salary<-log(Mega_Summary_Salary$salary_t1)
+
+x_train_salary<-model.matrix(log(salary_t1)~.,data=pitch_train_salary)[,-1]
+y_train_salary<-log(pitch_train_salary$salary_t1)
+
+x_test_salary<-model.matrix(log(salary_t1)~.,data=pitch_train_salary)[,-1]
+y_test_salary<-log(pitch_test_salary$salary_t1)
+
+#Creating model matrices for ERA
+x_full_model_ERA<-model.matrix(ERA_t1~.,data=Mega_Summary_ERA)[,-1]
+y_full_model_ERA<-Mega_Summary_ERA$ERA_t1
+
+x_train_ERA<-model.matrix(ERA_t1~.,data=pitch_train_ERA)[,-1]
+y_train_ERA<-pitch_train_ERA$ERA_t1
+
+x_test_ERA<-model.matrix(ERA_t1~.,data=pitch_train_ERA)[,-1]
+y_test_ERA<-pitch_test_ERA$ERA_t1
+
+#Selecting the best lambda
+my_cv_ridge<-cv.glmnet(x_train_salary, y_train_salary, alpha =0)
+best_L_ridge<-my_cv_ridge$lambda.min
+best_L_ridge
+
+ridge_mod<- glmnet(x_full_model_salary, y_full_model_salary, alpha = 0, lambda = best_L_ridge)
+
+
+#Recycling Josh's function for R-squared
+r_sq<- function (true_y, fitted,n_obs,k_obs) {
+  rss = sum((fitted - true_y)^2)
+  tss=sum(((true_y-mean(true_y))^2))
+  return (1 - ((rss/(n_obs - k_obs - 1)) / (tss/(n_obs - 1))))
+}
+
+#Ridge prediction on test
+ridge_predict<-predict(ridge_mod,newx=x_full_model_salary,s=best_L_ridge)
+
+#Calculating R-squared
+set.seed(0)
+ridge_r2<-r_sq(y_full_model_salary,ridge_predict,457,30)
+print(ridge_r2)
+
+
+#5 Fold CV for ridge salary 
+ridge_mod_salary_CV<- cv.glmnet(x_full_model_salary, y_full_model_salary, alpha = 0,nfolds=5)
+ridge_MSE_salary<-data.frame(ridge_mod_salary_CV$cvm)
+ridge_MSE_salary %>%
+  summarise(MSE = min(ridge_mod_salary_CV$cvm))
+
+
+#Lasso Lambda
+set.seed(0)
+my_cv_lasso<-cv.glmnet(x_train_salary, y_train_salary, alpha =1)
+best_L_lasso<-my_cv_lasso$lambda.min
+best_L_lasso
+
+lasso_mod<- glmnet(x_full_model_salary, y_full_model_salary, alpha = 0, lambda = best_L_lasso)
+
+#Lasso prediction on test
+lasso_predict<-predict(lasso_mod,newx=x_full_model_salary,s=best_L_lasso)
+
+#Calculating R-squared
+set.seed(0)
+lasso_r2<-r_sq(y_full_model_salary,lasso_predict,457,30)
+print(lasso_r2)
+
+#5 Fold CV for lasso salary 
+lasso_mod_salary_CV<- cv.glmnet(x_full_model_salary, y_full_model_salary, alpha = 1,nfolds=5)
+lasso_MSE_salary<-data.frame(lasso_mod_salary_CV$cvm)
+lasso_MSE_salary %>%
+  summarise(MSE = min(lasso_mod_salary_CV$cvm))
+
+
+
+#ERA Predictions
+
+#New Matrices
+#Creating model matrices
+x_full_model_ERA<-model.matrix(ERA_t1~.,data=Mega_Summary_ERA)[,-1]
+y_full_model_ERA<-Mega_Summary_ERA$ERA_t1
+
+x_train_ERA<-model.matrix(ERA_t1~.,data=pitch_train_ERA)[,-1]
+y_train_ERA<-pitch_train_ERA$ERA_t1
+
+x_test_ERA<-model.matrix(ERA_t1~.,data=pitch_test_ERA)[,-1]
+y_test_ERA<-pitch_test_ERA$ERA_t1
+
+#Selecting the best lambda for ridge
+set.seed(0)
+my_cv_ridge_ERA<-cv.glmnet(x_train_ERA, y_train_ERA, alpha =0)
+best_L_ridge_ERA<-my_cv_ridge_ERA$lambda.min
+best_L_ridge_ERA
+
+ridge_mod_ERA<- glmnet(x_full_model_ERA, y_full_model_ERA, alpha = 0, lambda = best_L_ridge_ERA)
+
+#Ridge pred and R-squared for ERA
+
+#Ridge prediction on test ERA
+ridge_predict_ERA<-predict(ridge_mod_ERA,newx=x_full_model_ERA,s=best_L_ridge_ERA)
+
+#Calculating R-squared_ridge
+set.seed(0)
+
+ridge_r2_ERA<-r_sq(y_full_model_ERA,ridge_predict_ERA,457,29)
+print(ridge_r2_ERA)
+
+
+#5 fold CV for ridge on ERA
+ridge_mod_ERA_CV<- cv.glmnet(x_full_model_ERA, y_full_model_ERA, alpha = 0,nfolds=5)
+ridge_MSE_ERA<-data.frame(ridge_mod_ERA_CV$cvm)
+ridge_MSE_ERA %>%
+  summarise(MSE = min(ridge_mod_ERA_CV$cvm))
+
+
+
+#Selecting the best lambda for Lasso
+set.seed(0)
+my_cv_lasso_ERA<-cv.glmnet(x_train_ERA, y_train_ERA, alpha =1)
+best_L_lasso_ERA<-my_cv_lasso_ERA$lambda.min
+best_L_lasso_ERA
+
+lasso_mod_ERA<- glmnet(x_full_model_ERA, y_full_model_ERA, alpha = 1, lambda = best_L_lasso_ERA)
+
+#Lasso pred and R-squared for ERA
+
+#Lasso prediction on test ERA
+lasso_predict_ERA<-predict(lasso_mod_ERA,newx=x_full_model_ERA,s=best_L_lasso_ERA)
+
+#Calculating R-squared
+set.seed(0)
+
+lasso_r2_ERA<-r_sq(y_full_model_ERA,lasso_predict_ERA,565,29)
+print(lasso_r2_ERA)
+
+#5 Fold CV for lasso ERA 
+lasso_mod_ERA_CV<- cv.glmnet(x_full_model_ERA, y_full_model_ERA, alpha = 1,nfolds=5)
+lasso_MSE_ERA<-data.frame(lasso_mod_ERA_CV$cvm)
+lasso_MSE_ERA %>%
+  summarise(MSE = min(lasso_mod_ERA_CV$cvm))
+
+#Below is code for the various MSE and R-squared models, you don't need to pay attention to it
+
+ridge_statistics<-c(ridge_r2,min(ridge_MSE_salary),ridge_r2_ERA,min(ridge_MSE_ERA))
+lasso_statistics<-c(lasso_r2,min(lasso_MSE_salary),lasso_r2_ERA,min(lasso_MSE_ERA))
+forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
+domain_knowledge_statistics<-c("NA","NA",0.1573634,0.972449)
+full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
+PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_statistics,domain_knowledge_statistics,full_statistics,PCR_statistics)
+view(all_statistics)
+```
+
+## ERA models
+
+```{r}
+pitchers <- read_csv("data/Final Mega Summary.csv")
+
+salary_data <- pitchers %>%
+  select(-Pitcher,-ΔERA, -ERA_t1, -ΔSalary)
+
+  
+
+#Is the below still necessary?
+pitchers <- pitchers %>%
+  mutate(`Standardized Barrel Luck` = -scale(`ERA/Barrel %`)) %>%
+  mutate(`Standardized Hard Hit Luck` = -scale(`ERA/Hard Hit %`)) %>%
+  mutate(`Standardized Luck` = (`Standardized Barrel Luck` + `Standardized Hard Hit Luck`)/2) %>%
+  mutate(`Luck Adjusted ERA` = ERA + (1/3)*`Standardized Luck`)
+
+pitchers <- pitchers %>%
+  select(-`BABIP - Mean BABIP`, -`xBA - BA`, -`ERA/Barrel %`, -`ERA/Hard Hit %`,-`Standardized Barrel Luck`, 
+         -`Standardized Hard Hit Luck`, -`Standardized Luck`)
+
+write_csv(pitchers, "Luck Mega Summary.csv")
+
+pitchers <- pitchers %>%
+  select(-Pitcher,-ΔERA,-salary_t1,-ΔSalary)
+
+pitchers <- pitchers %>%
+  filter(ERA_t1 < 7.00) %>%
+  filter(luck_adj_ERA < 7.00)
+
+
+write_csv(pitchers, "Luck Mega Summary.csv")
+
+## Single Variable Model
+
+k_mod <- lm(data = pitchers,
+               ERA_t1 ~ K_percent)
+
+
+summary(k_mod)$adj.r.squared
+
+
+
+## Full Model for ERA
+
+full_mod <- lm(data = pitchers,
+                 ERA_t1 ~.)
+
+#Full model adjusted R-squared
+
+summary(full_mod)$adj.r.squared
+
+#Full model 5 fold MSE
+
+full_mod_glm <- glm(data = pitchers,
+               ERA_t1 ~.)
+
+full_MSE_ERA_CV<- cv.glm(pitchers, full_mod_glm,K=5)
+
+full_MSE_ERA<-full_MSE_ERA_CV$delta[1]
+
+
+#Full model for salary
+
+full_mod_salary<-lm(data=salary_data,
+                    log(salary_t1)~.)
+
+#Full model salary adjusted R-squared
+
+summary(full_mod_salary)$adj.r.squared
+
+#Full model 5 fold MSE
+
+full_mod_salary_glm <- glm(data = salary_data,
+                          log(salary_t1)~.)
+
+full_MSE_salary_CV<- cv.glm(salary_data, full_mod_salary_glm,K=5)
+
+full_MSE_salary<-full_MSE_salary_CV$delta[1]
+
+## Custom Model
+
+custom_mod <- lm(data = pitchers,
+                  ERA_t1 ~ xwOBA + SO + `K %` + `Barrel %` + ERA:`xwOBA - wOBA` + 
+                   ERA:`xBA - BA` + ERA:`BABIP - Mean BABIP` + `ERA/Hard Hit %`)
+
+
+summary(custom_mod)$adj.r.squared
+
+
+
+## Custom Model 2
+
+custom_mod2 <- lm(data = pitchers,
+                 ERA_t1 ~ xwOBA + SO + `K %` + ERA:`ERA/Hard Hit %`)
+
+
+summary(custom_mod2)$adj.r.squared
+
+
+
+## Custom Model 3
+
+custom_mod3 <- lm(data = pitchers,
+                  ERA_t1 ~ xwOBA + SO + W + `K %` + 
+                    ERA:`ERA/Hard Hit %` + ERA:`xwOBA - wOBA`)
+
+
+summary(custom_mod3)$adj.r.squared
+
+
+
+## Custom Model 4
+
+custom_mod4 <- lm(data = pitchers, 
+                   ERA_t1 ~ xwOBA + `Spin Rate` + W + G + SO + `K %` + `BB %` +
+                    `Hard Hit %` + `Barrel %` + ERA:`ERA/Barrel %`)
+
+
+
+summary(custom_mod4)$adj.r.squared
+
+
+
+## Custom Model 5
+
+custom_mod5 <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+summary(custom_mod5)$adj.r.squared
+
+
+#Custom model 5 5-fold CV MSE
+
+custom_mod_salary_glm <- glm(data = pitchers, 
+                             ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                               ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+custom_mod_MSE_ERA_CV<- cv.glm(pitchers, custom_mod_salary_glm,K=5)
+
+custom_mod_MSE_ERA<-custom_mod_MSE_ERA_CV$delta[1]
+
+#Custom Model Salary
+
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1)~Year+SO+
+                           Salary+W*luck_adj_ERA)
+
+summary(custom_mod_salary)
+
+#Custom salary model 5 5-fold CV MSE
+
+custom_mod_salary_glm <- glm(data = salary_data,
+                             log(salary_t1)~Year+SO+
+                               Salary+W*luck_adj_ERA)
+
+custom_mod_MSE_salary_CV<- cv.glm(salary_data, custom_mod_salary_glm,K=5)
+
+custom_mod_MSE_salary<-custom_mod_MSE_salary_CV$delta[1]
+
+## Subset Selection Models
+
+# Forward Selection
+
+forward_select <- regsubsets(data = pitchers,
+                             ERA_t1 ~., 
+                             nvmax = 11, 
+                             method = "forward")
+summary(forward_select)
+
+#How many predictors should we include
+
+adj_r_sq_forward<-summary(forward_select)$adjr2
+
+rss_forward<-summary(forward_select)$rss
+
+cp_forward<-summary(forward_select)$cp
+
+forward_select_all<-data.frame(model = 1:12, adj_r_sq_forward, rss_forward, cp_forward )
+
+view(forward_select_all) #In terms of adjusted R-squared, model 9 did the best
+
+forward_mod <- lm(data = pitchers, 
+                   ERA_t1 ~ wOBA+L+BFP+SO+K_percent+hard_hit_percent+
+                    barrel_percent+`ERA/Barrel %`+luck_adj_ERA)
+
+#Adjusted R-squared for forward
+summary(forward_mod)$adj.r.squared
+
+#Forward model 5 5-fold CV MSE
+
+forward_ERA_glm <- glm(data = pitchers, 
+                          ERA_t1 ~ wOBA+L+BFP+SO+K_percent+hard_hit_percent+
+                            barrel_percent+`ERA/Barrel %`+luck_adj_ERA)
+
+forward_MSE_ERA_CV<- cv.glm(pitchers, forward_ERA_glm,K=5)
+
+forward_MSE_ERA<-forward_MSE_ERA_CV$delta[1]
+
+
+# Best Subset
+
+best_subset <- regsubsets(data = pitchers,
+                             ERA_t1 ~.,
+                             nvmax = 8)
+summary(best_subset)
+
+best_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ `Spin Rate` + ABs + H + BFP + `BB %` + `K %` + `Hard Hit %` + `Barrel %` + `ERA/Barrel %` + `ERA/Hard Hit %`)
+
+summary(best_mod)$adj.r.squared
+
+
+
+#Forward Select but for salary
+
+forward_select_salary <- regsubsets(data = salary_data,
+                             log(salary_t1) ~., 
+                             nvmax = 11, 
+                             method = "forward")
+
+#How many predictors should we include for salary
+
+adj_r_sq_forward_salary<-summary(forward_select_salary)$adjr2
+
+rss_forward_salary<-summary(forward_select_salary)$rss
+
+cp_forward_salary<-summary(forward_select_salary)$cp
+
+forward_select_all_salary<-data.frame(model = 1:12, adj_r_sq_forward_salary, rss_forward_salary, cp_forward_salary )
+
+view(forward_select_all_salary) #It seems like model 8 is the best
+
+forward_mod_salary <- lm(data = salary_data,
+                         log(salary_t1)~Pitches+Year+xBA+spin_rate+
+                           Velocity+K_percent+Salary+luck_adj_ERA)
+
+summary(forward_mod_salary)$adj.r.squared
+
+#Forward model 5 5-fold CV MSE for salary
+
+forward_salary_glm <- glm(data = salary_data,
+                          log(salary_t1)~Pitches+Year+xBA+spin_rate+
+                            Velocity+K_percent+Salary+luck_adj_ERA)
+
+forward_MSE_salary_CV<- cv.glm(salary_data, forward_salary_glm,K=5)
+
+forward_MSE_salary<-forward_MSE_salary_CV$delta[1]
+
+
+#Backward Selection
+
+backward_select <- regsubsets(data = pitchers,
+                             ERA_t1 ~., 
+                             nvmax = 10, 
+                             method = "backward")
+summary(backward_select)
+
+backward_select <- lm(data = pitchers, ERA_t1 ~ xwOBA + xBA+ `Spin Rate` +W+G+ERA+H+SO+`BB %`+`Hard Hit %`+`ERA/Barrel %`)
+
+summary(backward_select)$adj.r.squared
+
+
+
+#Backward Select but for salary
+
+backward_select_salary <- regsubsets(data = Mega_Summary_Salary,
+                                    `Salary (t+1)` ~., 
+                                    nvmax = 10, 
+                                    method = "backward")
+
+summary(backward_select_salary)
+
+backward_mod_salary <- lm(data = Mega_Summary_Salary, 
+                         `Salary (t+1)` ~ Hits + ABs + Velocity + BFP + BB + SO + `BB %` + `Hard Hit %` + `Barrel %` + Salary +  `ERA/Barrel %`)
+                           
+summary(backward_mod_salary)$adj.r.squared
+
+
+```
+
+## Ensemble
+
+```{r}
+# loading data
+
+data_raw <- read_csv("data/Final Mega Summary.csv")
+
+data <-
+  data_raw %>%
+  select(-`ΔERA`,
+         -`ΔSalary`) %>%
+  mutate(salary_t1 = log(salary_t1)) %>%
+  filter(ERA_t1 < 7.00) %>%
+  filter(luck_adj_ERA < 7.00)
+
+```
+
+
+```{r}
+data %>%
+  filter(salary_t1 > 14 & salary_t1 < 15) %>%
+  View()
+```
+
+```{r}
+# test/train splits
+
+set.seed(321)
+
+data_split <- initial_split(data)
+data_train <- training(data_split)
+data_test <- testing(data_split)
+
+# k-fold CV
+
+set.seed(345)
+
+folds <- vfold_cv(data_train, v = 5)
+```
+
+```{r}
+# setting up a recipe
+
+baseball_rec <- 
+  recipe(ERA_t1 ~., data = data_train) %>%
+  step_normalize(all_numeric(), -all_outcomes()) %>%
+  step_zv(all_predictors(), -all_outcomes()) %>%
+  update_role(Pitcher, new_role = "Id") %>%
+  step_corr(all_numeric(), -all_outcomes(), threshold = 0.75) 
+
+# workflow
+
+baseball_wf <-
+  workflow() %>%
+  add_recipe(baseball_rec)
+
+# rmse metric
+metric <- metric_set(rmse)
+
+```
+
+```{r}
+
+ctrl_grid <- control_stack_grid()
+ctrl_res <- control_stack_resamples()
+
+```
+
+```{r}
+# lasso model
+
+lasso_spec <-
+  linear_reg(penalty = tune(), mixture = 1) %>%
+  set_engine("glmnet")
+
+# add to wf
+
+lasso_wf <-
+  baseball_wf %>%
+  add_model(lasso_spec)
+
+# lambda grid
+
+lambda_grid <-
+  grid_regular(penalty(),
+               levels = 50)
+
+# k-fold CV
+
+set.seed(875)
+lasso_res <- 
+  tune_grid(
+    lasso_wf,
+    resamples = folds,
+    metrics = metric,
+    control = ctrl_grid,
+    grid = lambda_grid
+  )
+
+```
+
+
+```{r}
+# ridge spec
+
+ridge_spec <- 
+  linear_reg(penalty = tune(),
+             mixture = 0) %>%
+  set_engine("glmnet")
+
+  
+# add it to a workflow
+ridge_wf <- 
+  baseball_wf %>%
+  add_model(ridge_spec)
+
+# tune deg_free and fit to the 5-fold cv
+set.seed(123)
+ridge_res <- 
+  tune_grid(
+    ridge_wf,
+    resamples = folds,
+    metrics = metric,
+    control = ctrl_grid,
+    grid = lambda_grid
+  )
+```
+
+```{r}
+# random Forest spec
+
+rf_spec <- rand_forest(
+  mtry = tune(),
+  trees = 1000,
+  min_n = tune()
+  ) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+
+rf_wf <-
+  baseball_wf %>%
+  add_model(rf_spec)
+
+rf_grid <- grid_regular(
+  mtry(range = c(1,6)),
+  min_n(range = c(2,8)),
+  levels = 5
+  )
+
+set.seed(453)
+randf_res <- tune_grid(
+  rf_wf,
+  resamples = folds,
+  grid = rf_grid,
+  metrics = metric,
+  control = ctrl_grid
+)
+```
+
+
+
+```{r}
+# create data stack
+
+baseball_d_stack <- 
+  stacks() %>%
+    add_candidates(lasso_res) %>%
+    add_candidates(randf_res) %>%
+    add_candidates(ridge_res)
+
+```
+
+
+```{r}
+# blending predictions
+
+base_stack <- 
+  baseball_d_stack %>%
+  blend_predictions()
+```
+
+
+```{r}
+# fitting model
+
+base_stack <-
+  base_stack %>%
+  fit_members()
+
+```
+
+
+```{r}
+data_test <- 
+  data_test %>%
+  bind_cols(predict(base_stack, .))
+
+```
+
+
+```{r}
+data_test %>%
+  ggplot() +
+  aes(
+    x = ERA_t1, 
+    y = .pred
+  ) +
+  geom_point() + 
+  coord_obs_pred() +
+  labs(y = "prediction", x = "ERA (t+1)") +
+  geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2) +
+  theme_minimal()
+```
+
+```{r}
+rmse(data_test, truth = ERA_t1, estimate = .pred)
+rsq(data_test, truth = ERA_t1, estimate = .pred)
+```
+
+
+```{r}
+data_s <-
+  data_raw %>%
+  select(-`ΔERA`,
+         -`ΔSalary`) %>%
+  filter(salary_t1 > 600000) %>%
+  mutate(salary_t1 = log(salary_t1)) 
+  
+# test/train splits
+
+set.seed(321)
+
+data_split_s <- initial_split(data_s)
+data_train_s <- training(data_split_s)
+data_test_s <- testing(data_split_s)
+
+# k-fold CV
+
+set.seed(345)
+
+folds_s <- vfold_cv(data_train_s, v = 5)
+```
+
+```{r}
+# setting up a recipe
+
+baseball_rec_s <- 
+  recipe(salary_t1 ~., data = data_train_s) %>%
+  step_normalize(all_numeric(), -all_outcomes()) %>%
+  step_zv(all_predictors(), -all_outcomes()) %>%
+  update_role(Pitcher, new_role = "Id") %>%
+  step_corr(all_numeric(), -all_outcomes(), threshold = 0.75) 
+
+# workflow
+
+baseball_wf_s <-
+  workflow() %>%
+  add_recipe(baseball_rec_s)
+
+# rmse metric
+metric_s <- metric_set(rmse)
+
+```
+
+```{r}
+
+ctrl_grid <- control_stack_grid()
+ctrl_res <- control_stack_resamples()
+
+```
+
+```{r}
+
+lambda_grid_s <-
+  grid_regular(penalty(),
+               levels = 50)
+
+ridge_spec_s <- 
+  linear_reg(penalty = tune(),
+             mixture = 0) %>%
+  set_engine("glmnet")
+
+  
+# add it to a workflow
+ridge_wf_s <- 
+  baseball_wf_s %>%
+  add_model(ridge_spec_s)
+
+# tune deg_free and fit to the 5-fold cv
+set.seed(123)
+ridge_res_s <- 
+  tune_grid(
+    ridge_wf_s,
+    resamples = folds_s,
+    metrics = metric,
+    control = ctrl_grid,
+    grid = lambda_grid_s
+  )
+```
+
+
+```{r}
+set.seed(76)
+# lasso model
+
+lasso_spec_s <-
+  linear_reg(penalty = tune(), mixture = 1) %>%
+  set_engine("glmnet")
+
+# add to wf
+
+lasso_wf_s <-
+  baseball_wf_s %>%
+  add_model(lasso_spec_s)
+
+# lambda grid
+
+lambda_grid_s <-
+  grid_regular(penalty(),
+               levels = 50)
+
+# k-fold CV
+
+set.seed(875)
+lasso_res_s <- 
+  tune_grid(
+    lasso_wf_s,
+    resamples = folds_s,
+    metrics = metric_s,
+    control = ctrl_grid,
+    grid = lambda_grid_s
+  )
+
+```
+
+
+
+```{r}
+set.seed(12)
+# random Forest spec
+
+rf_spec_s <- rand_forest(
+  mtry = tune(),
+  trees = 1000,
+  min_n = tune()
+  ) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+
+rf_wf_s <-
+  baseball_wf_s %>%
+  add_model(rf_spec_s)
+
+rf_grid_s <- grid_regular(
+  mtry(range = c(1,6)),
+  min_n(range = c(2,8)),
+  levels = 5
+  )
+
+set.seed(453)
+randf_res_s <- tune_grid(
+  rf_wf_s,
+  resamples = folds_s,
+  grid = rf_grid_s,
+  metrics = metric_s,
+  control = ctrl_grid
+)
+```
+
+
+```{r}
+# create data stack
+
+baseball_d_stack_s <- 
+  stacks() %>%
+    add_candidates(lasso_res_s) %>%
+    add_candidates(randf_res_s) %>%
+    add_candidates(ridge_res_s)
+
+```
+
+
+```{r}
+# blending predictions
+
+base_stack_s <- 
+  baseball_d_stack_s %>%
+  blend_predictions()
+```
+
+
+```{r}
+# fitting model
+
+base_stack_s <-
+  base_stack_s %>%
+  fit_members()
+
+```
+
+
+```{r}
+data_test_s <- 
+  data_test_s %>%
+  bind_cols(predict(base_stack_s, .))
+
+```
+
+```{r}
+data_test_s %>%
+  ggplot() +
+  aes(
+    x = salary_t1, 
+    y = .pred
+  ) +
+  geom_point() + 
+  coord_obs_pred()
+```
+
+```{r}
+rmse(data_test_s, truth = salary_t1, estimate = .pred)
+# 0.2209
+rsq(data_test_s, truth = salary_t1, estimate = .pred)
+# 0.776
+```
+
+```{r}
+data_s <-
+  data_raw %>%
+  select(-`ΔERA`,
+         -`ΔSalary`) %>%
+  filter(salary_t1 > 600000) %>%
+  mutate(salary_t1 = log(salary_t1)) %>%
+  filter(Pitcher != "Jeremy Hellickson")
+  
+# test/train splits
+
+set.seed(321)
+
+data_split_s <- initial_split(data_s)
+data_train_s <- training(data_split_s)
+data_test_s <- testing(data_split_s)
+
+# k-fold CV
+
+set.seed(345)
+
+folds_s <- vfold_cv(data_train_s, v = 5)
+```
+
+```{r}
+# setting up a recipe
+
+baseball_rec_s <- 
+  recipe(salary_t1 ~., data = data_train_s) %>%
+  step_normalize(all_numeric(), -all_outcomes()) %>%
+  step_zv(all_predictors(), -all_outcomes()) %>%
+  update_role(Pitcher, new_role = "Id") %>%
+  step_corr(all_numeric(), -all_outcomes(), threshold = 0.75) 
+
+# workflow
+
+baseball_wf_s <-
+  workflow() %>%
+  add_recipe(baseball_rec_s)
+
+# rmse metric
+metric_s <- metric_set(rmse)
+
+```
+
+```{r}
+
+ctrl_grid <- control_stack_grid()
+ctrl_res <- control_stack_resamples()
+
+```
+
+```{r}
+
+lambda_grid_s <-
+  grid_regular(penalty(),
+               levels = 50)
+
+ridge_spec_s <- 
+  linear_reg(penalty = tune(),
+             mixture = 0) %>%
+  set_engine("glmnet")
+
+  
+# add it to a workflow
+ridge_wf_s <- 
+  baseball_wf_s %>%
+  add_model(ridge_spec_s)
+
+# tune deg_free and fit to the 5-fold cv
+set.seed(123)
+ridge_res_s <- 
+  tune_grid(
+    ridge_wf_s,
+    resamples = folds_s,
+    metrics = metric_s,
+    control = ctrl_grid,
+    grid = lambda_grid_s
+  )
+```
+
+
+```{r}
+set.seed(76)
+# lasso model
+
+lasso_spec_s <-
+  linear_reg(penalty = tune(), mixture = 1) %>%
+  set_engine("glmnet")
+
+# add to wf
+
+lasso_wf_s <-
+  baseball_wf_s %>%
+  add_model(lasso_spec_s)
+
+# lambda grid
+
+lambda_grid_s <-
+  grid_regular(penalty(),
+               levels = 50)
+
+# k-fold CV
+
+set.seed(875)
+lasso_res_s <- 
+  tune_grid(
+    lasso_wf_s,
+    resamples = folds_s,
+    metrics = metric_s,
+    control = ctrl_grid,
+    grid = lambda_grid_s
+  )
+
+```
+
+
+
+```{r}
+set.seed(12)
+# random Forest spec
+
+rf_spec_s <- rand_forest(
+  mtry = tune(),
+  trees = 1000,
+  min_n = tune()
+  ) %>%
+  set_mode("regression") %>%
+  set_engine("ranger")
+
+rf_wf_s <-
+  baseball_wf_s %>%
+  add_model(rf_spec_s)
+
+rf_grid_s <- grid_regular(
+  mtry(range = c(1,6)),
+  min_n(range = c(2,8)),
+  levels = 5
+  )
+
+set.seed(453)
+randf_res_s <- tune_grid(
+  rf_wf_s,
+  resamples = folds_s,
+  grid = rf_grid_s,
+  metrics = metric_s,
+  control = ctrl_grid
+)
+```
+
+
+```{r}
+# create data stack
+
+baseball_d_stack_s <- 
+  stacks() %>%
+    add_candidates(lasso_res_s) %>%
+    add_candidates(randf_res_s) %>%
+    add_candidates(ridge_res_s)
+
+```
+
+
+```{r}
+# blending predictions
+
+base_stack_s <- 
+  baseball_d_stack_s %>%
+  blend_predictions()
+```
+
+
+```{r}
+# fitting model
+
+base_stack_s <-
+  base_stack_s %>%
+  fit_members()
+
+```
+
+
+```{r}
+data_test_s <- 
+  data_test_s %>%
+  bind_cols(predict(base_stack_s, .))
+
+```
+
+
+```{r}
+data_test_s %>%
+  ggplot() +
+  aes(
+    x = salary_t1, 
+    y = .pred
+  ) +
+  geom_point(alpha = 0.7) + 
+  coord_obs_pred() +
+  geom_abline(slope = 1, intercept = 0, color = "midnightblue", alpha = 0.5, size = 2) +
+  labs(x = "Salary (t+1)", y = "prediction") +
+  theme_minimal()
+
+```
+
+```{r}
+rmse(data_test_s, truth = salary_t1, estimate = .pred)
+# 0.1814
+rsq(data_test_s, truth = salary_t1, estimate = .pred)
+# 0.829
+```
+
+```{r}
+autoplot(base_stack_s, type = "weights")
+```
+
+```{r}
+autoplot(base_stack_s)
+```
+
+```{r}
+write_csv(data_test_s, "ensemblepreds.csv")
+```
+
+
+# Data Section
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+pitchers0 <- read_csv("Final Mega Summary.csv")
+
+salary_data <- pitchers0 %>%
+  select(-Pitcher, -ΔERA, -ERA_t1, -ΔSalary)
+
+pitchers <- pitchers0 %>%
+  select(-Pitcher, -ΔERA,- salary_t1, -ΔSalary)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pitchers_2019 <- pitchers0 %>%
+  filter(Year == 2019) %>%
+  arrange(desc(salary_t1)) %>%
+  head(50) %>%
+  select(Pitcher, Year, W, L, G, ERA, spin_rate, SO, BB, K_percent, 
+         hard_hit_percent, barrel_percent, luck_adj_ERA, ERA_t1, salary_t1)
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+custom_pred_2019 <- predict(custom_mod, pitchers_2019, type = "response")
+
+custom_pred <- predict(custom_mod, pitchers0, type = "response")
+
+pitchers_2019 <- cbind(pitchers_2019, custom_pred_2019)
+
+pitchers0 <- cbind(pitchers0, custom_pred)
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = -scale(custom_pred_2019)) %>%
+  mutate(`Standardized Salary` = scale(salary_t1)) %>%
+  mutate(`Compensation` = ((salary_t1)/(10 -custom_pred_2019))/100000)
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = format(round(`Standardized Forecasted Adjusted ERA`, 2), nsmall = 2)) %>%
+  mutate(`Standardized Salary` = format(round(`Standardized Salary`, 2), nsmall = 2))
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = as.numeric(`Standardized Forecasted Adjusted ERA`)) %>%
+  mutate(`Standardized Salary` = as.numeric(`Standardized Salary`))
+
+pitchers_2019$ERA_type <- ifelse(pitchers_2019$`Standardized Forecasted Adjusted ERA` < 0, "below", "above")
+
+pitchers_2019$salary_type <- ifelse(pitchers_2019$`Standardized Salary` < 0, "below", "above")
+
+pitchers_2019_tidy <- pitchers_2019 %>%
+  pivot_longer(cols = c(custom_pred_2019, ERA_t1), 
+               names_to = "type",
+               values_to = "value")
+
+salary_2019 <- pitchers0 %>%
+  filter(Year == 2019) %>%
+  arrange(desc(salary_t1)) %>%
+  head(50)
+
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1) ~ Year + SO +
+                           Salary + W*luck_adj_ERA)
+
+salary_pred_2019 <- predict(custom_mod_salary, salary_2019, type = "response")
+
+salary_2019 <- cbind(salary_2019, salary_pred_2019)
+
+salary_2019_tidy <- salary_2019 %>%
+  mutate(salary_t1 = log(salary_t1)) %>%
+  pivot_longer(cols = c(salary_pred_2019, salary_t1), 
+               names_to = "type",
+               values_to = "value") 
+```
+
+```{r eval=FALSE}
+# Full Model for ERA
+
+full_mod <- lm(data = pitchers,
+                 ERA_t1 ~.)
+
+# Full Model for Salary
+
+full_mod <- lm(data = salary_data,
+                 salary_t1 ~.)
+```
+
+```{r echo=FALSE}
+full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+full_model_table<-data.frame(labels,full_statistics) 
+full_model_table<-full_model_table %>%  rename(
+    `Full Model Statistics` = full_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(full_model_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r eval=FALSE}
+# Forward Selection Model for ERA
+
+forward_mod <- lm(data = pitchers, 
+                   ERA_t1 ~ wOBA + L + BFP + SO + K_percent + hard_hit_percent +
+                    barrel_percent + `ERA/Barrel %` + luck_adj_ERA)
+
+# Forward Selection Model for Salary
+
+forward_mod_salary <- lm(data = salary_data,
+                         log(salary_t1) ~ Pitches + Year + xBA + spin_rate +
+                           Velocity + K_percent + Salary + luck_adj_ERA)
+```
+
+
+```{r echo=FALSE}
+forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+forward_model_table<-data.frame(labels,forward_statistics) 
+forward_model_table<-forward_model_table %>%  rename(
+    `Forward Model Statistics` = forward_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(forward_model_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r eval=FALSE}
+# Ridge Model for ERA
+
+ridge_mod_ERA <- glmnet(x_full_model_ERA, 
+                       y_full_model_ERA, 
+                       alpha = 0, 
+                       lambda = best_L_ridge_ERA)
+
+# Ridge Model for Salary
+
+ridge_mod <- glmnet(x_full_model_salary, 
+                   y_full_model_salary, 
+                   alpha = 0, 
+                   lambda = best_L_ridge)
+
+# Lasso Model for ERA
+
+lasso_mod <- glmnet(x_full_model_salary, 
+                    y_full_model_salary, 
+                    alpha = 1, 
+                    lambda = best_L_lasso)
+
+# Lasso Model for Salary
+
+lasso_mod_ERA <- glmnet(x_full_model_ERA, 
+                        y_full_model_ERA, 
+                        alpha = 1, 
+                        lambda = best_L_lasso_ERA)
+
+```
+
+```{r echo=FALSE}
+ridge_statistics<-c(0.62543602, 0.33715364, 0.09284193, 0.99001384)
+lasso_statistics<-c(0.6299247, 0.3284793, 0.1072762, 0.9734646)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+penalized_reg_table<-data.frame(labels,ridge_statistics,lasso_statistics) 
+penalized_reg_table<-penalized_reg_table %>%  rename(
+    `Ridge Regression Statistics` = ridge_statistics,
+    `Lasso Regression Statistics` = lasso_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(penalized_reg_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+
+```{r eval=FALSE}
+# PCR Model for ERA
+
+my_pcr_ERA <- pcr(formula = ERA_t1 ~ ., 
+                  ncomp = 4,
+                  data = pitchers)
+
+# PCR Model for Salary
+
+my_pcr_salary <- pcr(formula = log(salary_t1) ~ ., 
+                     ncomp = 13, 
+                     data = salary_data)
+
+```
+
+```{r echo=FALSE}
+PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+PCR_table<-data.frame(labels,PCR_statistics) 
+PCR_table<-PCR_table %>%  rename(
+    `Principal Component Regression Statistics` = PCR_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(PCR_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r eval=FALSE}
+# Custom Model for ERA
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+```
+
+```{r echo=FALSE}
+domain_knowledge_statistics<-c(0.6429,0.3293462,0.1573634,0.972449)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+custom_table<-data.frame(labels,domain_knowledge_statistics) 
+custom_table<-custom_table %>%  rename(
+    `Custom Model Statistics` = domain_knowledge_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(custom_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+
+```
+
+```{r echo=FALSE}
+ridge_statistics<-c(0.62543602, 0.33715364, 0.09284193, 0.99001384)
+lasso_statistics<-c(0.6299247, 0.3284793, 0.1072762, 0.9734646)
+forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
+domain_knowledge_statistics<-c("NA","NA",0.157,0.972)
+full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
+PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
+ensemble_statistics <-c(0.776,0.2209,0.149,0.970225)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_statistics,domain_knowledge_statistics,full_statistics,PCR_statistics, ensemble_statistics)
+
+all_statistics<-all_statistics %>%  rename(
+    `Full Model` =full_statistics,
+    `Forward Model` = forward_statistics,
+    `Ridge Regression`=ridge_statistics,
+    `Lasso Regression`=lasso_statistics,
+    `Custom Model`= domain_knowledge_statistics,
+    `Principal Regression` = PCR_statistics,
+    `Ensemble Model` = ensemble_statistics,
+    ` ` = labels)
+
+kable(all_statistics, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE}
+final_table <- tibble(
+    Model = c("Ridge", "Lasso", "Forward","Custom","Full","PCR", "Ensemble"),
+    `Rsq for ERA` = c(0.092,0.107,0.164,0.157,0.139,0.138,0.149),
+    `5-fold MSE for ERA` = c(0.990,0.973,0.999,0.972,1.043, 0.997,0.970),
+    `Rsq for Salary` = c(0.625,0.629,0.616,0.6429,0.609,0.654,0.829),
+    `5-fold MSE for Salary` = c(0.337,0.328,0.765,0.3293462,0.831,0.331,0.181))
+
+kable(final_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`Rsq for ERA`)),
+       aes(
+           x = factor(Model),
+           y = `Rsq for ERA`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.6
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "ERA Model Comparisons",
+         x = "Model",
+         y = "R-Squared for ERA") +
+    expand_limits(x = 0, y = 0)
+
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`5-fold MSE for ERA`)),
+       aes(
+           x = factor(Model),
+           y = `5-fold MSE for ERA`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.6
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "Salary Model Comparisons",
+         x = "Model") +
+    expand_limits(x = 0, y = 0)
+
+
+```
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`Rsq for Salary`)),
+       aes(
+           x = factor(Model),
+           y = `Rsq for Salary`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.6
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "ERA Model Comparisons",
+         x = "Model",
+         y = "R-Squared for ERA") +
+    expand_limits(x = 0, y = 0)
+
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`5-fold MSE for Salary`)),
+       aes(
+           x = factor(Model),
+           y = `5-fold MSE for Salary`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.6
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "Salary Model Comparisons",
+         x = "Model") +
+    expand_limits(x = 0, y = 0)
+
+```
+
+```{r}
+# Comparing Custom Models
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1) ~ Year + SO +
+                           Salary + W*luck_adj_ERA)
+
+```
+
+```{r, echo=FALSE}
+kable(summary(custom_mod)$coef, digits = 3,
+      caption = "Custom ERA Model Coeffcients") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r, echo=FALSE}
+kable(summary(custom_mod_salary)$coef, digits = 3,
+      caption = "Custom Salary Model Coeffcients") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+
+```{r echo=FALSE, fig.height=5, fig.width=7, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(pitchers,
+       aes(x = custom_pred, y = ERA_t1)) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm, color = "midnightblue") +
+  labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
+       subtitle = "Modelling Predictions",
+       x = "Predicted ERA (t+1)",
+       y = "ERA (t+1)") + 
+  theme_classic()
+```
+
+```{r echo=FALSE, fig.height=5, fig.width=7, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(pitchers,
+       aes(x = ERA, y = ERA_t1)) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm, color = "midnightblue") +
+  labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
+       subtitle = "Null Predictions",
+       x = "ERA",
+       y = "ERA (t+1)") + 
+  theme_classic()
+```
+
+
+```{r echo=FALSE}
+cor_table <- tibble(
+    Model = c("Custom ERA Model", "Null ERA Model"),
+    `Correlation (R)` = c(0.413, 0.218))
+
+kable(cor_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE, fig.width=9,fig.height=6}
+ggplot(pitchers_2019_tidy, aes(x = Pitcher,
+                          y = value,
+                          label = value)) + 
+  geom_point(stat = 'identity',
+             aes(color = type), 
+             size = 2.5) +
+  scale_color_manual(name = "Value", 
+                    labels = c("Predicted ERA", "Actual ERA"), 
+                    values = c("custom_pred_2019" = "deepskyblue", 
+                               "ERA_t1" = "palevioletred2")) +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Predicted ERA vs. Actual ERA (2020)",
+       x = "Pitcher",
+       y = "ERA Value") + 
+  geom_line() +
+  theme_minimal()
+```
+
+```{r, echo=FALSE, fig.width=7,fig.height=6}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted ERA`),
+                          y = `Standardized Forecasted Adjusted ERA`,
+                          label = `Standardized Forecasted Adjusted ERA`)) + 
+  geom_bar(stat = 'identity', aes(fill = ERA_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
+  labs(title = "Diverging Standardized Forecasted ERA (2020)",
+       x = "Pitcher",
+       y = "Standardized ERA Forecast (Adjusted)") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r, echo=FALSE, fig.width=7,fig.height=6}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
+                          y = `Standardized Salary`,
+                          label = `Standardized Salary`)) + 
+  geom_bar(stat = 'identity', aes(fill = salary_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
+  labs(title = "Diverging Standardized Salary (2020)",
+       x = "Pitcher",
+       y = "Standardized Salary") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot() +
+  scale_x_continuous(name = "Standardized Forecasted ERA (adjusted)",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  scale_y_continuous(name = "Standardized Salary",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  ggtitle("Standardized Forecasted ERA vs. Standardized Salary (2020)") +
+  geom_rect(aes(xmin = 0, ymin = 0, xmax = 3, ymax = 3), 
+            fill = "deepskyblue", alpha = 0.2) +
+  geom_rect(aes(xmin = -3, ymin = -3, xmax = 0, ymax = 0), 
+            fill = "palevioletred2", alpha = 0.2) +
+  geom_density_2d(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             color = "dodgerblue2", alpha = 0.3) +
+  geom_point(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             shape = 21,
+             colour = "dodgerblue", 
+             fill = "grey100", 
+             size = 5) +
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` > 1 | 
+                          `Standardized Salary` > 1),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.2) + 
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` < -2),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.33) + 
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.width=9,fig.height=6}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
+                          y = Compensation,
+                          label = Compensation)) + 
+  geom_col(aes(fill = Compensation)) +
+  scale_fill_continuous(type = "viridis") +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Starting Pitcher Compensation (2020)",
+       x = "Pitcher",
+       y = "Relative Compensation (Salary/Adjusted Forecasted ERA)") + 
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.width=9,fig.height=6}
+ggplot(salary_2019_tidy, aes(x = Pitcher,
+                          y = value,
+                          label = value)) + 
+  geom_point(stat = 'identity',
+             aes(color = type), 
+             size = 2.5) +
+  scale_color_manual(name = "Value", 
+                    labels = c("Predicted Salary", "Actual Salary"), 
+                    values = c("salary_pred_2019" = "deepskyblue", 
+                               "salary_t1" = "palevioletred2")) +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Predicted Salary vs. Actual Salary (2020)",
+       x = "Pitcher",
+       y = "Log (Salary)") + 
+  geom_line() +
+  theme_minimal()
+```
+
+# Extensions and Discussion
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pitchers <- read_csv("Final Mega Summary.csv")
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pitchers_2019 <- pitchers %>%
+  filter(Year == 2019) %>%
+  arrange(desc(salary_t1)) %>%
+  head(50) %>%
+  select(Pitcher, Year, W, L, G, ERA, spin_rate, SO, BB, K_percent, 
+         hard_hit_percent, barrel_percent, luck_adj_ERA, ERA_t1, salary_t1)
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+custom_pred_2019 <- predict(custom_mod, pitchers_2019, type = "response")
+
+custom_pred <- predict(custom_mod, pitchers, type = "response")
+
+pitchers_2019 <- cbind(pitchers_2019, custom_pred_2019)
+
+pitchers <- cbind(pitchers, custom_pred)
+
+normalize_salary <- function(x) {
+    (x - min(pitchers_2019$salary_t1)) / (max(pitchers_2019$salary_t1) - min(pitchers_2019$salary_t1))
+}
+
+normalize_ERA <- function(x) {
+    (x - min(pitchers_2019$custom_pred)) / (max(pitchers_2019$custom_pred) - min(pitchers_2019$custom_pred))
+  }
+
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = -scale(custom_pred_2019)) %>%
+  mutate(`Standardized Salary` = scale(salary_t1)) %>%
+  mutate(`Normalized Forecasted Adjusted ERA` = normalize_ERA(custom_pred_2019)) %>%
+  mutate(`Compensation` = ((salary_t1)/(10 -custom_pred_2019))/100000)
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = format(round(`Standardized Forecasted Adjusted ERA`, 2), nsmall = 2)) %>%
+  mutate(`Standardized Salary` = format(round(`Standardized Salary`, 2), nsmall = 2))
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = as.numeric(`Standardized Forecasted Adjusted ERA`)) %>%
+  mutate(`Standardized Salary` = as.numeric(`Standardized Salary`))
+
+pitchers_2019$ERA_type <- ifelse(pitchers_2019$`Standardized Forecasted Adjusted ERA` < 0, "below", "above")
+
+pitchers_2019$salary_type <- ifelse(pitchers_2019$`Standardized Salary` < 0, "below", "above")
+
+pitchers_2019_tidy <- pitchers_2019 %>%
+  pivot_longer(cols = c(custom_pred_2019, ERA_t1), 
+               names_to = "type",
+               values_to = "value")
+```
+
+
+```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(pitchers,
+       aes(x = custom_pred, y = ERA_t1)) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm, color = "midnightblue") +
+  labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
+       subtitle = "Modelling Predictions",
+       x = "Predicted ERA (t+1)",
+       y = "ERA (t+1)") + 
+  theme_classic()
+```
+```{r echo=FALSE}
+cor(as.numeric(pitchers$custom_pred), pitchers$ERA_t1)
+```
+
+
+```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(pitchers,
+       aes(x = ERA, y = ERA_t1)) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm, color = "midnightblue") +
+  labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
+       subtitle = "Null Predictions",
+       x = "ERA",
+       y = "ERA (t+1)") + 
+  theme_classic()
+```
+```{r echo=FALSE}
+cor(as.numeric(pitchers$ERA), pitchers$ERA_t1)
+```
+
+
+
+```{r echo=FALSE, fig.width=10,fig.height=6}
+ggplot(pitchers_2019_tidy, aes(x = Pitcher,
+                          y = value,
+                          label = value)) + 
+  geom_point(stat = 'identity',
+             aes(color = type), 
+             size = 2.5) +
+  scale_color_manual(name = "Value", 
+                    labels = c("Predicted ERA", "Actual ERA"), 
+                    values = c("custom_pred_2019" = "deepskyblue", 
+                               "ERA_t1" = "palevioletred2")) +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Predicted ERA vs. Actual ERA (2020)",
+       x = "Pitcher",
+       y = "ERA Value") + 
+  geom_line() +
+  theme_minimal()
+```
+
+```{r, echo=FALSE, fig.width=9,fig.height=7}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted ERA`),
+                          y = `Standardized Forecasted Adjusted ERA`,
+                          label = `Standardized Forecasted Adjusted ERA`)) + 
+  geom_bar(stat = 'identity', aes(fill = ERA_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
+  labs(title = "Diverging Standardized Forecasted ERA (2020)",
+       x = "Pitcher",
+       y = "Standardized ERA Forecast (Adjusted)") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r, echo=FALSE, fig.width=9,fig.height=7}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
+                          y = `Standardized Salary`,
+                          label = `Standardized Salary`)) + 
+  geom_bar(stat = 'identity', aes(fill = salary_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
+  labs(title = "Diverging Standardized Salary (2020)",
+       x = "Pitcher",
+       y = "Standardized Salary") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot() +
+  scale_x_continuous(name = "Standardized Forecasted ERA (adjusted)",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  scale_y_continuous(name = "Standardized Salary",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  ggtitle("Standardized Forecasted ERA vs. Standardized Salary (2020)") +
+  geom_rect(aes(xmin = 0, ymin = 0, xmax = 3, ymax = 3), 
+            fill = "deepskyblue", alpha = 0.2) +
+  geom_rect(aes(xmin = -3, ymin = -3, xmax = 0, ymax = 0), 
+            fill = "palevioletred2", alpha = 0.2) +
+  geom_density_2d(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             color = "dodgerblue2", alpha = 0.3) +
+  geom_point(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             shape = 21,
+             colour = "dodgerblue", 
+             fill = "grey100", 
+             size = 5) +
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` > 1 | 
+                          `Standardized Salary` > 1),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.2) + 
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` < -2),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.3) + 
+  theme_minimal()
+```
+
+
+```{r echo=FALSE, fig.width=10,fig.height=6}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
+                          y = Compensation,
+                          label = Compensation)) + 
+  geom_col(aes(fill = Compensation)) +
+  scale_fill_continuous(type = "viridis") +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Starting Pitcher Compensation (2020)",
+       x = "Pitcher",
+       y = "Compensation (Salary/Adjusted Forecasted ERA)") + 
+  theme_minimal()
+```
+
+# Code for full technical report
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, warning=FALSE, fig.cap="**Figure 1.** Total team wins plotted against team ERA from 2006 onwards; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+teams <- read_csv("teams.csv") %>%
+  filter(yearID > 2006)
+
+ggplot(teams, 
+       aes(x = ERA, y = W)) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Team ERA",
+       y = "Team Wins") +
+  theme_classic()
+
+cor(teams$ERA,
+   teams$W)
+```
+
+```{r echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+data <- read_csv("Final Mega Summary.csv")
+
+nrow(data)
+ncol(data)
+```
+
+```{r echo=FALSE, fig.height=4, fig.width=6}
+include_graphics("Data Frame Pic.png")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+Mega_Summary <- read_csv("Final Mega Summary.csv")
+Original_Summary <- read_csv("Mega Summary.csv") %>%
+  filter(`ERA (t+1)` < 7.00)
+
+#Filter out Pre-arbitration
+Mega_Summary_Filtered <- 
+  Mega_Summary %>% 
+  filter(salary_t1 > 600000)
+
+#Filter out Pre-arbitration
+Original_Summary_Filtered <- 
+  Original_Summary %>% 
+  filter(`Salary (t+1)` > 600000)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, fig.cap="**Figure 2.1.** Histogram of distribution of MLB starting pitcher salary; the evident right skew necessitated a log transformation."}
+ggplot(Mega_Summary_Filtered, 
+       aes(x = salary_t1)) + 
+  geom_histogram(
+    color = "grey100",
+    fill = "midnightblue",
+    bins = 30, 
+    alpha = .75 
+    ) + 
+  labs(x = "Salary (t+1)",
+       y = "Count") +
+  theme_classic()
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, fig.cap="**Figure 2.2.** Histogram of distribution of log-transformed MLB starting pitcher salary; the previously mentioned right skew is no longer as extreme."}
+ggplot(Mega_Summary_Filtered, 
+       aes(x = log(salary_t1))) + 
+  geom_histogram(
+    color = "grey100",
+    fill = "midnightblue",
+    bins = 30, 
+    alpha = .75 
+    ) + 
+  labs(x = "log(Salary (t+1))",
+       y = "Count") +
+  theme_classic()
+```
+
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.1.** Total pitcher wins plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Total Wins
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = W,
+         y = `salary_t1`)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "W",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$W,
+   Mega_Summary_Filtered$salary_t1)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.2.** Total pitcher losses plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Total Losses
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = L,
+         y = `salary_t1`)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "L",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$L,
+   Mega_Summary_Filtered$salary_t1)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.3.** Total pitches plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Total Pitches
+ggplot(Mega_Summary_Filtered, 
+       aes(
+         x = Pitches,
+         y = `salary_t1`)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Pitches",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$Pitches,
+   Mega_Summary_Filtered$salary_t1)
+
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.4.** Pitcher winning percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Win percent
+Mega_Summary_Filtered <- 
+  Mega_Summary_Filtered %>% 
+  mutate(Win_Percent = W/(W+L)) %>% 
+  drop_na()
+
+ggplot(Mega_Summary_Filtered, 
+       aes(
+         x = Win_Percent,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Win %",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$Win_Percent,
+   Mega_Summary_Filtered$salary_t1)
+
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.5.** Total games played plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Games played
+ggplot(Mega_Summary_Filtered, 
+       aes(
+         x = G,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "G",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$G,
+   Mega_Summary_Filtered$salary_t1)
+
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 3.6.** Earned run average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Current ERA
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = `ERA`,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "ERA",
+       y = "Salary (t+1)") +
+  theme_classic()
+cor(Mega_Summary_Filtered$ERA,
+    Mega_Summary_Filtered$salary_t1)
+
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.1.** Total batters faced plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Total batters faced
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = ABs,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "ABs",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$ABs,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.2.** Total strikeouts plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Total strikeouts
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = SO,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "SO",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$SO,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.3.** Total batters walked on balls plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Total batters walked
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = BB,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "BB",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$BB,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.4.** Total hits plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Total hits
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = H,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "H",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$H,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.5.** Total home runs plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Total Home Runs
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = HR,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "HR",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$HR,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.6.** Strikeout percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Strikeout Percent
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = K_percent,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "K %",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$K_percent,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.7.** Walk percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Percent of Batters walked
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = BB_percent,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "BB %",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$BB_percent,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.8.** Batting average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Batting average against (hit percent)
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = BA,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Batting Average (BA)",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$BA,
+    Mega_Summary_Filtered$salary_t1)
+
+
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.9.** Hard hit percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Hard hit percent
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = hard_hit_percent,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue")+
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Hard Hit %",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$hard_hit_percent,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 4.10.** Barrel percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Barrel percent
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = barrel_percent,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Barrel %",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$barrel_percent,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 5.1.** Average pitch speed plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Average Speed
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = Velocity,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Velocity",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$Velocity,
+    Mega_Summary_Filtered$salary_t1)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 5.2.** Average spin rate plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Average spin rate
+ggplot(Mega_Summary_Filtered,
+       aes(spin_rate,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Spin Rate",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$spin_rate,
+    Mega_Summary_Filtered$salary_t1)
+
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 6.1.** Weighted on-base average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Weighted on base average (wOBA)
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = wOBA,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "wOBA",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$wOBA,
+   Mega_Summary_Filtered$salary_t1)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 6.2.** Batting average on balls in play plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Batting average on balls in play against (BABIP)
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = BABIP,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "BABIP",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$BABIP,
+   Mega_Summary_Filtered$salary_t1)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 6.3.** Expected batting average on balls in play plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Expected wOBA
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = xwOBA,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "xwOBA",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$xwOBA,
+   Mega_Summary_Filtered$salary_t1)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 6.4.** Expected batting average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#Expected batting average
+ggplot(Mega_Summary_Filtered,
+       aes(
+         x = xBA,
+         y = salary_t1)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "xBA",
+       y = "Salary (t+1)") +
+  theme_classic()
+
+cor(Mega_Summary_Filtered$xBA,
+   Mega_Summary_Filtered$salary_t1)
+
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.1.** Expected weighted on-base average minus weighted on-base average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#xwOBA-wOBA
+ggplot(Original_Summary_Filtered,
+       aes(
+         x = `xwOBA - wOBA`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+
+cor(Original_Summary_Filtered$`xwOBA - wOBA`,
+   Original_Summary_Filtered$`Salary (t+1)`)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.2.** Expected batting average minus batting average plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#xBA-BA
+ggplot(Original_Summary_Filtered,
+       aes(
+         x = `xBA - BA`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+
+cor(Original_Summary_Filtered$`xBA - BA`,
+   Original_Summary_Filtered$`Salary (t+1)`)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.3.** Earned run average over hard hit percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#ERA/Hard Hit
+ggplot(Original_Summary_Filtered,
+       aes(
+         x = `ERA/Hard Hit %`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+
+cor(Original_Summary_Filtered$`ERA/Hard Hit %`,
+   Original_Summary_Filtered$`Salary (t+1)`)
+```
+
+```{r, echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 7.4.** Earned run average over barrel percentage plotted against future salary; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+#ERA/Barrel
+ggplot(Original_Summary_Filtered %>% filter(`ERA/Barrel %` < 1.5),
+       aes(
+         x = `ERA/Barrel %`,
+         y = `Salary (t+1)`)
+       ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+
+cor(Original_Summary_Filtered$`ERA/Barrel %`,
+   Original_Summary_Filtered$`Salary (t+1)`)
+
+```
+
+```{r echo=FALSE, fig.height=6, fig.width=9, message=FALSE, warning=FALSE, fig.cap="**Figure 8.1.** Correlogram illustrating correlations between predictors."}
+total_quant_pred <- 
+  select_if(
+    Original_Summary_Filtered,
+    is.numeric
+    )
+
+total_quant_pred <- 
+  total_quant_pred %>% 
+  select(
+    -Year,
+    -ΔERA,-ΔSalary,
+    -`Salary (t+1)`
+         )
+
+predictor_correlations <- 
+  cor(total_quant_pred)
+
+total_quant_pred %>%
+  select(-`ERA/Hard Hit %`, -`xBA - BA`, -`xwOBA - wOBA`, -`ERA/Barrel %`, -`BABIP - Mean BABIP`) %>%
+  correlate() %>%
+  rearrange() %>%
+  shave() %>%
+  rplot(shape = 19, colours = c("midnightblue", "white", "darkorange")) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+
+```
+
+```{r echo=FALSE}
+volume_predictors<-Mega_Summary_Filtered %>%select(Pitches,W,L,BFP,H,HR,SO)
+volume_predictors_cor<-cor(volume_predictors)
+kable(volume_predictors_cor, digits = 3, caption = "Volume Predictor Correlations") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE}
+hit_predictors<-Original_Summary_Filtered %>%select(BA,xBA,`K %`)
+hit_predictors_cor<-cor(hit_predictors,Original_Summary_Filtered$`Spin Rate`)
+kable(hit_predictors_cor, digits = 3, caption = "Spin Rate Correlations") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE}
+barrel_predictors<-Original_Summary_Filtered %>%select(xBA,wOBA,xwOBA,ERA)
+barrel_predictors_cor<-cor(barrel_predictors,Original_Summary_Filtered$`Barrel %`)
+kable(barrel_predictors_cor, digits = 3, caption = "Barrel % Correlations") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE}
+offense_statistics<-Original_Summary_Filtered %>%select(`K %`,BA,wOBA,xwOBA)
+strikes_and_hits<-Original_Summary_Filtered %>%select(`K %`,BA)
+strikes_hits_statistics_cor<-cor(offense_statistics,strikes_and_hits)
+kable(strikes_hits_statistics_cor, digits = 3, caption = "Rate Metric Correlations") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE}
+advanced_statistics<-Mega_Summary_Filtered %>%select(BABIP,xBA,wOBA,xwOBA)
+advanced_statistics_cor<-cor(advanced_statistics,Mega_Summary_Filtered$ERA)
+kable(advanced_statistics_cor, digits = 3, caption = "ERA Correlations") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE}
+wins_and_lossess<-Mega_Summary_Filtered %>%select(W,L)
+wins_and_lossess_cor<-cor(wins_and_lossess,Mega_Summary_Filtered$ERA)
+kable(wins_and_lossess_cor, digits = 3, caption = "ERA Correlations") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+pitch_data <- read_csv("2020_summary.csv") %>%
+  rename(`Pitch Category` = pitch_category) %>%
+  rename(wOBA = wOBAA)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 9.1.** Average pitch speed plotted against weighted on-base average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+pitch_data  %>%
+  ggplot(aes(
+    x = `Average Pitch Speed`,
+    y = wOBA)
+    ) +
+    geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  labs(x = "Velocity") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(pitch_data$`Average Pitch Speed`, pitch_data$wOBA)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=6, message=FALSE, fig.cap="**Figure 9.2.** Average pitch speed plotted against weighted on-base average, seperated by pitch category; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+pitch_data  %>%
+  ggplot(aes(
+    x = `Average Pitch Speed`,
+    y = wOBA, color =`Pitch Category`)
+    ) +
+  geom_point(
+    size = 2, 
+    alpha = 0.5) +
+    scale_color_manual(name = "Pitch Category", 
+                    labels = c("Fastball", "Off-speed"), 
+                    values = c("Off-speed" = "deepskyblue", 
+                               "Fastball" = "palevioletred2")) +
+  labs(x = "Velocity") +
+  geom_smooth(method = lm) +
+  theme_classic()
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 9.3.** Earned run average plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = ERA,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$ERA, Original_Summary$`ERA (t+1)`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 10.1.** Histogram of distribution of future earned run average."}
+ggplot(Original_Summary, aes(x = `ERA (t+1)` ))+
+  geom_histogram(
+    color="grey100",
+    fill = "midnightblue",
+    bins = 30, 
+    alpha = .75 ) +
+  labs(y = "Count") +
+  theme_classic()
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=6, message=FALSE, fig.cap="**Figure 10.2.** Density plots of distribution of future earned run average, separated by year."}
+ggplot(Original_Summary, aes(x = `ERA (t+1)`, fill = factor(Year))) +
+  geom_density(alpha = 0.25) + 
+  labs(y = "Density",
+       fill = "Year") +
+  theme_classic()
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 11.1.** Total pitcher wins plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = W,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$W, Original_Summary$`ERA (t+1)`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 11.2.** Total pitches plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = Pitches,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$Pitches, Original_Summary$`ERA (t+1)`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 11.3.** Total strikeouts plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = SO,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$SO, Original_Summary$`ERA (t+1)`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 12.1.** Strikeout percentage plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = `K %`,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$`K %`, Original_Summary$`ERA (t+1)`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 12.2.** Weighted on-base average plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = wOBA,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$wOBA, Original_Summary$`ERA (t+1)`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 12.3.** Expected weighted on-base average plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = xwOBA,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$xwOBA, Original_Summary$`ERA (t+1)`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 12.4.** Batting average on balls in play plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = BABIP,
+    y = `ERA (t+1)`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$BABIP, Original_Summary$`ERA (t+1)`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.1.** Batting average on balls in play minus mean batting average on balls in play plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = `BABIP - Mean BABIP`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$`BABIP - Mean BABIP`, Original_Summary$`ΔERA`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.2.** Expected batting average minus batting average plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = `xBA - BA`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$`xBA - BA`, Original_Summary$`ΔERA`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.3.** Expected weighted on-base average minus weighted on-base average plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = `xwOBA - wOBA`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$`xwOBA - wOBA`, Original_Summary$`ΔERA`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.4.** Earned run average over hard hit percentage plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  ggplot(aes(
+    x = `ERA/Hard Hit %`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+cor(Original_Summary$`ERA/Hard Hit %`, Original_Summary$`ΔERA`)
+```
+
+```{r echo=FALSE, fig.height=3, fig.width=5, message=FALSE, fig.cap="**Figure 13.5.** Earned run average over barrel percentage plotted against change in earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+Original_Summary %>%
+  filter(`ERA/Barrel %` < 1.5) %>%
+  ggplot(aes(
+    x = `ERA/Barrel %`,
+    y = `ΔERA`)
+    ) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm,
+              color = "midnightblue") +
+  theme_classic()
+```
+
+```{r echo=FALSE}
+Barrel_Filtered <- Original_Summary %>%
+  filter(`ERA/Barrel %` < 1.5) 
+cor(Barrel_Filtered$`ERA/Barrel %`, Barrel_Filtered$`ΔERA`)
+```
+
+
+```{r echo=FALSE}
+cor(Original_Summary$`ERA (t+1)`, Original_Summary$`ΔERA`)
+```
+
+
+```{r echo=FALSE}
+salary_pred<-Mega_Summary_Filtered %>%select(SO,W,ABs,Pitches,BFP)
+salary_pred_cor<-cor(salary_pred,Mega_Summary_Filtered$salary_t1)
+kable(salary_pred_cor, digits = 3, caption = "Strongest Salary Predictors") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE}
+future_ERA_pred<-Original_Summary %>%select(wOBA, BA, xBA, xwOBA, `K %`)
+future_ERA_pred_cor<-cor(future_ERA_pred,Original_Summary$`ERA (t+1)`)
+kable(future_ERA_pred_cor, digits = 3, caption = "Strongest ERA Predictors") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+pitchers0 <- read_csv("Final Mega Summary.csv")
+
+salary_data <- pitchers0 %>%
+  select(-Pitcher, -ΔERA, -ERA_t1, -ΔSalary)
+
+pitchers <- pitchers0 %>%
+  select(-Pitcher, -ΔERA,- salary_t1, -ΔSalary)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+pitchers_2019 <- pitchers0 %>%
+  filter(Year == 2019) %>%
+  arrange(desc(salary_t1)) %>%
+  head(50) %>%
+  select(Pitcher, Year, W, L, G, ERA, spin_rate, SO, BB, K_percent, 
+         hard_hit_percent, barrel_percent, luck_adj_ERA, ERA_t1, salary_t1)
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+custom_pred_2019 <- predict(custom_mod, pitchers_2019, type = "response")
+
+custom_pred <- predict(custom_mod, pitchers0, type = "response")
+
+pitchers_2019 <- cbind(pitchers_2019, custom_pred_2019)
+
+pitchers0 <- cbind(pitchers0, custom_pred)
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = -scale(custom_pred_2019)) %>%
+  mutate(`Standardized Salary` = scale(salary_t1)) %>%
+  mutate(`Compensation` = (log((salary_t1))/(10 -custom_pred_2019)))
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = format(round(`Standardized Forecasted Adjusted ERA`, 2), nsmall = 2)) %>%
+  mutate(`Standardized Salary` = format(round(`Standardized Salary`, 2), nsmall = 2))
+
+pitchers_2019 <- pitchers_2019 %>%
+  mutate(`Standardized Forecasted Adjusted ERA` = as.numeric(`Standardized Forecasted Adjusted ERA`)) %>%
+  mutate(`Standardized Salary` = as.numeric(`Standardized Salary`))
+
+pitchers_2019$ERA_type <- ifelse(pitchers_2019$`Standardized Forecasted Adjusted ERA` < 0, "below", "above")
+
+pitchers_2019$salary_type <- ifelse(pitchers_2019$`Standardized Salary` < 0, "below", "above")
+
+pitchers_2019_tidy <- pitchers_2019 %>%
+  pivot_longer(cols = c(custom_pred_2019, ERA_t1), 
+               names_to = "type",
+               values_to = "value")
+
+salary_2019 <- pitchers0 %>%
+  filter(Year == 2019) %>%
+  arrange(desc(salary_t1)) %>%
+  head(50)
+
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1) ~ Year + SO +
+                           Salary + W*luck_adj_ERA)
+
+salary_pred_2019 <- predict(custom_mod_salary, salary_2019, type = "response")
+
+salary_2019 <- cbind(salary_2019, salary_pred_2019)
+
+salary_2019_tidy <- salary_2019 %>%
+  mutate(salary_t1 = log(salary_t1)) %>%
+  pivot_longer(cols = c(salary_pred_2019, salary_t1), 
+               names_to = "type",
+               values_to = "value") 
+```
+
+```{r eval=FALSE}
+# Full Model for ERA
+
+full_mod <- lm(data = pitchers,
+                 ERA_t1 ~.)
+
+# Full Model for Salary
+
+full_mod_salary <- lm(data = salary_data,
+                 salary_t1 ~.)
+```
+
+
+```{r echo=FALSE}
+full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+full_model_table<-data.frame(labels,full_statistics) 
+full_model_table<-full_model_table %>%  rename(
+    `Full Model Statistics` = full_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(full_model_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+
+```{r eval=FALSE}
+# Forward Selection Model for ERA
+
+forward_mod <- lm(data = pitchers, 
+                   ERA_t1 ~ wOBA + L + BFP + SO + K_percent + hard_hit_percent +
+                    barrel_percent + `ERA/Barrel %` + luck_adj_ERA)
+
+# Forward Selection Model for Salary
+
+forward_mod_salary <- lm(data = salary_data,
+                         log(salary_t1) ~ Pitches + Year + xBA + spin_rate +
+                           Velocity + K_percent + Salary + luck_adj_ERA)
+```
+
+
+```{r echo=FALSE}
+forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+forward_model_table<-data.frame(labels,forward_statistics) 
+forward_model_table<-forward_model_table %>%  rename(
+    `Forward Model Statistics` = forward_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(forward_model_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r eval=FALSE}
+# Ridge Model for ERA
+
+ridge_mod_ERA <- glmnet(x_full_model_ERA, 
+                       y_full_model_ERA, 
+                       alpha = 0, 
+                       lambda = best_L_ridge_ERA)
+
+# Ridge Model for Salary
+
+ridge_mod <- glmnet(x_full_model_salary, 
+                   y_full_model_salary, 
+                   alpha = 0, 
+                   lambda = best_L_ridge)
+
+# Lasso Model for ERA
+
+lasso_mod <- glmnet(x_full_model_salary, 
+                    y_full_model_salary, 
+                    alpha = 1, 
+                    lambda = best_L_lasso)
+
+# Lasso Model for Salary
+
+lasso_mod_ERA <- glmnet(x_full_model_ERA, 
+                        y_full_model_ERA, 
+                        alpha = 1, 
+                        lambda = best_L_lasso_ERA)
+
+```
+
+```{r echo=FALSE}
+ridge_statistics<-c(0.62543602, 0.33715364, 0.09284193, 0.99001384)
+lasso_statistics<-c(0.6299247, 0.3284793, 0.1072762, 0.9734646)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+penalized_reg_table<-data.frame(labels,ridge_statistics,lasso_statistics) 
+penalized_reg_table<-penalized_reg_table %>%  rename(
+    `Ridge Regression Statistics` = ridge_statistics,
+    `LASSO Regression Statistics` = lasso_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(penalized_reg_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+
+```{r eval=FALSE}
+# PCR Model for ERA
+
+my_pcr_ERA <- pcr(formula = ERA_t1 ~ ., 
+                  ncomp = 4,
+                  data = pitchers)
+
+# PCR Model for Salary
+
+my_pcr_salary <- pcr(formula = log(salary_t1) ~ ., 
+                     ncomp = 13, 
+                     data = salary_data)
+
+```
+
+
+```{r echo=FALSE}
+PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+PCR_table<-data.frame(labels,PCR_statistics) 
+PCR_table<-PCR_table %>%  rename(
+    `Principal Component Regression Statistics` = PCR_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(PCR_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r eval=FALSE}
+# Custom Model for ERA
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+# Custom Model for Salary
+
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1)~Year+SO+
+                           Salary+W*luck_adj_ERA)
+
+```
+
+
+```{r echo=FALSE}
+domain_knowledge_statistics<-c(0.6429,0.3293462,0.1573634,0.972449)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+custom_table<-data.frame(labels,domain_knowledge_statistics) 
+custom_table<-custom_table %>%  rename(
+    `Custom Model Statistics` = domain_knowledge_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(custom_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+
+```
+
+```{r echo=FALSE}
+ensemble_statistics<-c(0.776,0.2209,0.149,0.970225)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+ensemble_table<-data.frame(labels,ensemble_statistics) 
+ensemble_table<-ensemble_table %>%  rename(
+    `Ensemble Model Statistics` = ensemble_statistics,
+    `Adjusted R-squared and 5-Fold CV MSE` = labels)
+
+kable(ensemble_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+
+```
+
+
+```{r echo=FALSE}
+ridge_statistics<-c(0.62543602, 0.33715364, 0.09284193, 0.99001384)
+lasso_statistics<-c(0.6299247, 0.3284793, 0.1072762, 0.9734646)
+forward_statistics<-c(0.6169164,0.7657645,0.1642511,0.9994591)
+domain_knowledge_statistics<-c(0.6429,0.3293462,0.157,0.972)
+full_statistics<-c(0.6092759,0.8313169,0.1397712,1.04342)
+PCR_statistics<-c(0.65489,0.3313,0.13856,0.9972)
+ensemble_statistics <-c(0.776,0.2209,0.149,0.970225)
+labels<-c("R-Squared on Salary", "5-fold MSE on Salary","R-Squared on ERA","5-Fold MSE on ERA")
+
+all_statistics<-data.frame(labels,ridge_statistics,lasso_statistics,forward_statistics,domain_knowledge_statistics,full_statistics,PCR_statistics, ensemble_statistics)
+
+all_statistics<-all_statistics %>%  rename(
+    `Full Model` =full_statistics,
+    `Forward Model` = forward_statistics,
+    `Ridge Regression`=ridge_statistics,
+    `LASSO Regression`=lasso_statistics,
+    `Custom Model`= domain_knowledge_statistics,
+    `Principal Regression` = PCR_statistics,
+    `Ensemble Model` = ensemble_statistics,
+    ` ` = labels)
+
+kable(all_statistics, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE}
+final_table <- tibble(
+    Model = c("Ridge", "LASSO", "Forward","Custom","Full","PCR", "Ensemble"),
+    `Rsq for ERA` = c(0.092,0.107,0.164,0.157,0.139,0.138,0.149),
+    `5-fold MSE for ERA` = c(0.990,0.973,0.999,0.972,1.043, 0.997,0.970),
+    `Rsq for Salary` = c(0.625,0.629,0.616,0.6429,0.609,0.654,0.829),
+    `5-fold MSE for Salary` = c(0.337,0.328,0.765,0.3293462,0.831,0.331,0.181))
+
+kable(final_table, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 14.1.** Line graph comparing the adjusted R-squared values of our models predicting future salary."}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`Rsq for Salary`)),
+       aes(
+           x = factor(Model),
+           y = `Rsq for Salary`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.7
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "Salary Model Comparisons",
+         x = "Model",
+         y = "R-Squared for Salary") +
+    expand_limits(x = 0, y = 0)
+```
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 14.2.** Line graph comparing the 5-fold MSE values of our models predicting future salary."}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`5-fold MSE for Salary`)),
+       aes(
+           x = factor(Model),
+           y = `5-fold MSE for Salary`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.7
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "Salary Model Comparisons",
+         x = "Model") +
+    expand_limits(x = 0, y = 0)
+
+```
+
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 14.3.** Line graph comparing the adjusted R-squared values of our models predicting future earned run average."}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`Rsq for ERA`)),
+       aes(
+           x = factor(Model),
+           y = `Rsq for ERA`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.7
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "ERA Model Comparisons",
+         x = "Model",
+         y = "R-Squared for ERA") +
+    expand_limits(x = 0, y = 0)
+```
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 14.4.** Line graph comparing the 5-fold MSE values of our models predicting future earned run average."}
+ggplot(final_table %>%
+           mutate(Model = fct_reorder(Model,`5-fold MSE for ERA`)),
+       aes(
+           x = factor(Model),
+           y = `5-fold MSE for ERA`,
+           group = 1)
+       ) +
+    stat_summary(
+        fun.y=sum,
+        geom="line",
+        color = "midnightblue",
+        size = 2.5, 
+        alpha = 0.7
+        ) +
+    geom_point(
+        color = "white",
+        size = 1.5
+        ) +
+    theme_minimal() +
+    labs(title = "ERA Model Comparisons",
+         x = "Model") +
+    expand_limits(x = 0, y = 0)
+
+
+```
+
+
+```{r include=FALSE}
+lasso_coef_names<-c("Pitches","BA","BABIP","wOBA","xwOBA","xBA","Hits","ABs","spin_rate","Velocity","W","L","G","BFP","ERA","H","HR","BB","SO","K_percent","BB_percent","hard_hit_percent","barrel_percent","Salary","BFP_per_G","BABIP_minus_meanBABIP", "xwOBA_minus_wOBA","`ERA/Barrel %`","`ERA/Hard Hit %`","luck_adj_ERA") 
+
+lasso_coef_salary<-c(3.679551e-05,-3.938318e+00,1.476968e+00,2.483049e+00,2.743261e+00,-2.577875e+00,1.762172e-03, 3.263765e-04 ,1.665866e-04,-4.088986e-03,-2.656325e-04,-1.440660e-02 ,1.058231e-02,-8.902579e-05,-1.823438e-02,-8.672353e-04,-4.961412e-03,-1.201000e-03,-6.262600e-04,-3.609648e-01,4.310003e-01,-5.630545e-03,-1.923594e-02,7.730858e-08,3.653187e-02,1.146286e+00,-2.687309e-01,-6.353398e-02,8.098175e-01,-4.987056e-02)
+
+lasso_coef_ERA<-c(0,0,0,0,1.424176214,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.002102052,-4.452771489,0,0,0,0,0,0,0,0,0,0)
+                     
+lasso_coef<-data.frame(lasso_coef_names,lasso_coef_ERA,lasso_coef_salary)
+```
+
+```{r echo=FALSE}
+#Comparing Lasso Coefficients
+lasso_coef<-data.frame(lasso_coef_names,lasso_coef_ERA,lasso_coef_salary)
+
+lasso_coef<-lasso_coef %>% rename(
+  `Predictor` =lasso_coef_names,
+  `Coefficients for ERA` = lasso_coef_ERA,
+  `Coefficients for Salary`= lasso_coef_salary)
+
+kable(lasso_coef, digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+
+```{r}
+# Comparing Custom Models
+
+custom_mod <- lm(data = pitchers, 
+                  ERA_t1 ~ spin_rate + G + SO + K_percent + 
+                    ERA:hard_hit_percent + ERA:barrel_percent + luck_adj_ERA)
+
+custom_mod_salary <- lm(data = salary_data,
+                         log(salary_t1) ~ Year + SO +
+                           Salary + W*luck_adj_ERA)
+
+```
+
+```{r, echo=FALSE}
+kable(summary(custom_mod)$coef, digits = 3,
+      caption = "Custom ERA Model Coeffcients") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r, echo=FALSE}
+kable(summary(custom_mod_salary)$coef, digits = 3,
+      caption = "Custom Salary Model Coeffcients") %>%
+  kable_styling(bootstrap_options = "striped", font_size = 12, full_width = FALSE)
+```
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 15.1.** Custom model predictions plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+ggplot(pitchers,
+       aes(x = custom_pred, y = ERA_t1)) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm, color = "midnightblue") +
+  labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
+       subtitle = "Model Predictions",
+       x = "Predicted ERA (t+1)",
+       y = "ERA (t+1)") + 
+  theme_classic()
+
+cor(pitchers0$custom_pred, pitchers0$ERA_t1)
+```
+
+```{r echo=FALSE, fig.height=4, fig.width=6, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 15.2.** Null model predictions plotted against future earned run average; trend line represents linear line of best fit. Correlation between the two values shown underneath."}
+ggplot(pitchers,
+       aes(x = ERA, y = ERA_t1)) +
+  geom_point(alpha = 0.5, color = "midnightblue") +
+  geom_smooth(method = lm, color = "midnightblue") +
+  labs(title =  "Predicted ERA vs. Actual ERA (2016-2020)",
+       subtitle = "Null Predictions",
+       x = "ERA",
+       y = "ERA (t+1)") + 
+  theme_classic()
+
+cor(pitchers0$ERA, pitchers0$ERA_t1)
+```
+
+```{r echo=FALSE, fig.width=9,fig.height=6, fig.cap="**Figure 15.3.** Dot plot illustrating the residuals of observed 2020 earned run average values among the 50 highest-paid starting pitchers."}
+ggplot(pitchers_2019_tidy, aes(x = Pitcher,
+                          y = value,
+                          label = value)) + 
+  geom_point(stat = 'identity',
+             aes(color = type), 
+             size = 2.5) +
+  scale_color_manual(name = "Value", 
+                    labels = c("Predicted ERA", "Actual ERA"), 
+                    values = c("custom_pred_2019" = "deepskyblue", 
+                               "ERA_t1" = "palevioletred2")) +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Predicted ERA vs. Actual ERA (2020)",
+       x = "Pitcher",
+       y = "ERA Value") + 
+  geom_line() +
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.width=9,fig.height=6, fig.cap="**Figure 15.4.** Dot plot illustrating the ordered size of absolute residuals of observed 2020 earned run average values among the 50 highest-paid starting pitchers."}
+pitchers_2019_tidy %>%
+  pivot_wider(names_from = type, values_from = value) %>%
+  mutate(residual = ERA_t1 - custom_pred_2019) %>%
+  mutate(Pitcher = fct_reorder(Pitcher, abs(residual))) %>%
+  ggplot(aes(x = Pitcher, y = abs(residual), color = residual < 0)) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_manual(values = c("gray60","midnightblue")) +
+  labs(y = "Absolute Residual",
+       color = "Residual < 0") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 50, hjust = 1)) 
+```
+
+```{r, echo=FALSE, fig.width=7,fig.height=6, fig.cap="**Figure 15.5.** Horizontal bar graph illustrating the standardized 2020 earned run average predictions among the 50 highest-paid starting pitchers, arranged in descending order."}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Forecasted Adjusted ERA`),
+                          y = `Standardized Forecasted Adjusted ERA`,
+                          label = `Standardized Forecasted Adjusted ERA`)) + 
+  geom_bar(stat = 'identity', aes(fill = ERA_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
+  labs(title = "Diverging Standardized Forecasted ERA (2020)",
+       x = "Pitcher",
+       y = "Standardized ERA Forecast (Adjusted)") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r, echo=FALSE, fig.width=7,fig.height=6, fig.cap="**Figure 15.6.** Horizontal bar graph illustrating the observed standardized 2020 salary values among the 50 highest-paid starting pitchers, arranged in descending order."}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, `Standardized Salary`),
+                          y = `Standardized Salary`,
+                          label = `Standardized Salary`)) + 
+  geom_bar(stat = 'identity', aes(fill = salary_type), width = .5)  +
+  scale_fill_manual(name = " ", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="deepskyblue", "below"="palevioletred2")) + 
+  labs(title = "Diverging Standardized Salary (2020)",
+       x = "Pitcher",
+       y = "Standardized Salary") + 
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, paged.print=FALSE, fig.cap="**Figure 15.7.** Contour plot separating the 50 highest-paid starting pitchers in 2020 along both standardized salary and standardized predicted earned run average."}
+ggplot() +
+  scale_x_continuous(name = "Standardized Forecasted ERA (adjusted)",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  scale_y_continuous(name = "Standardized Salary",
+                     breaks = seq(-3, 3, 1),
+                     limits =c(-3, 3)) +
+  ggtitle("Standardized Forecasted ERA vs. Standardized Salary (2020)") +
+  geom_rect(aes(xmin = 0, ymin = 0, xmax = 3, ymax = 3), 
+            fill = "deepskyblue", alpha = 0.2) +
+  geom_rect(aes(xmin = -3, ymin = -3, xmax = 0, ymax = 0), 
+            fill = "palevioletred2", alpha = 0.2) +
+  geom_density_2d(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             color = "dodgerblue2", alpha = 0.3) +
+  geom_point(data = pitchers_2019, 
+             aes(x = `Standardized Forecasted Adjusted ERA`, 
+                 y = `Standardized Salary`),
+             shape = 21,
+             colour = "dodgerblue", 
+             fill = "grey100", 
+             size = 5) +
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` > 1 | 
+                          `Standardized Salary` > 1),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.2) + 
+  geom_text(data = subset(pitchers_2019, 
+                          `Standardized Forecasted Adjusted ERA` < -2),
+            aes(x = `Standardized Forecasted Adjusted ERA` , 
+                y = `Standardized Salary`, 
+                label = Pitcher),
+            size = 3,
+            alpha = 0.8,
+            hjust = 0.3,
+            vjust = -1.33) + 
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.width=9,fig.height=6, fig.cap="**Figure 15.8.** Bar graph showing player compensation per unit of adjusted earned run average. Pitchers on the right of the graph are over-compensated for production relative to average, while those on the left are under-compensated."}
+ggplot(pitchers_2019, aes(x = reorder(Pitcher, Compensation),
+                          y = Compensation,
+                          label = Compensation)) + 
+  geom_col(aes(fill = Compensation)) +
+  scale_fill_continuous(type = "viridis") +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Starting Pitcher Compensation (2020)",
+       x = "Pitcher",
+       y = "log(Salary) / (1 -Adjusted Forecasted ERA)") + 
+  theme_minimal()
+```
+
+```{r echo=FALSE, fig.width=9,fig.height=6, fig.cap="**Figure 15.9.** Dot plot illustrating the residuals of observed 2020 salary values among the 50 highest-paid starting pitchers."}
+ggplot(salary_2019_tidy, aes(x = Pitcher,
+                          y = value,
+                          label = value)) + 
+  geom_point(stat = 'identity',
+             aes(color = type), 
+             size = 2.5) +
+  scale_color_manual(name = "Value", 
+                    labels = c("Predicted Salary", "Actual Salary"), 
+                    values = c("salary_pred_2019" = "deepskyblue", 
+                               "salary_t1" = "palevioletred2")) +
+  scale_x_discrete(guide = guide_axis(angle = 50)) +
+  labs(title =  "Predicted Salary vs. Actual Salary (2020)",
+       x = "Pitcher",
+       y = "Log (Salary)") + 
+  geom_line() +
+  theme_minimal()
+```
 
 
 
