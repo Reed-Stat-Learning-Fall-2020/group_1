@@ -6,6 +6,7 @@ output:
   pdf_document:
     latex_engine: xelatex
 ---
+
 <style>
 body {
 text-align: justify}
@@ -23,7 +24,6 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.cap.style = "Image Caption",
                       fig.cap.pre = "Figure ",
                       fig.cap.sep = ": ")
-knitr::asis_output("\394")
 library(tidyverse)
 library(tidymodels)
 library(rvest)
@@ -121,7 +121,7 @@ nrow(data)
 ncol(data)
 ```
 
-```{r echo=FALSE, fig.height=4, fig.width=6}
+```{r echo=FALSE, fig.height=4, fig.width=6, out.width = "50%"}
 include_graphics("Data Frame Pic.png")
 ```
 
@@ -235,7 +235,9 @@ ggplot(Mega_Summary_Filtered,
   labs(x = "W",
        y = "Salary (t+1)") +
   theme_classic()
+```
 
+```{r echo=FALSE}
 cor(Mega_Summary_Filtered$W,
    Mega_Summary_Filtered$salary_t1)
 ```
@@ -253,7 +255,9 @@ ggplot(Mega_Summary_Filtered,
   labs(x = "L",
        y = "Salary (t+1)") +
   theme_classic()
+```
 
+```{r echo=FALSE}
 cor(Mega_Summary_Filtered$L,
    Mega_Summary_Filtered$salary_t1)
 ```
