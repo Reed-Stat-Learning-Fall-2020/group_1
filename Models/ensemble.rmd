@@ -244,6 +244,13 @@ rsq(data_test, truth = ERA_t1, estimate = .pred)
 
 rmse = 0.899, mse = 0.808201
 
+```{r}
+write_csv(data_test, "ensemble_era_preds.csv")
+```
+
+
+
+
 ## Salary
 
 ```{r}
