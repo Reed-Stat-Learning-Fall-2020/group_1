@@ -30,6 +30,7 @@ data <-
   select(-`ΔERA`,
          -`ΔSalary`) %>%
   mutate(salary_t1 = log(salary_t1)) %>%
+  mutate(Salary = log(Salary)) %>% 
   filter(ERA_t1 < 7.00) %>%
   filter(luck_adj_ERA < 7.00)
 
@@ -49,7 +50,7 @@ data %>%
 ```{r}
 # test/train splits
 
-set.seed(321)
+set.seed(4) 
 
 data_split <- initial_split(data)
 data_train <- training(data_split)
@@ -57,7 +58,7 @@ data_test <- testing(data_split)
 
 # k-fold CV
 
-set.seed(345)
+set.seed(5) 
 
 folds <- vfold_cv(data_train, v = 5)
 ```
@@ -70,7 +71,7 @@ baseball_rec <-
   step_normalize(all_numeric(), -all_outcomes()) %>%
   step_zv(all_predictors(), -all_outcomes()) %>%
   update_role(Pitcher, new_role = "Id") %>%
-  step_corr(all_numeric(), -all_outcomes(), threshold = 0.75) 
+  step_corr(all_numeric(), -all_outcomes(), threshold = 0.7) 
 
 # workflow
 
@@ -241,6 +242,7 @@ rmse(data_test, truth = ERA_t1, estimate = .pred)
 rsq(data_test, truth = ERA_t1, estimate = .pred)
 ```
 
+rmse = 0.899, mse = 0.808201
 
 ## Salary
 
