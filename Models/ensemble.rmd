@@ -250,7 +250,8 @@ data_s <-
   select(-`ΔERA`,
          -`ΔSalary`) %>%
   filter(salary_t1 > 600000) %>%
-  mutate(salary_t1 = log(salary_t1)) 
+  mutate(salary_t1 = log(salary_t1),
+         Salary = log(Salary)) 
   
 # test/train splits
 
@@ -318,7 +319,7 @@ ridge_res_s <-
   tune_grid(
     ridge_wf_s,
     resamples = folds_s,
-    metrics = metric,
+    metrics = metric_s,
     control = ctrl_grid,
     grid = lambda_grid_s
   )
@@ -466,6 +467,7 @@ data_s <-
          -`ΔSalary`) %>%
   filter(salary_t1 > 600000) %>%
   mutate(salary_t1 = log(salary_t1)) %>%
+  mutate(Salary = log(Salary)) %>% 
   filter(Pitcher != "Jeremy Hellickson")
   
 # test/train splits
