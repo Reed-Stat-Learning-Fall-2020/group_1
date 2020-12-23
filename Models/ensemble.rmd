@@ -222,6 +222,9 @@ data_test <-
 
 ```
 
+```{r}
+cor(data_test$ERA_t1, data_test$.pred)
+```
 
 ```{r}
 data_test %>%
