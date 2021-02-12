@@ -203,3 +203,66 @@ final20 <- cleaned_salary20 %>%
 
 ```
 
+
+
+
+
+```{r}
+data1 <- readr::read_csv("/Users/joshuayamamoto/Downloads/savant_data-6.csv")
+```
+
+```{r}
+data <- read_csv("/Users/joshuayamamoto/Downloads/savant2018.csv") %>% 
+  select(pitches:release_extension)
+```
+
+
+
+
+```{r}
+## name cleaning function
+
+
+name_cleaning <- function(data, name_var){
+  data %>% 
+    dplyr::select(name_var) %>% 
+    dplyr::pull() %>% 
+    janitor::make_clean_names() %>% 
+    cbind(data) %>% 
+    dplyr::select(-name_var) %>% 
+    dplyr::rename(name = ".")
+}
+
+# savant name cleaning
+
+savant18 <- name_cleaning(savant18, "player_name")
+savant19 <- name_cleaning(savant19, "player_name")
+savant20 <- name_cleaning(savant20, "player_name")
+
+# salary name cleaning
+
+salary18 <- name_cleaning(salary18, "name")
+salary19 <- name_cleaning(salary19, "name")
+salary20 <- name_cleaning(salary20, "name")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
